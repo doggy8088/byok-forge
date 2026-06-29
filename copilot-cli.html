@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Copilot Alias Forge — generate Copilot CLI launch aliases</title>
+<meta name="description" content="Generate ready-to-paste GitHub Copilot CLI launch aliases & functions for any AI provider — Shell (bash/zsh) and PowerShell." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Martian+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0a0b0e;
+    --bg-2:#0e1015;
+    --panel:#13151c;
+    --panel-2:#171a22;
+    --panel-3:#1c2029;
+    --border:#262b37;
+    --border-2:#323848;
+    --text:#e9e7e0;
+    --muted:#888e9d;
+    --muted-2:#5d636f;
+    --amber:#ffb454;
+    --amber-soft:rgba(255,180,84,.14);
+    --amber-line:rgba(255,180,84,.40);
+    --green:#74e0a0;
+    --cyan:#56b6c2;
+    --violet:#b48ead;
+    --red:#ff6a6a;
+    --radius:14px;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --display:'Martian Mono',var(--mono);
+    --sans:'IBM Plex Sans',system-ui,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    overflow-x:hidden;
+  }
+  /* atmospheric background */
+  body::before{
+    content:"";
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(900px 500px at 12% -8%, rgba(255,180,84,.10), transparent 60%),
+      radial-gradient(820px 520px at 100% 0%, rgba(86,182,194,.07), transparent 55%),
+      radial-gradient(700px 700px at 80% 110%, rgba(116,224,160,.05), transparent 60%);
+  }
+  body::after{
+    content:"";
+    position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+    background-image:
+      linear-gradient(transparent 0 31px, rgba(255,255,255,.018) 31px 32px),
+      linear-gradient(90deg, transparent 0 31px, rgba(255,255,255,.018) 31px 32px);
+    background-size:32px 32px;
+    mask-image:radial-gradient(circle at 50% 30%, #000 0%, transparent 85%);
+  }
+  .wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 24px 80px;}
+
+  /* ---------- header ---------- */
+  header.top{
+    display:flex;align-items:center;justify-content:space-between;gap:24px;
+    padding:30px 0 26px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:16px;}
+  .brand .glyph{
+    width:54px;height:54px;flex:none;border-radius:13px;
+    background:linear-gradient(145deg,#1d2029,#10131a);
+    border:1px solid var(--border-2);
+    display:grid;place-items:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 8px 24px -12px rgba(255,180,84,.5);
+    position:relative;overflow:hidden;
+  }
+  .brand .glyph::after{
+    content:"_";color:var(--amber);font-family:var(--mono);font-weight:700;font-size:26px;
+    animation:blink 1.1s steps(1) infinite;line-height:1;margin-top:-6px;
+  }
+  .brand .glyph .chev{position:absolute;color:var(--green);font-family:var(--mono);font-weight:700;font-size:20px;left:9px;top:13px;}
+  @keyframes blink{50%{opacity:0;}}
+  .brand h1{
+    margin:0;font-family:var(--display);font-weight:800;letter-spacing:-.04em;
+    font-size:23px;line-height:1.05;text-transform:lowercase;
+  }
+  .brand h1 b{color:var(--amber);font-weight:800;}
+  .brand p{margin:3px 0 0;color:var(--muted);font-size:12.5px;font-family:var(--mono);letter-spacing:.01em;}
+  .top .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .pill{
+    font-family:var(--mono);font-size:11.5px;color:var(--muted);
+    border:1px solid var(--border);border-radius:999px;padding:6px 12px;
+    background:var(--panel);white-space:nowrap;
+  }
+  .pill b{color:var(--green);font-weight:500;}
+  a.home{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:6px 13px;background:var(--panel);white-space:nowrap;transition:all .14s ease;}
+  a.home:hover{color:var(--amber);border-color:var(--amber-line);}
+  a.gh{color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--muted-2);}
+  a.gh:hover{color:var(--amber);border-color:var(--amber);}
+
+  /* ---------- layout ---------- */
+  .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:26px;align-items:start;}
+  @media(max-width:980px){.grid{grid-template-columns:1fr;}}
+
+  .card{
+    background:linear-gradient(180deg,var(--panel),var(--bg-2));
+    border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:0 24px 60px -40px rgba(0,0,0,.9);
+  }
+  .card .pad{padding:22px 22px 24px;}
+
+  .section-h{
+    display:flex;align-items:baseline;gap:10px;margin:0 0 16px;
+  }
+  .section-h .n{
+    font-family:var(--mono);color:var(--amber);font-size:12px;font-weight:700;
+    border:1px solid var(--amber-line);background:var(--amber-soft);
+    border-radius:7px;padding:2px 8px;letter-spacing:.05em;
+  }
+  .section-h h2{margin:0;font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:-.02em;text-transform:lowercase;}
+  .section-h .hint{margin-left:auto;color:var(--muted-2);font-size:11.5px;font-family:var(--mono);}
+
+  .field{margin-bottom:20px;}
+  .field:last-child{margin-bottom:0;}
+  label.lbl{
+    display:flex;align-items:center;gap:7px;
+    font-size:12px;font-weight:600;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px;font-family:var(--mono);
+  }
+  label.lbl .req{color:var(--amber);font-size:13px;line-height:0;}
+  label.lbl .tag{
+    margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400;
+    color:var(--muted-2);font-size:11px;
+  }
+
+  /* provider grid */
+  .providers{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:10px;}
+  .prov{
+    cursor:pointer;border:1px solid var(--border);border-radius:11px;
+    background:var(--panel-2);padding:12px 12px 11px;text-align:left;
+    transition:transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
+    position:relative;display:flex;flex-direction:column;gap:9px;min-height:78px;
+  }
+  .prov:hover{transform:translateY(-2px);border-color:var(--border-2);background:var(--panel-3);}
+  .prov.sel{
+    border-color:var(--amber-line);background:linear-gradient(180deg,var(--amber-soft),transparent);
+    box-shadow:0 0 0 1px var(--amber-line), 0 12px 30px -18px rgba(255,180,84,.6);
+  }
+  .prov.sel::after{content:"●";position:absolute;top:9px;right:11px;color:var(--amber);font-size:9px;}
+  .prov .mono-badge{
+    width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+    font-family:var(--display);font-weight:800;font-size:13px;color:#0a0b0e;flex:none;
+  }
+  .prov .pname{font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--text);line-height:1.2;}
+  .prov .ptype{font-family:var(--mono);font-size:10px;color:var(--muted-2);}
+
+  /* generic inputs */
+  select,input[type=text],input[type=number],input[type=password]{
+    width:100%;background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13.5px;
+    border:1px solid var(--border-2);border-radius:9px;padding:11px 12px;outline:none;
+    transition:border-color .14s ease, box-shadow .14s ease;
+  }
+  select:focus,input:focus{border-color:var(--amber-line);box-shadow:0 0 0 3px var(--amber-soft);}
+  select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 18px,calc(100% - 13px) 18px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;cursor:pointer;}
+  .hintline{margin-top:7px;font-size:11.5px;color:var(--muted-2);font-family:var(--mono);line-height:1.45;}
+  .hintline b{color:var(--cyan);font-weight:500;}
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:520px){.row2{grid-template-columns:1fr;}}
+
+  /* segmented control */
+  .seg{display:inline-flex;background:var(--bg);border:1px solid var(--border-2);border-radius:9px;padding:3px;gap:3px;flex-wrap:wrap;}
+  .seg button{
+    border:0;background:transparent;color:var(--muted);font-family:var(--mono);font-size:12.5px;
+    padding:7px 13px;border-radius:7px;cursor:pointer;transition:all .12s ease;font-weight:500;
+  }
+  .seg button:hover{color:var(--text);}
+  .seg button.on{background:var(--amber);color:#0a0b0e;font-weight:700;}
+  .seg.green button.on{background:var(--green);}
+  .seg.cyan button.on{background:var(--cyan);}
+
+  /* key mode + input adornment */
+  .adorn{position:relative;}
+  .adorn .pre{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--amber);font-family:var(--mono);font-size:13.5px;pointer-events:none;}
+  .adorn input{padding-left:24px;}
+
+  /* toggle checkbox row */
+  .check{display:flex;align-items:flex-start;gap:11px;cursor:pointer;padding:11px 13px;border:1px solid var(--border);border-radius:10px;background:var(--panel-2);transition:border-color .14s ease;}
+  .check:hover{border-color:var(--border-2);}
+  .check input{appearance:none;width:18px;height:18px;flex:none;border:1px solid var(--border-2);border-radius:5px;background:var(--bg);margin-top:1px;cursor:pointer;position:relative;transition:all .14s ease;}
+  .check input:checked{background:var(--amber);border-color:var(--amber);}
+  .check input:checked::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#0a0b0e;font-size:12px;font-weight:800;}
+  .check .ctxt{font-size:12.5px;color:var(--text);}
+  .check .ctxt span{display:block;color:var(--muted-2);font-size:11.5px;font-family:var(--mono);margin-top:2px;}
+  .check.danger input:checked{background:var(--red);border-color:var(--red);}
+
+  .divider{height:1px;background:var(--border);margin:22px 0;position:relative;}
+  .divider::after{content:"";position:absolute;left:0;top:0;width:40px;height:1px;background:var(--amber-line);}
+
+  /* ---------- output / terminal ---------- */
+  .out-col{position:sticky;top:18px;display:flex;flex-direction:column;gap:18px;}
+  @media(max-width:980px){.out-col{position:static;}}
+
+  .term{
+    background:#08090c;border:1px solid var(--border-2);border-radius:var(--radius);overflow:hidden;
+    box-shadow:0 30px 70px -40px rgba(0,0,0,1), inset 0 0 0 1px rgba(255,255,255,.02);
+  }
+  .term .bar{
+    display:flex;align-items:center;gap:8px;padding:11px 14px;background:#0d0f14;border-bottom:1px solid var(--border);
+  }
+  .term .bar .dot{width:11px;height:11px;border-radius:50%;}
+  .dot.r{background:#ff5f57;} .dot.y{background:#febc2e;} .dot.g{background:#28c840;}
+  .term .bar .ttl{margin-left:8px;font-family:var(--mono);font-size:11.5px;color:var(--muted);}
+  .term .bar .ttl b{color:var(--green);font-weight:500;}
+  .term .bar .target{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted-2);}
+
+  .term pre{
+    margin:0;padding:18px 18px 20px;font-family:var(--mono);font-size:12.7px;line-height:1.75;
+    color:#cfd3da;white-space:pre-wrap;word-break:break-word;overflow-x:auto;max-height:48vh;
+  }
+  .c-com{color:var(--muted-2);font-style:italic;}
+  .c-str{color:var(--green);}
+  .c-env{color:var(--amber);}
+  .c-var{color:var(--cyan);}
+  .c-kw{color:var(--violet);font-weight:700;}
+  .c-cmd{color:#fff;font-weight:700;}
+  .c-flag{color:var(--cyan);}
+
+  .out-actions{display:flex;gap:10px;padding:13px 14px;background:#0d0f14;border-top:1px solid var(--border);}
+  .btn{
+    font-family:var(--mono);font-size:12.5px;font-weight:600;border-radius:9px;padding:10px 16px;cursor:pointer;
+    border:1px solid var(--border-2);background:var(--panel-2);color:var(--text);transition:all .14s ease;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn:hover{border-color:var(--border-2);background:var(--panel-3);transform:translateY(-1px);}
+  .btn.primary{background:var(--amber);border-color:var(--amber);color:#0a0b0e;}
+  .btn.primary:hover{box-shadow:0 10px 26px -12px rgba(255,180,84,.8);}
+  .btn.ghost{background:transparent;}
+  .btn.ok{background:var(--green);border-color:var(--green);color:#08090c;}
+  .btn.flex{flex:1;justify-content:center;}
+
+  .summary{display:flex;flex-wrap:wrap;gap:7px;}
+  .chip{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel-2);border:1px solid var(--border);border-radius:7px;padding:4px 9px;}
+  .chip b{color:var(--text);font-weight:500;}
+  .chip.warn{border-color:rgba(255,106,106,.4);color:#ffb3b3;background:rgba(255,106,106,.08);}
+
+  /* collection */
+  .coll-item{
+    display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--panel-2);margin-bottom:8px;
+  }
+  .coll-item .ci-name{font-family:var(--mono);color:var(--amber);font-size:13px;font-weight:600;}
+  .coll-item .ci-meta{font-family:var(--mono);color:var(--muted-2);font-size:11px;}
+  .coll-item .ci-x{margin-left:auto;cursor:pointer;color:var(--muted-2);border:0;background:transparent;font-size:16px;padding:2px 6px;border-radius:6px;}
+  .coll-item .ci-x:hover{color:var(--red);background:rgba(255,106,106,.1);}
+  .empty-note{color:var(--muted-2);font-family:var(--mono);font-size:12px;text-align:center;padding:14px;}
+
+  footer{margin-top:42px;text-align:center;color:var(--muted-2);font-size:11.5px;font-family:var(--mono);line-height:1.7;}
+  footer b{color:var(--muted);font-weight:500;}
+  footer .disc{max-width:680px;margin:10px auto 0;}
+
+  .toast{
+    position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--green);color:#08090c;font-family:var(--mono);font-weight:700;font-size:13px;
+    padding:11px 20px;border-radius:10px;opacity:0;pointer-events:none;transition:all .25s ease;z-index:50;
+    box-shadow:0 16px 40px -14px rgba(116,224,160,.7);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* load-in animation */
+  .fade{opacity:0;transform:translateY(10px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards;}
+  @keyframes rise{to{opacity:1;transform:none;}}
+  .d1{animation-delay:.04s;} .d2{animation-delay:.12s;} .d3{animation-delay:.2s;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top fade d1">
+    <div class="brand">
+      <div class="glyph"><span class="chev">&gt;</span></div>
+      <div>
+        <h1>copilot <b>alias</b> forge</h1>
+        <p>// byok launch-alias generator for the copilot cli</p>
+      </div>
+    </div>
+    <div class="meta">
+      <span class="pill"><b>14</b> providers</span>
+      <span class="pill"><b>shell</b> + powershell</span>
+      <a class="home" href="index.html">⊞ all tools</a>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- ================= CONFIG ================= -->
+    <div class="card fade d2">
+      <div class="pad">
+
+        <!-- 01 provider -->
+        <div class="field">
+          <div class="section-h">
+            <span class="n">01</span><h2>provider</h2>
+            <span class="hint">sets type · base url · key</span>
+          </div>
+          <div class="providers" id="providers"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 02 model -->
+        <div class="field">
+          <div class="section-h"><span class="n">02</span><h2>model</h2><span class="hint" id="modelHint"></span></div>
+          <label class="lbl" for="model">COPILOT_MODEL <span class="req">*</span></label>
+          <select id="model"></select>
+          <div class="hintline" id="modelMeta"></div>
+        </div>
+
+        <!-- azure-only: resource + deployment -->
+        <div class="field hidden" id="azureFields">
+          <div class="row2">
+            <div>
+              <label class="lbl" for="resource">Azure resource <span class="req">*</span></label>
+              <input type="text" id="resource" value="my-resource" autocomplete="off" spellcheck="false" />
+              <div class="hintline">→ <b id="azureUrlPreview"></b></div>
+            </div>
+            <div>
+              <label class="lbl" for="deployment">Deployment name <span class="req">*</span></label>
+              <input type="text" id="deployment" autocomplete="off" spellcheck="false" />
+              <div class="hintline">Used as <b>COPILOT_MODEL</b></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- base url (non azure) -->
+        <div class="field" id="baseUrlField">
+          <label class="lbl" for="baseUrl">COPILOT_PROVIDER_BASE_URL <span class="req">*</span></label>
+          <input type="text" id="baseUrl" autocomplete="off" spellcheck="false" />
+          <div class="hintline" id="baseUrlHint"></div>
+        </div>
+
+        <!-- api key -->
+        <div class="field" id="keyField">
+          <label class="lbl">COPILOT_PROVIDER_API_KEY
+            <span class="tag" id="keyReqTag"></span>
+          </label>
+          <div class="seg" id="keyMode" style="margin-bottom:10px;">
+            <button data-km="env" class="on">$ env reference</button>
+            <button data-km="literal">literal value</button>
+          </div>
+          <div id="keyEnvWrap" class="adorn">
+            <span class="pre">$</span>
+            <input type="text" id="keyEnv" autocomplete="off" spellcheck="false" placeholder="OPENAI_API_KEY" />
+          </div>
+          <input type="password" id="keyLiteral" class="hidden" autocomplete="off" spellcheck="false" placeholder="sk-..." />
+          <div class="hintline" id="keyHint">Recommended: reference an env var so your key never lands in shared dotfiles.</div>
+        </div>
+
+        <div class="field hidden" id="keyNote">
+          <div class="hintline">🔓 <b id="keyNoteText">This provider runs locally and needs no API key.</b></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 03 tuning -->
+        <div class="field">
+          <div class="section-h"><span class="n">03</span><h2>tuning</h2><span class="hint">prefilled from model</span></div>
+          <div class="row2">
+            <div>
+              <label class="lbl" for="maxPrompt">MAX_PROMPT_TOKENS <span class="tag">context</span></label>
+              <input type="number" id="maxPrompt" min="1" />
+            </div>
+            <div>
+              <label class="lbl" for="maxOutput">MAX_OUTPUT_TOKENS <span class="tag">output</span></label>
+              <input type="number" id="maxOutput" min="1" />
+            </div>
+          </div>
+          <div class="hintline">Optional but recommended — explicit limits prevent silent context truncation or a wrong output cap.</div>
+        </div>
+
+        <!-- wire api -->
+        <div class="field">
+          <label class="lbl">COPILOT_PROVIDER_WIRE_API <span class="tag" id="wireAuto"></span></label>
+          <div class="seg cyan" id="wireMode">
+            <button data-w="auto" class="on">auto</button>
+            <button data-w="responses">responses</button>
+            <button data-w="completions">completions</button>
+          </div>
+          <div class="hintline" id="wireHint"></div>
+        </div>
+
+        <!-- effort -->
+        <div class="field" id="effortField">
+          <label class="lbl">reasoning effort <span class="tag">--effort flag</span></label>
+          <div class="seg green" id="effortSeg"></div>
+          <div class="hintline" id="effortHint"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 04 launch -->
+        <div class="field">
+          <div class="section-h"><span class="n">04</span><h2>launch &amp; output</h2></div>
+          <div class="row2">
+            <div>
+              <label class="lbl" for="aliasName">alias / function name <span class="req">*</span></label>
+              <input type="text" id="aliasName" value="cc" autocomplete="off" spellcheck="false" />
+            </div>
+            <div>
+              <label class="lbl">shape</label>
+              <div class="seg" id="kindSeg">
+                <button data-k="alias" class="on">alias</button>
+                <button data-k="function">function</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="lbl">target shell</label>
+          <div class="seg" id="shellSeg" style="margin-bottom:14px;">
+            <button data-s="bash" class="on">shell · bash/zsh</button>
+            <button data-s="powershell">powershell</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <label class="check danger">
+              <input type="checkbox" id="yolo" checked />
+              <span class="ctxt">--yolo<span>enable all permissions (tools + paths + urls). use with care.</span></span>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="offline" />
+              <span class="ctxt">COPILOT_OFFLINE=true<span>block all calls to GitHub (air-gapped / local provider only).</span></span>
+            </label>
+            <label class="check hidden" id="psCleanupRow">
+              <input type="checkbox" id="psCleanup" checked />
+              <span class="ctxt">restore env after run<span>try/finally cleanup so vars don't leak into your PowerShell session.</span></span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= OUTPUT ================= -->
+    <div class="out-col fade d3">
+
+      <div>
+        <div class="summary" id="summary" style="margin-bottom:14px;"></div>
+        <div class="term">
+          <div class="bar">
+            <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+            <span class="ttl" id="termTitle">~ <b>copilot-alias</b></span>
+            <span class="target" id="termTarget"></span>
+          </div>
+          <pre id="output"></pre>
+          <div class="out-actions">
+            <button class="btn primary flex" id="copyBtn">⧉ copy</button>
+            <button class="btn ghost" id="addBtn">＋ add to collection</button>
+          </div>
+        </div>
+        <div class="hintline" id="placement" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="card">
+        <div class="pad">
+          <div class="section-h"><span class="n">★</span><h2>collection</h2><span class="hint" id="collCount">0 aliases</span></div>
+          <div id="collList"></div>
+          <div style="display:flex;gap:10px;margin-top:6px;">
+            <button class="btn primary flex" id="copyAllBtn">⧉ copy all</button>
+            <button class="btn ghost" id="clearBtn">clear</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div><b>Copilot Alias Forge</b> · generates <span style="color:var(--amber)">COPILOT_PROVIDER_*</span> launch aliases for the GitHub Copilot CLI (BYOK)</div>
+    <div class="disc">Token limits &amp; model names are best-effort defaults for mid-2026 — verify against your provider and <b>copilot help providers</b>. Your keys never leave the browser; nothing is uploaded.</div>
+  </footer>
+</div>
+
+<div class="toast" id="toast">copied ✓</div>
+
+<script>
+"use strict";
+
+/* =========================================================================
+   DATA — providers + per-model defaults (context window / max output /
+   responses-api capability / reasoning effort levels). Best-effort mid-2026.
+   ========================================================================= */
+const PROVIDERS = [
+  { id:"openai", name:"OpenAI", type:"openai", color:"#74e0a0", badge:"AI",
+    baseUrl:"https://api.openai.com/v1", supportsResponses:true,
+    keyRequired:true, keyEnv:"OPENAI_API_KEY",
+    models:[
+      {id:"gpt-5.5",       maxPrompt:1050000, maxOutput:128000, responses:true, effort:["low","medium","high","xhigh"]},
+      {id:"gpt-5.5-pro",   maxPrompt:1050000, maxOutput:128000, responses:true, effort:["medium","high","xhigh"]},
+      {id:"gpt-5.4",       maxPrompt:1050000, maxOutput:128000, responses:true, effort:["low","medium","high","xhigh"]},
+      {id:"gpt-5.4-mini",  maxPrompt:400000,  maxOutput:128000, responses:true, effort:["low","medium","high","xhigh"]},
+      {id:"gpt-5.3-codex", maxPrompt:400000,  maxOutput:128000, responses:true, effort:["low","medium","high","xhigh"]},
+      {id:"gpt-5.2",       maxPrompt:400000,  maxOutput:128000, responses:true, effort:["low","medium","high"]},
+      {id:"gpt-5.1",       maxPrompt:400000,  maxOutput:128000, responses:true, effort:["low","medium","high"]},
+      {id:"gpt-5",         maxPrompt:400000,  maxOutput:128000, responses:true, effort:["minimal","low","medium","high"]},
+      {id:"gpt-5-mini",    maxPrompt:400000,  maxOutput:128000, responses:true, effort:["low","medium","high"]},
+      {id:"o4-mini",       maxPrompt:200000,  maxOutput:100000, responses:true, effort:["low","medium","high"]},
+      {id:"o3",            maxPrompt:200000,  maxOutput:100000, responses:true, effort:["low","medium","high"]},
+      {id:"gpt-4.1",       maxPrompt:1047576, maxOutput:32768,  responses:true, effort:[]},
+      {id:"gpt-4o",        maxPrompt:128000,  maxOutput:16384,  responses:true, effort:[]},
+    ]},
+  { id:"azure", name:"Azure OpenAI", type:"azure", color:"#56b6c2", badge:"AZ",
+    baseUrlTemplate:"https://{resource}.openai.azure.com/openai/v1/", needsResource:true, modelIsDeployment:true,
+    supportsResponses:true, keyRequired:true, keyEnv:"AZURE_OPENAI_API_KEY",
+    models:[
+      {id:"gpt-5.5",       maxPrompt:1050000, maxOutput:128000, responses:true, effort:["low","medium","high","xhigh"]},
+      {id:"gpt-5.4",       maxPrompt:1050000, maxOutput:128000, responses:true, effort:["low","medium","high","xhigh"]},
+      {id:"gpt-5.4-mini",  maxPrompt:400000,  maxOutput:128000, responses:true, effort:["low","medium","high","xhigh"]},
+      {id:"gpt-5.3-codex", maxPrompt:400000,  maxOutput:128000, responses:true, effort:["low","medium","high","xhigh"]},
+      {id:"gpt-5.2",       maxPrompt:400000,  maxOutput:128000, responses:true, effort:["low","medium","high"]},
+      {id:"gpt-5.1",       maxPrompt:400000,  maxOutput:128000, responses:true, effort:["low","medium","high"]},
+      {id:"gpt-5",         maxPrompt:400000,  maxOutput:128000, responses:true, effort:["minimal","low","medium","high"]},
+      {id:"gpt-4.1",       maxPrompt:300000,  maxOutput:32768,  responses:true, effort:[]},
+      {id:"gpt-4o",        maxPrompt:128000,  maxOutput:16384,  responses:true, effort:[]},
+    ]},
+  { id:"anthropic", name:"Anthropic", type:"anthropic", color:"#ffb454", badge:"CL",
+    baseUrl:"https://api.anthropic.com", supportsResponses:false,
+    keyRequired:true, keyEnv:"ANTHROPIC_API_KEY",
+    models:[
+      {id:"claude-opus-4-8",   maxPrompt:1000000, maxOutput:128000, responses:false, effort:["low","medium","high","max"]},
+      {id:"claude-sonnet-4-6", maxPrompt:1000000, maxOutput:128000, responses:false, effort:["low","medium","high","max"]},
+      {id:"claude-opus-4-7",   maxPrompt:1000000, maxOutput:128000, responses:false, effort:["low","medium","high","max"]},
+      {id:"claude-opus-4-6",   maxPrompt:1000000, maxOutput:128000, responses:false, effort:["low","medium","high","max"]},
+      {id:"claude-fable-5",    maxPrompt:1000000, maxOutput:128000, responses:false, effort:["low","medium","high","max"]},
+      {id:"claude-haiku-4-5",  maxPrompt:200000,  maxOutput:64000,  responses:false, effort:["low","medium","high"]},
+      {id:"claude-sonnet-4-5", maxPrompt:200000,  maxOutput:64000,  responses:false, effort:["low","medium","high"]},
+      {id:"claude-opus-4-5",   maxPrompt:200000,  maxOutput:64000,  responses:false, effort:["low","medium","high"]},
+    ]},
+  { id:"gemini", name:"Google Gemini", type:"openai", color:"#56b6c2", badge:"GG",
+    baseUrl:"https://generativelanguage.googleapis.com/v1beta/openai/", supportsResponses:false,
+    keyRequired:true, keyEnv:"GEMINI_API_KEY",
+    models:[
+      {id:"gemini-3.5-flash",        maxPrompt:1048576, maxOutput:65535, responses:false, effort:["low","medium","high"]},
+      {id:"gemini-3.1-pro-preview",  maxPrompt:1048576, maxOutput:65536, responses:false, effort:["low","medium","high"]},
+      {id:"gemini-2.5-pro",          maxPrompt:1048576, maxOutput:65535, responses:false, effort:["low","medium","high"]},
+      {id:"gemini-2.5-flash",        maxPrompt:1048576, maxOutput:65535, responses:false, effort:["low","medium","high"]},
+    ]},
+  { id:"mistral", name:"Mistral AI", type:"openai", color:"#ffb454", badge:"MS",
+    baseUrl:"https://api.mistral.ai/v1", supportsResponses:false,
+    keyRequired:true, keyEnv:"MISTRAL_API_KEY",
+    models:[
+      {id:"codestral-latest",       maxPrompt:262144, maxOutput:262144, responses:false, effort:[]},
+      {id:"mistral-large-latest",   maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+      {id:"mistral-medium-latest",  maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+      {id:"mistral-small-latest",   maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+      {id:"devstral-small-2505",    maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+    ]},
+  { id:"ollama-local", name:"Ollama (local)", type:"openai", color:"#e9e7e0", badge:"OL",
+    baseUrl:"http://localhost:11434/v1", supportsResponses:false,
+    keyRequired:false, keyEnv:"",
+    models:[
+      {id:"qwen3-coder:30b",   maxPrompt:262144, maxOutput:131072, responses:false, effort:[]},
+      {id:"qwen2.5-coder:32b", maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+      {id:"devstral",          maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+      {id:"gpt-oss:120b",      maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+      {id:"gpt-oss:20b",       maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+      {id:"llama3.3:70b",      maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+      {id:"deepseek-r1:8b",    maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+    ]},
+  { id:"ollama-cloud", name:"Ollama Cloud", type:"openai", color:"#74e0a0", badge:"OC",
+    baseUrl:"https://ollama.com/v1", supportsResponses:false,
+    keyRequired:true, keyEnv:"OLLAMA_API_KEY",
+    models:[
+      {id:"glm-5.1",                maxPrompt:198000, maxOutput:131072, responses:false, effort:[]},
+      {id:"kimi-k2.6",             maxPrompt:262144, maxOutput:131072, responses:false, effort:[]},
+      {id:"qwen3-coder:480b-cloud", maxPrompt:262144, maxOutput:131072, responses:false, effort:[]},
+      {id:"gpt-oss:120b-cloud",     maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+      {id:"minimax-m3",             maxPrompt:512000, maxOutput:131072, responses:false, effort:[]},
+    ]},
+  { id:"openrouter", name:"OpenRouter", type:"openai", color:"#b48ead", badge:"OR",
+    baseUrl:"https://openrouter.ai/api/v1", supportsResponses:false,
+    keyRequired:true, keyEnv:"OPENROUTER_API_KEY",
+    models:[
+      {id:"openai/gpt-5.5",            maxPrompt:1050000, maxOutput:128000, responses:false, effort:[]},
+      {id:"anthropic/claude-opus-4.8", maxPrompt:1000000, maxOutput:128000, responses:false, effort:[]},
+      {id:"google/gemini-3.5-flash",   maxPrompt:1048576, maxOutput:65535,  responses:false, effort:[]},
+      {id:"deepseek/deepseek-v4-pro",  maxPrompt:1000000, maxOutput:65536,  responses:false, effort:[]},
+      {id:"x-ai/grok-4.3",             maxPrompt:1000000, maxOutput:131072, responses:false, effort:[]},
+    ]},
+  { id:"groq", name:"Groq", type:"openai", color:"#ff6a6a", badge:"GQ",
+    baseUrl:"https://api.groq.com/openai/v1", supportsResponses:true,
+    keyRequired:true, keyEnv:"GROQ_API_KEY",
+    models:[
+      {id:"openai/gpt-oss-120b",       maxPrompt:131072, maxOutput:131072, responses:true,  effort:["low","medium","high"]},
+      {id:"openai/gpt-oss-20b",        maxPrompt:131072, maxOutput:131072, responses:true,  effort:["low","medium","high"]},
+      {id:"qwen/qwen3.6-27b",          maxPrompt:262144, maxOutput:131072, responses:false, effort:[]},
+      {id:"llama-3.3-70b-versatile",   maxPrompt:131072, maxOutput:32768,  responses:false, effort:[]},
+    ]},
+  { id:"xai", name:"xAI Grok", type:"openai", color:"#e9e7e0", badge:"X", 
+    baseUrl:"https://api.x.ai/v1", supportsResponses:true,
+    keyRequired:true, keyEnv:"XAI_API_KEY",
+    models:[
+      {id:"grok-4.3",        maxPrompt:1000000, maxOutput:131072, responses:true, effort:["low","medium","high"]},
+      {id:"grok-code-fast",  maxPrompt:256000,  maxOutput:131072, responses:true, effort:[]},
+    ]},
+  { id:"deepseek", name:"DeepSeek", type:"openai", color:"#56b6c2", badge:"DS",
+    baseUrl:"https://api.deepseek.com", supportsResponses:false,
+    keyRequired:true, keyEnv:"DEEPSEEK_API_KEY",
+    models:[
+      {id:"deepseek-v4-pro",   maxPrompt:1000000, maxOutput:65536, responses:false, effort:[]},
+      {id:"deepseek-v4-flash", maxPrompt:1000000, maxOutput:65536, responses:false, effort:[]},
+    ]},
+  { id:"together", name:"Together AI", type:"openai", color:"#b48ead", badge:"TG",
+    baseUrl:"https://api.together.ai/v1", supportsResponses:false,
+    keyRequired:true, keyEnv:"TOGETHER_API_KEY",
+    models:[
+      {id:"Qwen/Qwen3-Coder-480B-A35B-Instruct", maxPrompt:262144, maxOutput:131072, responses:false, effort:[]},
+      {id:"deepseek-ai/DeepSeek-V3.1",           maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+    ]},
+  { id:"fireworks", name:"Fireworks AI", type:"openai", color:"#ffb454", badge:"FW",
+    baseUrl:"https://api.fireworks.ai/inference/v1", supportsResponses:false,
+    keyRequired:true, keyEnv:"FIREWORKS_API_KEY",
+    models:[
+      {id:"accounts/fireworks/models/deepseek-v3p1",     maxPrompt:163840, maxOutput:131072, responses:false, effort:[]},
+      {id:"accounts/fireworks/models/qwen3-coder-480b",  maxPrompt:262144, maxOutput:131072, responses:false, effort:[]},
+    ]},
+  { id:"cerebras", name:"Cerebras", type:"openai", color:"#74e0a0", badge:"CB",
+    baseUrl:"https://api.cerebras.ai/v1", supportsResponses:false,
+    keyRequired:true, keyEnv:"CEREBRAS_API_KEY",
+    models:[
+      {id:"gpt-oss-120b",       maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+      {id:"qwen-3-coder-480b",  maxPrompt:131072, maxOutput:131072, responses:false, effort:[]},
+      {id:"llama-3.3-70b",      maxPrompt:131072, maxOutput:32768,  responses:false, effort:[]},
+    ]},
+];
+
+/* =========================================================================
+   STATE
+   ========================================================================= */
+const state = {
+  providerId:"azure",
+  modelId:"gpt-5.5",
+  resource:"my-resource",
+  deployment:"gpt-5.5",
+  keyMode:"env",       // env | literal
+  keyEnv:"AZURE_OPENAI_API_KEY",
+  keyLiteral:"",
+  offline:false,
+  wireMode:"auto",     // auto | responses | completions
+  effort:"high",
+  yolo:true,
+  maxPrompt:1050000,
+  maxOutput:128000,
+  aliasName:"cc",
+  shell:"bash",        // bash | powershell
+  kind:"alias",        // alias | function
+  psCleanup:true,
+};
+const collection = [];
+
+/* =========================================================================
+   HELPERS
+   ========================================================================= */
+const $ = id => document.getElementById(id);
+const provider = () => PROVIDERS.find(p => p.id === state.providerId);
+const model = () => provider().models.find(m => m.id === state.modelId) || provider().models[0];
+
+function baseUrl(){
+  const p = provider();
+  if(p.needsResource){
+    const r = (state.resource || "YOUR-RESOURCE").trim() || "YOUR-RESOURCE";
+    return p.baseUrlTemplate.replace("{resource}", r);
+  }
+  return p.baseUrl;
+}
+function modelString(){
+  return provider().modelIsDeployment ? ((state.deployment || model().id).trim() || model().id) : model().id;
+}
+function effortOptions(){ return model().effort || []; }
+function wireValue(){
+  if(state.wireMode === "responses") return "responses";
+  if(state.wireMode === "completions") return null;
+  // auto
+  return (provider().supportsResponses && model().responses) ? "responses" : null;
+}
+
+/* =========================================================================
+   OUTPUT GENERATION
+   ========================================================================= */
+function shellKeyValue(){
+  if(!provider().keyRequired) return null;
+  if(state.keyMode === "env"){
+    const n = (state.keyEnv || provider().keyEnv || "API_KEY").trim() || "API_KEY";
+    return "$" + n;                       // unquoted env reference, expands at runtime
+  }
+  return '"' + (state.keyLiteral || "YOUR-API-KEY") + '"';
+}
+function psKeyValue(){
+  if(!provider().keyRequired) return null;
+  if(state.keyMode === "env"){
+    const n = (state.keyEnv || provider().keyEnv || "API_KEY").trim() || "API_KEY";
+    return "$env:" + n;                   // PS env reference (no quotes)
+  }
+  return "'" + (state.keyLiteral || "YOUR-API-KEY") + "'";
+}
+
+// ordered list of [name, shellValue|null] env pairs
+function envPairs(kind){ // kind: 'shell' | 'ps'
+  const pairs = [];
+  if(state.offline) pairs.push(["COPILOT_OFFLINE", kind==="ps" ? "'true'" : "true"]);
+  pairs.push(["COPILOT_PROVIDER_TYPE", kind==="ps" ? `'${provider().type}'` : `"${provider().type}"`]);
+  pairs.push(["COPILOT_PROVIDER_BASE_URL", kind==="ps" ? `'${baseUrl()}'` : `"${baseUrl()}"`]);
+  const key = kind==="ps" ? psKeyValue() : shellKeyValue();
+  if(key !== null) pairs.push(["COPILOT_PROVIDER_API_KEY", key]);
+  pairs.push(["COPILOT_MODEL", kind==="ps" ? `'${modelString()}'` : `"${modelString()}"`]);
+  const wire = wireValue();
+  if(wire) pairs.push(["COPILOT_PROVIDER_WIRE_API", kind==="ps" ? `'${wire}'` : `"${wire}"`]);
+  if(state.maxPrompt) pairs.push(["COPILOT_PROVIDER_MAX_PROMPT_TOKENS", kind==="ps" ? `'${state.maxPrompt}'` : `${state.maxPrompt}`]);
+  if(state.maxOutput) pairs.push(["COPILOT_PROVIDER_MAX_OUTPUT_TOKENS", kind==="ps" ? `'${state.maxOutput}'` : `${state.maxOutput}`]);
+  return pairs;
+}
+
+function flagsStr(){
+  let f = "";
+  if(state.yolo) f += " --yolo";
+  const eff = state.effort;
+  if(eff && eff !== "none" && effortOptions().includes(eff)) f += " --effort " + eff;
+  return f;
+}
+
+function genShellAlias(){
+  const name = state.aliasName || "cc";
+  const body = envPairs("shell").map(([k,v]) => `${k}=${v}`).join(" ");
+  return `alias ${name}='${body} copilot${flagsStr()}'`;
+}
+function genShellFunction(){
+  const name = state.aliasName || "cc";
+  const pairs = envPairs("shell").map(([k,v]) => `  ${k}=${v}`);
+  const lines = [];
+  lines.push(`${name}() {`);
+  pairs.forEach(p => lines.push(p + " \\"));
+  lines.push(`  copilot${flagsStr()} "$@"`);
+  lines.push(`}`);
+  return lines.join("\n");
+}
+function genPwshFunction(withNote){
+  const name = state.aliasName || "cc";
+  const pairs = envPairs("ps");
+  const w = Math.max.apply(null, pairs.map(p => p[0].length));
+  const hash = pairs.map(([k,v]) => `        ${k.padEnd(w)} = ${v}`).join("\n");
+  const out = [];
+  if(withNote){
+    out.push(`# NOTE: PowerShell's Set-Alias/New-Alias cannot include arguments or`);
+    out.push(`# environment variables — a function is required. The function name below`);
+    out.push(`# IS the command you type (use it like an alias). Add it to $PROFILE.`);
+  }
+  out.push(`function ${name} {`);
+  out.push(`    $vars = [ordered]@{`);
+  out.push(hash);
+  out.push(`    }`);
+  if(state.psCleanup){
+    out.push(`    $prev = @{}`);
+    out.push(`    foreach ($k in $vars.Keys) { $prev[$k] = (Get-Item "Env:\\$k" -ErrorAction SilentlyContinue).Value }`);
+    out.push(`    foreach ($k in $vars.Keys) { Set-Item "Env:\\$k" $vars[$k] }`);
+    out.push(`    try {`);
+    out.push(`        copilot${flagsStr()} @args`);
+    out.push(`    } finally {`);
+    out.push(`        foreach ($k in $vars.Keys) {`);
+    out.push(`            if ($null -ne $prev[$k]) { Set-Item "Env:\\$k" $prev[$k] }`);
+    out.push(`            else { Remove-Item "Env:\\$k" -ErrorAction SilentlyContinue }`);
+    out.push(`        }`);
+    out.push(`    }`);
+  } else {
+    out.push(`    foreach ($k in $vars.Keys) { Set-Item "Env:\\$k" $vars[$k] }`);
+    out.push(`    copilot${flagsStr()} @args`);
+  }
+  out.push(`}`);
+  return out.join("\n");
+}
+
+function generate(){
+  if(state.shell === "bash"){
+    return state.kind === "alias" ? genShellAlias() : genShellFunction();
+  }
+  // powershell: alias-kind shows the limitation note + function; function-kind = plain function
+  return genPwshFunction(state.kind === "alias");
+}
+
+/* =========================================================================
+   SYNTAX HIGHLIGHT (display only; copy uses raw text)
+   ========================================================================= */
+function hl(code){
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  return code.split("\n").map(line => {
+    if(line.trimStart().startsWith("#")) return `<span class="c-com">${esc(line)}</span>`;
+    let h = esc(line);
+    h = h.replace(/"[^"]*"/g, m => `<span class="c-str">${m}</span>`);
+    h = h.replace(/'[^']*'/g, m => `<span class="c-str">${m}</span>`);
+    h = h.replace(/\b([A-Z][A-Z0-9_]{2,})(\s*=)/g, (m,n,eq) => `<span class="c-env">${n}</span>${eq}`);
+    h = h.replace(/\$env:[A-Za-z_][A-Za-z0-9_]*/g, m => `<span class="c-var">${m}</span>`);
+    h = h.replace(/(^|[\s=(])(\$[A-Za-z_][A-Za-z0-9_]*)/g, (m,pre,v) => `${pre}<span class="c-var">${v}</span>`);
+    h = h.replace(/^(\s*)(alias|function)\b/, (m,sp,kw) => `${sp}<span class="c-kw">${kw}</span>`);
+    h = h.replace(/\bcopilot\b/g, `<span class="c-cmd">copilot</span>`);
+    h = h.replace(/(\s)(--[a-z-]+)/g, (m,sp,fl) => `${sp}<span class="c-flag">${fl}</span>`);
+    return h;
+  }).join("\n");
+}
+
+/* =========================================================================
+   RENDER
+   ========================================================================= */
+function renderProviders(){
+  const wrap = $("providers");
+  wrap.innerHTML = "";
+  PROVIDERS.forEach(p => {
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "prov" + (p.id === state.providerId ? " sel" : "");
+    el.innerHTML =
+      `<span class="mono-badge" style="background:${p.color}">${p.badge}</span>` +
+      `<span class="pname">${p.name}</span>` +
+      `<span class="ptype">type=${p.type}</span>`;
+    el.addEventListener("click", () => selectProvider(p.id));
+    wrap.appendChild(el);
+  });
+}
+
+function renderModelOptions(){
+  const sel = $("model");
+  sel.innerHTML = "";
+  provider().models.forEach(m => {
+    const o = document.createElement("option");
+    o.value = m.id; o.textContent = m.id;
+    if(m.id === state.modelId) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+function renderEffort(){
+  const opts = effortOptions();
+  const field = $("effortField");
+  const seg = $("effortSeg");
+  seg.innerHTML = "";
+  if(opts.length === 0){
+    field.classList.add("hidden");
+    return;
+  }
+  field.classList.remove("hidden");
+  const all = opts.concat(["none"]);
+  all.forEach(o => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = o === "none" ? "none" : o;
+    b.className = (state.effort === o) ? "on" : "";
+    b.addEventListener("click", () => { state.effort = o; renderEffort(); refresh(); });
+    seg.appendChild(b);
+  });
+  $("effortHint").innerHTML = `Adds <b>--effort ${state.effort==="none"?"(omitted)":state.effort}</b>. Only models with configurable reasoning honor it.`;
+}
+
+function renderConditional(){
+  const p = provider();
+  // azure fields
+  $("azureFields").classList.toggle("hidden", !p.needsResource);
+  $("baseUrlField").classList.toggle("hidden", !!p.needsResource);
+  if(p.needsResource){
+    $("resource").value = state.resource;
+    $("deployment").value = state.deployment;
+    $("azureUrlPreview").textContent = baseUrl();
+  } else {
+    $("baseUrl").value = baseUrl();
+    $("baseUrlHint").innerHTML = baseUrlHintFor(p);
+  }
+  // key fields
+  const needKey = p.keyRequired;
+  $("keyField").classList.toggle("hidden", !needKey);
+  $("keyNote").classList.toggle("hidden", needKey);
+  if(needKey){
+    $("keyReqTag").textContent = "required";
+    $("keyEnv").value = state.keyEnv;
+    $("keyLiteral").value = state.keyLiteral;
+    $("keyEnvWrap").classList.toggle("hidden", state.keyMode !== "env");
+    $("keyLiteral").classList.toggle("hidden", state.keyMode !== "literal");
+    Array.from($("keyMode").children).forEach(b => b.classList.toggle("on", b.dataset.km === state.keyMode));
+  } else {
+    $("keyNoteText").textContent = p.id === "ollama-local"
+      ? "Local Ollama needs no API key — COPILOT_PROVIDER_API_KEY is omitted."
+      : "This provider needs no API key.";
+  }
+  // wire
+  const auto = wireValue();
+  $("wireAuto").textContent = "auto → " + (auto ? "responses" : "completions");
+  Array.from($("wireMode").children).forEach(b => b.classList.toggle("on", b.dataset.w === state.wireMode));
+  $("wireHint").innerHTML = p.supportsResponses
+    ? `<b>${p.name}</b> supports the Responses API. Use <b>responses</b> for GPT-5.x / reasoning endpoints; <b>completions</b> for classic chat.`
+    : `<b>${p.name}</b> is Chat-Completions only — wire stays unset (completions).`;
+  // tuning
+  $("maxPrompt").value = state.maxPrompt;
+  $("maxOutput").value = state.maxOutput;
+  // ps cleanup row visibility
+  $("psCleanupRow").classList.toggle("hidden", state.shell !== "powershell");
+  // kind seg (reflect)
+  Array.from($("kindSeg").children).forEach(b => b.classList.toggle("on", b.dataset.k === state.kind));
+  Array.from($("shellSeg").children).forEach(b => b.classList.toggle("on", b.dataset.s === state.shell));
+}
+
+function baseUrlHintFor(p){
+  const notes = {
+    "openrouter":"Note the non-standard <b>/api/v1</b> path.",
+    "fireworks":"Note the non-standard <b>/inference/v1</b> path.",
+    "gemini":"OpenAI-compat path is <b>/v1beta/openai/</b> (trailing slash).",
+    "ollama-local":"Start Ollama first — it serves an OpenAI-compatible API on <b>:11434</b>.",
+    "anthropic":"Uses the native Anthropic adapter (type=anthropic).",
+  };
+  return notes[p.id] || "Editable — adjust if your endpoint differs.";
+}
+
+function renderModelMeta(){
+  const m = model();
+  const p = provider();
+  $("modelMeta").innerHTML =
+    `ctx <b>${Number(m.maxPrompt).toLocaleString()}</b> · out <b>${Number(m.maxOutput).toLocaleString()}</b> · ` +
+    `wire <b>${(p.supportsResponses && m.responses) ? "responses" : "completions"}</b> · ` +
+    `effort <b>${m.effort.length ? m.effort.join("/") : "n/a"}</b>`;
+  $("modelHint").textContent = p.modelIsDeployment ? "azure → uses deployment name" : (p.models.length + " models");
+}
+
+function renderSummary(){
+  const p = provider();
+  const m = model();
+  const sum = $("summary");
+  sum.innerHTML = "";
+  const chips = [
+    ["provider", p.name],
+    ["model", modelString()],
+    ["wire", wireValue() || "completions"],
+  ];
+  if(state.effort && state.effort !== "none" && effortOptions().includes(state.effort)) chips.push(["effort", state.effort]);
+  chips.forEach(([k,v]) => {
+    const c = document.createElement("span");
+    c.className = "chip"; c.innerHTML = `${k} <b>${v}</b>`;
+    sum.appendChild(c);
+  });
+  if(state.yolo){
+    const c = document.createElement("span");
+    c.className = "chip warn"; c.innerHTML = `⚠ <b>--yolo</b>`;
+    sum.appendChild(c);
+  }
+}
+
+function renderPlacement(){
+  if(state.shell === "bash"){
+    $("termTarget").textContent = "~/.zshrc";
+    $("placement").innerHTML = `Add to <b>~/.bashrc</b> or <b>~/.zshrc</b>, then run <b>source</b> it (or open a new terminal).`;
+  } else {
+    $("termTarget").textContent = "$PROFILE";
+    $("placement").innerHTML = `Add to your PowerShell <b>$PROFILE</b> (run <b>notepad $PROFILE</b>), then restart PowerShell.`;
+  }
+}
+
+function refresh(){
+  const code = generate();
+  $("output").innerHTML = hl(code);
+  $("output").dataset.raw = code;
+  renderSummary();
+  renderModelMeta();
+  renderPlacement();
+  // keep azure url preview fresh
+  if(provider().needsResource) $("azureUrlPreview").textContent = baseUrl();
+}
+
+/* =========================================================================
+   ACTIONS
+   ========================================================================= */
+function selectProvider(id){
+  state.providerId = id;
+  const p = provider();
+  // default model = first
+  state.modelId = p.models[0].id;
+  applyModelDefaults();
+  // key defaults
+  state.keyMode = "env";
+  state.keyEnv = p.keyEnv || "API_KEY";
+  state.keyLiteral = "";
+  state.wireMode = "auto";
+  renderProviders();
+  renderModelOptions();
+  renderEffort();
+  renderConditional();
+  refresh();
+}
+
+function applyModelDefaults(){
+  const m = model();
+  state.maxPrompt = m.maxPrompt;
+  state.maxOutput = m.maxOutput;
+  if(provider().modelIsDeployment) state.deployment = m.id;
+  // pick a sensible effort default
+  const opts = m.effort;
+  if(opts.length === 0) state.effort = "none";
+  else if(opts.includes("high")) state.effort = "high";
+  else if(opts.includes("medium")) state.effort = "medium";
+  else state.effort = opts[0];
+}
+
+function copyText(text, btn, okLabel){
+  const done = () => {
+    if(btn){ const o = btn.textContent; btn.textContent = okLabel||"copied ✓"; btn.classList.add("ok");
+      setTimeout(()=>{btn.textContent=o; btn.classList.remove("ok");},1300); }
+    showToast();
+  };
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
+  } else fallbackCopy(text, done);
+}
+function fallbackCopy(text, cb){
+  const ta = document.createElement("textarea");
+  ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); }catch(e){}
+  document.body.removeChild(ta); cb && cb();
+}
+let toastT;
+function showToast(){
+  const t = $("toast"); t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove("show"),1400);
+}
+
+function renderCollection(){
+  const list = $("collList");
+  $("collCount").textContent = collection.length + (collection.length===1?" alias":" aliases");
+  if(collection.length === 0){
+    list.innerHTML = `<div class="empty-note">Build a set like <b style="color:var(--amber)">cc</b> / <b style="color:var(--amber)">cx</b> / <b style="color:var(--amber)">c4</b> — add aliases and copy them all at once.</div>`;
+    return;
+  }
+  list.innerHTML = "";
+  collection.forEach((c, i) => {
+    const row = document.createElement("div");
+    row.className = "coll-item";
+    row.innerHTML =
+      `<span class="ci-name">${c.name}</span>` +
+      `<span class="ci-meta">${c.shell} · ${c.kind} · ${c.provider}/${c.model}</span>` +
+      `<button class="ci-x" title="remove">✕</button>`;
+    row.querySelector(".ci-x").addEventListener("click", () => { collection.splice(i,1); renderCollection(); });
+    list.appendChild(row);
+  });
+}
+
+/* =========================================================================
+   WIRE UP EVENTS
+   ========================================================================= */
+function bind(){
+  $("model").addEventListener("change", e => {
+    state.modelId = e.target.value;
+    applyModelDefaults();
+    renderEffort(); renderConditional(); refresh();
+  });
+  $("resource").addEventListener("input", e => { state.resource = e.target.value; refresh(); $("azureUrlPreview").textContent = baseUrl(); });
+  $("deployment").addEventListener("input", e => { state.deployment = e.target.value; refresh(); });
+  $("baseUrl").addEventListener("input", e => {
+    // user override of base url for non-azure providers (session only)
+    provider().baseUrl = e.target.value; refresh();
+  });
+  $("keyMode").addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    state.keyMode = b.dataset.km; renderConditional(); refresh();
+  });
+  $("keyEnv").addEventListener("input", e => { state.keyEnv = e.target.value; refresh(); });
+  $("keyLiteral").addEventListener("input", e => { state.keyLiteral = e.target.value; refresh(); });
+  $("maxPrompt").addEventListener("input", e => { state.maxPrompt = parseInt(e.target.value,10) || 0; refresh(); });
+  $("maxOutput").addEventListener("input", e => { state.maxOutput = parseInt(e.target.value,10) || 0; refresh(); });
+  $("wireMode").addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    state.wireMode = b.dataset.w; renderConditional(); refresh();
+  });
+  $("aliasName").addEventListener("input", e => { state.aliasName = e.target.value.replace(/\s+/g,""); refresh(); });
+  $("kindSeg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    state.kind = b.dataset.k; renderConditional(); refresh();
+  });
+  $("shellSeg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    state.shell = b.dataset.s; renderConditional(); renderEffort(); refresh();
+  });
+  $("yolo").addEventListener("change", e => { state.yolo = e.target.checked; refresh(); });
+  $("offline").addEventListener("change", e => { state.offline = e.target.checked; refresh(); });
+  $("psCleanup").addEventListener("change", e => { state.psCleanup = e.target.checked; refresh(); });
+
+  $("copyBtn").addEventListener("click", () => copyText($("output").dataset.raw || "", $("copyBtn"), "⧉ copied ✓"));
+  $("addBtn").addEventListener("click", () => {
+    collection.push({
+      name: state.aliasName || "cc",
+      shell: state.shell === "bash" ? "shell" : "pwsh",
+      kind: state.kind,
+      provider: provider().name,
+      model: modelString(),
+      code: generate(),
+    });
+    renderCollection(); showToast();
+  });
+  $("copyAllBtn").addEventListener("click", () => {
+    if(collection.length === 0){ copyText($("output").dataset.raw || "", $("copyAllBtn"), "⧉ copied ✓"); return; }
+    const all = collection.map(c => c.code).join("\n\n");
+    copyText(all, $("copyAllBtn"), "⧉ copied all ✓");
+  });
+  $("clearBtn").addEventListener("click", () => { collection.length = 0; renderCollection(); });
+}
+
+/* =========================================================================
+   INIT
+   ========================================================================= */
+function init(){
+  renderProviders();
+  renderModelOptions();
+  renderEffort();
+  renderConditional();
+  renderCollection();
+  bind();
+  refresh();
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>

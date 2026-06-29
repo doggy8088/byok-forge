@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LiteLLM Config Forge — generate litellm-config.yaml proxy configs</title>
+<meta name="description" content="Build a litellm-config.yaml for the LiteLLM proxy — add multiple models from any provider, generate run commands, and wire it into Codex / Copilot via the Responses API." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Martian+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0a0b0e; --bg-2:#0e1015; --panel:#13151c; --panel-2:#171a22; --panel-3:#1c2029;
+    --border:#262b37; --border-2:#323848;
+    --text:#e9e7e0; --muted:#888e9d; --muted-2:#5d636f;
+    /* litellm accent = violet (distinct from copilot amber & codex sky) */
+    --amber:#a78bfa; --amber-soft:rgba(167,139,250,.15); --amber-line:rgba(167,139,250,.45);
+    --green:#74e0a0; --cyan:#56b6c2; --violet:#b48ead; --red:#ff6a6a; --orange:#ffb454;
+    --radius:14px;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --display:'Martian Mono',var(--mono);
+    --sans:'IBM Plex Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden;}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(900px 500px at 12% -8%, rgba(167,139,250,.12), transparent 60%),radial-gradient(820px 520px at 100% 0%, rgba(180,142,173,.07), transparent 55%),radial-gradient(700px 700px at 80% 110%, rgba(86,182,194,.05), transparent 60%);}
+  body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+    background-image:linear-gradient(transparent 0 31px, rgba(255,255,255,.018) 31px 32px),linear-gradient(90deg, transparent 0 31px, rgba(255,255,255,.018) 31px 32px);background-size:32px 32px;mask-image:radial-gradient(circle at 50% 30%, #000 0%, transparent 85%);}
+  .wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 24px 80px;}
+
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:30px 0 26px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:16px;}
+  .brand .glyph{width:54px;height:54px;flex:none;border-radius:13px;background:linear-gradient(145deg,#1d2029,#10131a);border:1px solid var(--border-2);display:grid;place-items:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 8px 24px -12px rgba(167,139,250,.5);position:relative;overflow:hidden;}
+  .brand .glyph::after{content:"_";color:var(--amber);font-family:var(--mono);font-weight:700;font-size:26px;animation:blink 1.1s steps(1) infinite;line-height:1;margin-top:-6px;}
+  .brand .glyph .chev{position:absolute;color:var(--green);font-family:var(--mono);font-weight:700;font-size:20px;left:9px;top:13px;}
+  @keyframes blink{50%{opacity:0;}}
+  .brand h1{margin:0;font-family:var(--display);font-weight:800;letter-spacing:-.04em;font-size:23px;line-height:1.05;text-transform:lowercase;}
+  .brand h1 b{color:var(--amber);font-weight:800;}
+  .brand p{margin:3px 0 0;color:var(--muted);font-size:12.5px;font-family:var(--mono);letter-spacing:.01em;}
+  .top .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .pill{font-family:var(--mono);font-size:11.5px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:6px 12px;background:var(--panel);white-space:nowrap;}
+  .pill b{color:var(--green);font-weight:500;}
+  a.home{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:6px 13px;background:var(--panel);transition:all .14s ease;}
+  a.home:hover{color:var(--amber);border-color:var(--amber-line);}
+
+  .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:26px;align-items:start;}
+  @media(max-width:980px){.grid{grid-template-columns:1fr;}}
+  .card{background:linear-gradient(180deg,var(--panel),var(--bg-2));border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 24px 60px -40px rgba(0,0,0,.9);}
+  .card .pad{padding:22px 22px 24px;}
+
+  .section-h{display:flex;align-items:baseline;gap:10px;margin:0 0 16px;}
+  .section-h .n{font-family:var(--mono);color:var(--amber);font-size:12px;font-weight:700;border:1px solid var(--amber-line);background:var(--amber-soft);border-radius:7px;padding:2px 8px;letter-spacing:.05em;}
+  .section-h h2{margin:0;font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:-.02em;text-transform:lowercase;}
+  .section-h .hint{margin-left:auto;color:var(--muted-2);font-size:11.5px;font-family:var(--mono);}
+
+  .field{margin-bottom:20px;}.field:last-child{margin-bottom:0;}
+  label.lbl{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px;font-family:var(--mono);}
+  label.lbl .req{color:var(--amber);font-size:13px;line-height:0;}
+  label.lbl .tag{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted-2);font-size:11px;}
+
+  select,input[type=text],input[type=number]{width:100%;background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;border:1px solid var(--border-2);border-radius:9px;padding:10px 11px;outline:none;transition:border-color .14s ease, box-shadow .14s ease;}
+  select:focus,input:focus{border-color:var(--amber-line);box-shadow:0 0 0 3px var(--amber-soft);}
+  select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 16px) 17px,calc(100% - 11px) 17px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;cursor:pointer;}
+  .hintline{margin-top:7px;font-size:11.5px;color:var(--muted-2);font-family:var(--mono);line-height:1.45;}
+  .hintline b{color:var(--cyan);font-weight:500;}
+
+  /* model entry cards */
+  .entry{border:1px solid var(--border);border-radius:12px;background:var(--panel-2);padding:15px 15px 16px;margin-bottom:13px;position:relative;transition:border-color .14s ease;}
+  .entry:hover{border-color:var(--border-2);}
+  .entry .ehead{display:flex;align-items:center;gap:10px;margin-bottom:13px;}
+  .entry .ebadge{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:10px;color:#0a0b0e;flex:none;}
+  .entry .etitle{font-family:var(--mono);font-size:12px;color:var(--muted);}
+  .entry .etitle b{color:var(--text);font-weight:600;}
+  .entry .ealias{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--amber);background:var(--amber-soft);border:1px solid var(--amber-line);border-radius:6px;padding:2px 8px;max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .entry .rm{border:1px solid var(--border-2);background:var(--panel-3);color:var(--muted);width:26px;height:26px;border-radius:7px;cursor:pointer;flex:none;font-size:14px;line-height:1;transition:all .14s ease;display:grid;place-items:center;}
+  .entry .rm:hover{color:var(--red);border-color:var(--red);}
+  .erow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+  .erow:last-child{margin-bottom:0;}
+  .erow.full{grid-template-columns:1fr;}
+  @media(max-width:520px){.erow{grid-template-columns:1fr;}}
+  .mini{font-family:var(--mono);font-size:10px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;display:block;}
+  .adorn{position:relative;}
+  .adorn .pre{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--amber);font-family:var(--mono);font-size:12.5px;pointer-events:none;}
+  .adorn input{padding-left:23px;}
+  .ecell.hidden{display:none;}
+
+  .addbtn{width:100%;border:1px dashed var(--border-2);background:transparent;color:var(--muted);font-family:var(--mono);font-size:12.5px;font-weight:600;padding:12px;border-radius:11px;cursor:pointer;transition:all .14s ease;display:flex;align-items:center;justify-content:center;gap:9px;}
+  .addbtn:hover{border-color:var(--amber-line);color:var(--amber);background:var(--amber-soft);}
+
+  .divider{height:1px;background:var(--border);margin:22px 0;position:relative;}
+  .divider::after{content:"";position:absolute;left:0;top:0;width:40px;height:1px;background:var(--amber-line);}
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:520px){.row2{grid-template-columns:1fr;}}
+  .check{display:flex;align-items:flex-start;gap:11px;cursor:pointer;padding:11px 13px;border:1px solid var(--border);border-radius:10px;background:var(--panel-2);transition:border-color .14s ease;}
+  .check:hover{border-color:var(--border-2);}
+  .check input{appearance:none;width:18px;height:18px;flex:none;border:1px solid var(--border-2);border-radius:5px;background:var(--bg);margin-top:1px;cursor:pointer;position:relative;transition:all .14s ease;}
+  .check input:checked{background:var(--amber);border-color:var(--amber);}
+  .check input:checked::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#0a0b0e;font-size:12px;font-weight:800;}
+  .check .ctxt{font-size:12.5px;color:var(--text);}
+  .check .ctxt span{display:block;color:var(--muted-2);font-size:11.5px;font-family:var(--mono);margin-top:2px;}
+
+  .out-col{position:sticky;top:18px;display:flex;flex-direction:column;gap:16px;}
+  @media(max-width:980px){.out-col{position:static;}}
+  .term{background:#08090c;border:1px solid var(--border-2);border-radius:var(--radius);overflow:hidden;box-shadow:0 30px 70px -40px rgba(0,0,0,1), inset 0 0 0 1px rgba(255,255,255,.02);}
+  .term .bar{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#0d0f14;border-bottom:1px solid var(--border);}
+  .term .bar .dot{width:11px;height:11px;border-radius:50%;}
+  .dot.r{background:#ff5f57;}.dot.y{background:#febc2e;}.dot.g{background:#28c840;}
+  .term .bar .ttl{margin-left:8px;font-family:var(--mono);font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .term .bar .ttl b{color:var(--amber);font-weight:500;}
+  .term pre{margin:0;padding:16px 18px 18px;font-family:var(--mono);font-size:12.7px;line-height:1.7;color:#cfd3da;white-space:pre-wrap;word-break:break-word;overflow-x:auto;max-height:42vh;}
+  .c-com{color:var(--muted-2);font-style:italic;}
+  .c-str{color:var(--green);}
+  .c-sec{color:var(--amber);font-weight:700;}
+  .c-key{color:var(--cyan);}
+  .c-val{color:var(--violet);}
+  .c-cmd{color:#fff;font-weight:700;}
+  .c-flag{color:var(--cyan);}
+  .out-actions{display:flex;gap:9px;padding:12px 14px;background:#0d0f14;border-top:1px solid var(--border);flex-wrap:wrap;}
+  .btn{font-family:var(--mono);font-size:12.5px;font-weight:600;border-radius:9px;padding:10px 15px;cursor:pointer;border:1px solid var(--border-2);background:var(--panel-2);color:var(--text);transition:all .14s ease;display:inline-flex;align-items:center;gap:8px;}
+  .btn:hover{border-color:var(--border-2);background:var(--panel-3);transform:translateY(-1px);}
+  .btn.primary{background:var(--amber);border-color:var(--amber);color:#0a0b0e;}
+  .btn.primary:hover{box-shadow:0 10px 26px -12px rgba(167,139,250,.8);}
+  .btn.ok{background:var(--green);border-color:var(--green);color:#08090c;}
+  .btn.flex{flex:1;justify-content:center;}
+
+  .out-label{font-family:var(--mono);font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;display:flex;align-items:center;gap:8px;}
+  .out-label .path{color:var(--amber);text-transform:none;letter-spacing:0;}
+  .summary{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px;}
+  .chip{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel-2);border:1px solid var(--border);border-radius:7px;padding:4px 9px;}
+  .chip b{color:var(--text);font-weight:500;}
+  .crosslink{border:1px dashed var(--border-2);border-radius:11px;background:var(--panel-2);padding:13px 15px;font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.55;}
+  .crosslink a{color:var(--amber);text-decoration:none;border-bottom:1px solid var(--amber-line);}
+  .crosslink a:hover{color:var(--text);}
+  .crosslink b{color:var(--text);font-weight:500;}
+
+  footer{margin-top:42px;text-align:center;color:var(--muted-2);font-size:11.5px;font-family:var(--mono);line-height:1.7;}
+  footer b{color:var(--muted);font-weight:500;}
+  footer .disc{max-width:720px;margin:10px auto 0;}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#08090c;font-family:var(--mono);font-weight:700;font-size:13px;padding:11px 20px;border-radius:10px;opacity:0;pointer-events:none;transition:all .25s ease;z-index:50;box-shadow:0 16px 40px -14px rgba(116,224,160,.7);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .fade{opacity:0;transform:translateY(10px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards;}
+  @keyframes rise{to{opacity:1;transform:none;}}
+  .d1{animation-delay:.04s;}.d2{animation-delay:.12s;}.d3{animation-delay:.2s;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top fade d1">
+    <div class="brand">
+      <div class="glyph"><span class="chev">&gt;</span></div>
+      <div>
+        <h1>litellm <b>config</b> forge</h1>
+        <p>// build a litellm-config.yaml proxy for any provider</p>
+      </div>
+    </div>
+    <div class="meta">
+      <span class="pill"><b>responses</b> ⇄ chat bridge</span>
+      <a class="home" href="index.html">⊞ all tools</a>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- ================= CONFIG ================= -->
+    <div class="card fade d2">
+      <div class="pad">
+
+        <div class="field">
+          <div class="section-h"><span class="n">01</span><h2>models</h2><span class="hint" id="modelCount"></span></div>
+          <div id="entries"></div>
+          <button class="addbtn" id="addBtn">＋ add another model</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <div class="section-h"><span class="n">02</span><h2>proxy settings</h2></div>
+          <div class="row2" style="margin-bottom:16px;">
+            <div>
+              <label class="lbl" for="port">port</label>
+              <input type="text" id="port" value="4000" autocomplete="off" spellcheck="false" />
+            </div>
+            <div>
+              <label class="lbl" for="masterKey">master key env <span class="tag">optional</span></label>
+              <div class="adorn"><span class="pre">$</span><input type="text" id="masterKey" placeholder="LITELLM_MASTER_KEY" autocomplete="off" spellcheck="false" /></div>
+            </div>
+          </div>
+          <label class="check" style="margin-bottom:12px;">
+            <input type="checkbox" id="dropParams" checked />
+            <span class="ctxt">drop_params<span>silently drop params a provider doesn't support (avoids 400s when bridging).</span></span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="detailedDebug" />
+            <span class="ctxt">detailed_debug<span>add --detailed_debug to the run command for verbose proxy logs.</span></span>
+          </label>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= OUTPUT ================= -->
+    <div class="out-col fade d3">
+
+      <div class="summary" id="summary"></div>
+
+      <div>
+        <p class="out-label">proxy config · <span class="path">litellm-config.yaml</span></p>
+        <div class="term">
+          <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">litellm-config<b>.yaml</b></span></div>
+          <pre id="yamlOut"></pre>
+          <div class="out-actions">
+            <button class="btn primary flex" id="copyYamlBtn">⧉ copy yaml</button>
+            <button class="btn ok" id="downloadYamlBtn">⤓ download .yaml</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="out-label">start the proxy</p>
+        <div class="term">
+          <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">~ <b>terminal</b></span></div>
+          <pre id="runOut"></pre>
+          <div class="out-actions">
+            <button class="btn primary flex" id="copyRunBtn">⧉ copy commands</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="out-label">use it from codex · <span class="path">~/.codex/config.toml</span></p>
+        <div class="term">
+          <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">~/.codex/<b>config.toml</b></span></div>
+          <pre id="codexOut"></pre>
+          <div class="out-actions">
+            <button class="btn primary flex" id="copyCodexBtn">⧉ copy block</button>
+          </div>
+        </div>
+        <div class="crosslink" style="margin-top:10px;">↪ Pair this with the <a href="codex-cli.html">Codex Config Forge</a> — pick <b>Custom</b>, set <b>base_url</b> to your proxy, and you're done. Works with any Responses-API client (Codex, Copilot CLI…).</div>
+      </div>
+
+    </div>
+  </div>
+
+  <datalist id="dl-store"></datalist>
+
+  <footer>
+    <div><b>LiteLLM Config Forge</b> · build a <span style="color:var(--amber)">litellm-config.yaml</span> for the LiteLLM proxy</div>
+    <div class="disc">The <a href="https://docs.litellm.ai/docs/response_api" style="color:var(--amber)">LiteLLM proxy</a> exposes an OpenAI <b>/v1/responses</b> endpoint and bridges to Chat-Completions providers automatically — so Responses-only clients like the Codex CLI can talk to Mistral, DeepSeek, Anthropic, Gemini and more. API keys are referenced as <code style="color:var(--amber)">os.environ/NAME</code> and read by the proxy at runtime; they're never written into the YAML. Model names are best-effort for mid-2026 — verify with each provider.</div>
+  </footer>
+</div>
+<div class="toast" id="toast">copied ✓</div>
+
+<script>
+"use strict";
+
+/* =========================================================================
+   DATA — LiteLLM provider catalog.
+   prefix      : LiteLLM provider route prefix (model = "<prefix>/<model>")
+   keyless     : no API key (local Ollama)
+   needsBase   : requires api_base (local / azure / vllm)
+   needsVersion: requires api_version (azure)
+   ========================================================================= */
+const LL_PROVIDERS = [
+  { id:"mistral",   name:"Mistral",       prefix:"mistral",      env:"MISTRAL_API_KEY",    color:"#ffb454", badge:"MI",
+    models:["mistral-medium-latest","mistral-large-latest","devstral-2512","magistral-medium-latest"] },
+  { id:"deepseek",  name:"DeepSeek",      prefix:"deepseek",     env:"DEEPSEEK_API_KEY",   color:"#5cc8ff", badge:"DS",
+    models:["deepseek-chat","deepseek-reasoner"] },
+  { id:"anthropic", name:"Anthropic",     prefix:"anthropic",    env:"ANTHROPIC_API_KEY",  color:"#d6a27a", badge:"AN",
+    models:["claude-opus-4-8","claude-sonnet-4-6","claude-haiku-4-5"] },
+  { id:"gemini",    name:"Google Gemini", prefix:"gemini",       env:"GEMINI_API_KEY",     color:"#74e0a0", badge:"GM",
+    models:["gemini-3-pro","gemini-2.5-pro","gemini-2.5-flash"] },
+  { id:"cerebras",  name:"Cerebras",      prefix:"cerebras",     env:"CEREBRAS_API_KEY",   color:"#e9e7e0", badge:"CB",
+    models:["qwen-3-coder-480b","llama-3.3-70b","gpt-oss-120b"] },
+  { id:"together",  name:"Together AI",   prefix:"together_ai",  env:"TOGETHER_API_KEY",   color:"#56b6c2", badge:"TG",
+    models:["deepseek-ai/DeepSeek-V3.1","Qwen/Qwen3-Coder-480B-A35B-Instruct","moonshotai/Kimi-K2-Instruct"] },
+  { id:"fireworks", name:"Fireworks",     prefix:"fireworks_ai", env:"FIREWORKS_API_KEY",  color:"#b48ead", badge:"FW",
+    models:["accounts/fireworks/models/deepseek-v3p1","accounts/fireworks/models/qwen3-coder-480b-a35b-instruct"] },
+  { id:"groq",      name:"Groq",          prefix:"groq",         env:"GROQ_API_KEY",       color:"#ff6a6a", badge:"GQ",
+    models:["openai/gpt-oss-120b","llama-3.3-70b-versatile","moonshotai/kimi-k2-instruct"] },
+  { id:"openai",    name:"OpenAI",        prefix:"openai",       env:"OPENAI_API_KEY",     color:"#74e0a0", badge:"AI",
+    models:["gpt-5.5","gpt-5.4","o3","o4-mini"] },
+  { id:"openrouter",name:"OpenRouter",    prefix:"openrouter",   env:"OPENROUTER_API_KEY", color:"#b48ead", badge:"OR",
+    models:["anthropic/claude-opus-4.8","x-ai/grok-4.3","deepseek/deepseek-chat"] },
+  { id:"xai",       name:"xAI Grok",      prefix:"xai",          env:"XAI_API_KEY",        color:"#e9e7e0", badge:"X",
+    models:["grok-4.3","grok-code-fast"] },
+  { id:"azure",     name:"Azure OpenAI",  prefix:"azure",        env:"AZURE_API_KEY",      color:"#56b6c2", badge:"AZ",
+    needsBase:true, needsVersion:true, baseDefault:"https://YOUR-RESOURCE.openai.azure.com", versionDefault:"2025-04-01-preview", modelLabel:"deployment",
+    models:["gpt-5.5","gpt-5.4","gpt-4.1"] },
+  { id:"ollama",    name:"Ollama (local)",prefix:"ollama_chat",  env:"", color:"#e9e7e0", badge:"OL",
+    keyless:true, needsBase:true, baseDefault:"http://localhost:11434",
+    models:["qwen3-coder:30b","llama3.3:70b","deepseek-r1:8b","devstral"] },
+  { id:"vllm",      name:"vLLM (hosted)", prefix:"hosted_vllm",  env:"VLLM_API_KEY", color:"#5cc8ff", badge:"VL",
+    needsBase:true, baseDefault:"http://localhost:8000/v1",
+    models:["Qwen/Qwen3-Coder-30B-A3B-Instruct","openai/gpt-oss-120b"] },
+];
+const provById = id => LL_PROVIDERS.find(p => p.id === id);
+
+/* =========================================================================
+   STATE — a list of model entries.
+   ========================================================================= */
+let uid = 0;
+function makeEntry(provId){
+  const p = provById(provId);
+  const model = p.models[0];
+  return {
+    uid: ++uid,
+    provider: provId,
+    model,
+    alias: defaultAlias(model),
+    env: p.env,
+    base: p.baseDefault || "",
+    version: p.versionDefault || "",
+  };
+}
+function defaultAlias(model){ return (model.split("/").pop() || model).trim(); }
+
+const state = {
+  entries: [ makeEntry("mistral"), makeEntry("deepseek") ],
+  port: "4000",
+  masterKey: "",
+  dropParams: true,
+  detailedDebug: false,
+};
+state.entries[1].model = "deepseek-reasoner";
+state.entries[1].alias = "deepseek-reasoner";
+
+const $ = id => document.getElementById(id);
+
+/* =========================================================================
+   GENERATION
+   ========================================================================= */
+function entryModelString(e){
+  const p = provById(e.provider);
+  return `${p.prefix}/${(e.model||"").trim()||"your-model"}`;
+}
+function genYaml(){
+  const lines = ["model_list:"];
+  state.entries.forEach(e => {
+    const p = provById(e.provider);
+    lines.push(`  - model_name: ${(e.alias||"").trim()||defaultAlias(e.model)}`);
+    lines.push(`    litellm_params:`);
+    lines.push(`      model: ${entryModelString(e)}`);
+    if(!p.keyless) lines.push(`      api_key: os.environ/${(e.env||p.env||"API_KEY").trim()||"API_KEY"}`);
+    if(p.needsBase) lines.push(`      api_base: ${(e.base||p.baseDefault||"").trim()}`);
+    if(p.needsVersion) lines.push(`      api_version: "${(e.version||"").trim()}"`);
+  });
+  const settings = [];
+  if(state.dropParams) settings.push(`litellm_settings:`, `  drop_params: true`);
+  if((state.masterKey||"").trim()) settings.push(`general_settings:`, `  master_key: os.environ/${state.masterKey.trim()}`);
+  if(settings.length) return lines.join("\n") + "\n\n" + settings.join("\n");
+  return lines.join("\n");
+}
+function uniqueEnvs(){
+  const set = [];
+  state.entries.forEach(e => {
+    const p = provById(e.provider);
+    if(!p.keyless){ const env=(e.env||p.env||"").trim(); if(env && !set.includes(env)) set.push(env); }
+  });
+  if((state.masterKey||"").trim() && !set.includes(state.masterKey.trim())) set.push(state.masterKey.trim());
+  return set;
+}
+function genRun(){
+  const out = [
+    `# 1) install the LiteLLM proxy (once)`,
+    `pip install "litellm[proxy]"`,
+    ``,
+    `# 2) export the keys the proxy needs`,
+  ];
+  const envs = uniqueEnvs();
+  if(envs.length === 0) out.push(`# (no API keys required — local provider only)`);
+  envs.forEach(env => out.push(`export ${env}="<your-${env.toLowerCase().replace(/_/g,"-")}>"`));
+  out.push(``);
+  out.push(`# 3) start the proxy on http://localhost:${(state.port||"4000").trim()}/v1`);
+  const dbg = state.detailedDebug ? " --detailed_debug" : "";
+  out.push(`litellm --config litellm-config.yaml --port ${(state.port||"4000").trim()}${dbg}`);
+  return out.join("\n");
+}
+function genCodex(){
+  const port = (state.port||"4000").trim();
+  const firstAlias = state.entries.length ? ((state.entries[0].alias||"").trim()||defaultAlias(state.entries[0].model)) : "your-model";
+  const lines = [
+    `# Append to ~/.codex/config.toml`,
+    `[model_providers.litellm]`,
+    `name = "LiteLLM proxy"`,
+    `base_url = "http://localhost:${port}/v1"`,
+  ];
+  if((state.masterKey||"").trim()) lines.push(`env_key = "${state.masterKey.trim()}"`);
+  lines.push(`wire_api = "responses"`);
+  lines.push(``);
+  lines.push(`# then in ~/.codex/<profile>.config.toml:`);
+  lines.push(`#   model = "${firstAlias}"`);
+  lines.push(`#   model_provider = "litellm"`);
+  return lines.join("\n");
+}
+
+/* =========================================================================
+   HIGHLIGHTERS
+   ========================================================================= */
+function esch(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function hlYaml(code){
+  return code.split("\n").map(line => {
+    if(line.trimStart().startsWith("#")) return `<span class="c-com">${esch(line)}</span>`;
+    let h = esch(line);
+    h = h.replace(/^(\s*-?\s*)([A-Za-z0-9_.\-]+)(:)/, (m,sp,k,c) => `${sp}<span class="c-key">${k}</span>${c}`);
+    h = h.replace(/(:\s+)("?[^\s].*?"?)$/, (m,c,v) => `${c}<span class="c-str">${v}</span>`);
+    h = h.replace(/\b(true|false)\b/g, m => `<span class="c-val">${m}</span>`);
+    return h;
+  }).join("\n");
+}
+function hlToml(code){
+  return code.split("\n").map(line => {
+    if(line.trimStart().startsWith("#")) return `<span class="c-com">${esch(line)}</span>`;
+    let h = esch(line);
+    if(/^\s*\[.*\]\s*$/.test(line)) return `<span class="c-sec">${h}</span>`;
+    h = h.replace(/"[^"]*"/g, m => `<span class="c-str">${m}</span>`);
+    h = h.replace(/^(\s*)([A-Za-z0-9_.\-]+)(\s*=)/, (m,sp,k,eq) => `${sp}<span class="c-key">${k}</span>${eq}`);
+    return h;
+  }).join("\n");
+}
+function hlShell(code){
+  return code.split("\n").map(line => {
+    if(line.trimStart().startsWith("#")) return `<span class="c-com">${esch(line)}</span>`;
+    let h = esch(line);
+    h = h.replace(/"[^"]*"/g, m => `<span class="c-str">${m}</span>`);
+    h = h.replace(/\b(pip|litellm|export)\b/g, m => `<span class="c-cmd">${m}</span>`);
+    h = h.replace(/(\s)(-{1,2}[a-z][a-z_-]*)/g, (m,sp,fl) => `${sp}<span class="c-flag">${fl}</span>`);
+    return h;
+  }).join("\n");
+}
+
+/* =========================================================================
+   RENDER — entries
+   ========================================================================= */
+function renderDatalists(){
+  const store = $("dl-store");
+  store.innerHTML = "";
+  LL_PROVIDERS.forEach(p => {
+    const dl = document.createElement("datalist");
+    dl.id = "models-" + p.id;
+    p.models.forEach(m => { const o=document.createElement("option"); o.value=m; dl.appendChild(o); });
+    store.appendChild(dl);
+  });
+}
+function renderEntries(){
+  const wrap = $("entries"); wrap.innerHTML = "";
+  state.entries.forEach((e, i) => {
+    const p = provById(e.provider);
+    const card = document.createElement("div");
+    card.className = "entry";
+    card.dataset.uid = e.uid;
+    const opts = LL_PROVIDERS.map(pp => `<option value="${pp.id}"${pp.id===e.provider?" selected":""}>${pp.name}</option>`).join("");
+    const modelLbl = p.modelLabel || "model";
+    card.innerHTML = `
+      <div class="ehead">
+        <span class="ebadge" style="background:${p.color}">${p.badge}</span>
+        <span class="etitle">model <b>#${i+1}</b></span>
+        <span class="ealias">${(e.alias||"").trim()||defaultAlias(e.model)}</span>
+        ${state.entries.length>1?`<button class="rm" data-act="rm" title="remove">✕</button>`:""}
+      </div>
+      <div class="erow">
+        <div class="ecell">
+          <span class="mini">provider</span>
+          <select data-field="provider">${opts}</select>
+        </div>
+        <div class="ecell">
+          <span class="mini">${modelLbl}</span>
+          <input type="text" data-field="model" list="models-${p.id}" value="${escAttr(e.model)}" autocomplete="off" spellcheck="false" />
+        </div>
+      </div>
+      <div class="erow">
+        <div class="ecell">
+          <span class="mini">model_name (alias)</span>
+          <input type="text" data-field="alias" value="${escAttr(e.alias)}" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="ecell ${p.keyless?"hidden":""}">
+          <span class="mini">api key env</span>
+          <div class="adorn"><span class="pre">$</span><input type="text" data-field="env" value="${escAttr(e.env)}" autocomplete="off" spellcheck="false" /></div>
+        </div>
+      </div>
+      <div class="erow full ${p.needsBase?"":"hidden"}">
+        <div class="ecell">
+          <span class="mini">api_base</span>
+          <input type="text" data-field="base" value="${escAttr(e.base)}" autocomplete="off" spellcheck="false" />
+        </div>
+      </div>
+      <div class="erow full ${p.needsVersion?"":"hidden"}">
+        <div class="ecell">
+          <span class="mini">api_version</span>
+          <input type="text" data-field="version" value="${escAttr(e.version)}" autocomplete="off" spellcheck="false" />
+        </div>
+      </div>
+      <div class="hintline">→ routes as <b>${entryModelString(e)}</b></div>
+    `;
+    wrap.appendChild(card);
+  });
+  $("modelCount").textContent = state.entries.length + (state.entries.length===1?" model":" models");
+}
+function escAttr(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+
+function renderSummary(){
+  const sum = $("summary"); sum.innerHTML = "";
+  const chips = [["models", state.entries.length], ["port", (state.port||"4000").trim()]];
+  const keys = uniqueEnvs().length;
+  chips.push(["keys", keys]);
+  if((state.masterKey||"").trim()) chips.push(["auth", "master key"]);
+  chips.forEach(([k,v])=>{ const c=document.createElement("span"); c.className="chip"; c.innerHTML=`${k} <b>${v}</b>`; sum.appendChild(c); });
+}
+
+function refresh(){
+  const yaml = genYaml(); $("yamlOut").innerHTML = hlYaml(yaml); $("yamlOut").dataset.raw = yaml;
+  const run = genRun(); $("runOut").innerHTML = hlShell(run); $("runOut").dataset.raw = run;
+  const codex = genCodex(); $("codexOut").innerHTML = hlToml(codex); $("codexOut").dataset.raw = codex;
+  renderSummary();
+}
+
+/* =========================================================================
+   EVENTS — entry edits (delegation)
+   ========================================================================= */
+function entryByCard(el){
+  const card = el.closest(".entry"); if(!card) return null;
+  const u = Number(card.dataset.uid);
+  return state.entries.find(e => e.uid === u);
+}
+function onEntryInput(ev){
+  const t = ev.target;
+  const field = t.dataset.field; if(!field) return;
+  const e = entryByCard(t); if(!e) return;
+  if(field === "provider") return; // handled on change
+  e[field] = t.value;
+  if(field === "alias"){ const card=t.closest(".entry"); const a=card.querySelector(".ealias"); if(a) a.textContent=(e.alias||"").trim()||defaultAlias(e.model); }
+  if(field === "model" || field === "env" || field === "base" || field === "version"){
+    const card=t.closest(".entry"); const hint=card.querySelector(".hintline b"); if(hint) hint.textContent = entryModelString(e);
+  }
+  refresh();
+}
+function onEntryChange(ev){
+  const t = ev.target;
+  if(t.dataset.field !== "provider") return;
+  const e = entryByCard(t); if(!e) return;
+  const p = provById(t.value);
+  e.provider = t.value;
+  e.model = p.models[0];
+  e.alias = defaultAlias(e.model);
+  e.env = p.env;
+  e.base = p.baseDefault || "";
+  e.version = p.versionDefault || "";
+  renderEntries(); refresh();
+}
+function onEntryClick(ev){
+  const btn = ev.target.closest("[data-act=rm]"); if(!btn) return;
+  const e = entryByCard(btn); if(!e) return;
+  if(state.entries.length <= 1) return;
+  state.entries = state.entries.filter(x => x.uid !== e.uid);
+  renderEntries(); refresh();
+}
+
+/* =========================================================================
+   ACTIONS
+   ========================================================================= */
+function copyText(text, btn, okLabel){
+  const done = ()=>{ if(btn){ const o=btn.textContent; btn.textContent=okLabel||"copied ✓"; btn.classList.add("ok"); setTimeout(()=>{btn.textContent=o;btn.classList.remove("ok");},1300);} showToast(); };
+  if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
+  else fallbackCopy(text,done);
+}
+function fallbackCopy(text,cb){ const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");}catch(e){} document.body.removeChild(ta); cb&&cb(); }
+let toastT;
+function showToast(){ const t=$("toast"); t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),1400); }
+function download(filename, text, mime){
+  const blob = new Blob([text], {type:mime||"text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 120);
+}
+
+/* =========================================================================
+   BIND
+   ========================================================================= */
+function bind(){
+  const wrap = $("entries");
+  wrap.addEventListener("input", onEntryInput);
+  wrap.addEventListener("change", onEntryChange);
+  wrap.addEventListener("click", onEntryClick);
+
+  $("addBtn").addEventListener("click", () => {
+    const last = state.entries[state.entries.length-1];
+    state.entries.push(makeEntry(last ? last.provider : "mistral"));
+    renderEntries(); refresh();
+  });
+
+  $("port").addEventListener("input", e => { state.port = e.target.value.replace(/[^0-9]/g,""); e.target.value=state.port; refresh(); });
+  $("masterKey").addEventListener("input", e => { state.masterKey = e.target.value.replace(/[^A-Za-z0-9_]/g,""); e.target.value=state.masterKey; refresh(); });
+  $("dropParams").addEventListener("change", e => { state.dropParams = e.target.checked; refresh(); });
+  $("detailedDebug").addEventListener("change", e => { state.detailedDebug = e.target.checked; refresh(); });
+
+  $("copyYamlBtn").addEventListener("click", () => copyText($("yamlOut").dataset.raw||"", $("copyYamlBtn"), "⧉ copied ✓"));
+  $("copyRunBtn").addEventListener("click", () => copyText($("runOut").dataset.raw||"", $("copyRunBtn"), "⧉ copied ✓"));
+  $("copyCodexBtn").addEventListener("click", () => copyText($("codexOut").dataset.raw||"", $("copyCodexBtn"), "⧉ copied ✓"));
+  $("downloadYamlBtn").addEventListener("click", () => { download("litellm-config.yaml", $("yamlOut").dataset.raw||"", "application/yaml"); showToast(); });
+}
+
+/* =========================================================================
+   INIT
+   ========================================================================= */
+function init(){ renderDatalists(); renderEntries(); bind(); refresh(); }
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>

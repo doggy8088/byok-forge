@@ -1,0 +1,106 @@
+# BYOK Forge
+
+A tiny toolkit of **single-file web tools** that generate *bring-your-own-key* launch
+configs for AI coding CLIs. Pick a provider and model, tweak a few options, and copy a
+ready-to-paste config. Everything runs locally in the browser — your API keys are
+referenced by environment-variable name and never leave the page.
+
+## Pages
+
+| File | Tool | Output |
+|------|------|--------|
+| [`index.html`](index.html) | **Landing / hub** | Links to all three generators |
+| [`copilot-cli.html`](copilot-cli.html) | **Copilot Alias Forge** | Shell / PowerShell launch aliases for the GitHub Copilot CLI |
+| [`codex-cli.html`](codex-cli.html) | **Codex Config Forge** | `~/.codex/<profile>.config.toml` profiles for the OpenAI Codex CLI |
+| [`litellm.html`](litellm.html) | **LiteLLM Config Forge** | `litellm-config.yaml` proxy that exposes `/v1/responses` for chat-only providers |
+
+## Usage
+
+Open `index.html` in any browser — no build step, no install, no server.
+
+```bash
+open index.html      # macOS
+# or double-click the file
+```
+
+Each tool is a self-contained HTML file; you can also open `copilot-cli.html`,
+`codex-cli.html`, or `litellm.html` directly, or host the folder on any static web server.
+
+---
+
+## copilot-cli.html — Copilot Alias Forge
+
+Generates **GitHub Copilot CLI launch aliases** that wire up the `COPILOT_PROVIDER_*`
+environment variables for any BYOK provider.
+
+- **14 providers** — OpenAI, Azure OpenAI, Anthropic, Google Gemini, Mistral, Ollama
+  (local & cloud), OpenRouter, Groq, xAI Grok, DeepSeek, Together, Fireworks, Cerebras.
+- **Cascading options** — picking a provider auto-fills `COPILOT_PROVIDER_TYPE`, base URL,
+  and API-key field; picking a model pre-fills `COPILOT_PROVIDER_MAX_PROMPT_TOKENS` /
+  `COPILOT_PROVIDER_MAX_OUTPUT_TOKENS`, the wire API, and the reasoning-effort levels.
+- **Four output shapes** — Shell *alias*, Shell *function* (`"$@"` forwarding), PowerShell
+  *function* (with `try/finally` env cleanup), and a PowerShell *alias* explainer.
+- **Collection** — build a set of aliases (e.g. `cc` / `cx` / `c4`) and copy them all at once.
+
+**Where to put it:** add the snippet to `~/.bashrc` / `~/.zshrc` (then `source`), or to your
+PowerShell `$PROFILE` (then restart PowerShell).
+
+---
+
+## codex-cli.html — Codex Config Forge
+
+Generates **OpenAI Codex CLI BYOK profiles**. Output comes in three parts:
+
+1. A **`[model_providers.<id>]` block** to append to `~/.codex/config.toml` (skipped for
+   built-in providers like `ollama` / `lmstudio` / `openai`).
+2. A downloadable **`~/.codex/<profile>.config.toml`** profile file (model, provider,
+   reasoning effort, approval policy, sandbox mode).
+3. The matching **launch command**, e.g. `codex -p ollama-glm-5-2 --yolo`.
+
+- **Responses-API providers only** — OpenAI, Azure OpenAI, Ollama (local & cloud),
+  LM Studio, Groq, vLLM, OpenRouter, xAI, and a generic *Custom* endpoint all speak
+  `/v1/responses` directly.
+- Handles Azure's `base_url` (`…/openai`, no `/v1`) + required `query_params` api-version,
+  deployment-name-as-model, and keyless local providers.
+
+> Codex no longer supports `wire_api = "chat"` (verified in the `openai/codex` source), so
+> Chat-Completions-only providers **cannot** be added as native providers. To use one, run a
+> local proxy with the **[LiteLLM Config Forge](litellm.html)** and add it here as a *Custom*
+> provider pointing at the proxy.
+
+**Where to put it:** save the downloaded file into `~/.codex/`, append the provider block to
+`~/.codex/config.toml`, `export` the referenced API-key env var, then run `codex -p <profile>`.
+
+---
+
+## litellm.html — LiteLLM Config Forge
+
+Builds a multi-model **`litellm-config.yaml`** for a local [LiteLLM](https://docs.litellm.ai/docs/response_api)
+proxy. The proxy exposes an OpenAI-compatible `/v1/responses` endpoint and auto-bridges to
+Chat Completions, so **chat-only providers become usable from any Responses-API client**
+(Codex CLI, Copilot CLI, …). Output comes in three parts:
+
+1. The **`litellm-config.yaml`** (a `model_list` of routed models) — copy or download.
+2. The **run commands** — `pip install "litellm[proxy]"`, the `export …` lines for the keys
+   it needs, and `litellm --config litellm-config.yaml --port 4000`.
+3. A ready-to-paste **`[model_providers.litellm]` block** to wire the proxy into Codex.
+
+- **14 providers** — Mistral, DeepSeek, Anthropic, Google Gemini, Cerebras, Together,
+  Fireworks, Groq, OpenAI, OpenRouter, xAI, Azure OpenAI, Ollama (local), vLLM.
+- **Multi-model** — add as many model entries as you like; each picks a provider, model,
+  alias (`model_name`), and key env var. Azure adds `api_base` + `api_version`; local
+  providers (Ollama) are keyless with an `api_base`.
+- **Proxy settings** — port, optional `master_key`, and `drop_params` to silently drop
+  unsupported params when bridging.
+
+**Where to put it:** save `litellm-config.yaml` anywhere, `export` the referenced key env
+vars, start the proxy, then point Codex (or any client) at `http://localhost:<port>/v1`.
+
+---
+
+## Notes & accuracy
+
+- Keys are referenced by **environment-variable name** (e.g. `$OLLAMA_API_KEY`); generated
+  configs contain references, not secrets.
+- Model names and token/limit defaults are **best-effort (mid-2026)** and fully editable in
+  the UI. Verify against `copilot --help` / `codex --help` and your provider's docs.

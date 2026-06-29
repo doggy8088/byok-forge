@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Codex Config Forge — generate Codex CLI BYOK profiles</title>
+<meta name="description" content="Generate ~/.codex/<profile>.config.toml BYOK profiles for the OpenAI Codex CLI — provider block, profile file, download & launch command." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Martian+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0a0b0e; --bg-2:#0e1015; --panel:#13151c; --panel-2:#171a22; --panel-3:#1c2029;
+    --border:#262b37; --border-2:#323848;
+    --text:#e9e7e0; --muted:#888e9d; --muted-2:#5d636f;
+    /* codex accent = sky/cyan (distinct from copilot's amber) */
+    --amber:#5cc8ff; --amber-soft:rgba(92,200,255,.14); --amber-line:rgba(92,200,255,.42);
+    --green:#74e0a0; --cyan:#56b6c2; --violet:#b48ead; --red:#ff6a6a; --orange:#ffb454;
+    --radius:14px;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --display:'Martian Mono',var(--mono);
+    --sans:'IBM Plex Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden;}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(900px 500px at 12% -8%, rgba(92,200,255,.10), transparent 60%),radial-gradient(820px 520px at 100% 0%, rgba(116,224,160,.06), transparent 55%),radial-gradient(700px 700px at 80% 110%, rgba(86,182,194,.06), transparent 60%);}
+  body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+    background-image:linear-gradient(transparent 0 31px, rgba(255,255,255,.018) 31px 32px),linear-gradient(90deg, transparent 0 31px, rgba(255,255,255,.018) 31px 32px);background-size:32px 32px;mask-image:radial-gradient(circle at 50% 30%, #000 0%, transparent 85%);}
+  .wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 24px 80px;}
+
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:30px 0 26px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:16px;}
+  .brand .glyph{width:54px;height:54px;flex:none;border-radius:13px;background:linear-gradient(145deg,#1d2029,#10131a);border:1px solid var(--border-2);display:grid;place-items:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 8px 24px -12px rgba(92,200,255,.5);position:relative;overflow:hidden;}
+  .brand .glyph::after{content:"_";color:var(--amber);font-family:var(--mono);font-weight:700;font-size:26px;animation:blink 1.1s steps(1) infinite;line-height:1;margin-top:-6px;}
+  .brand .glyph .chev{position:absolute;color:var(--green);font-family:var(--mono);font-weight:700;font-size:20px;left:9px;top:13px;}
+  @keyframes blink{50%{opacity:0;}}
+  .brand h1{margin:0;font-family:var(--display);font-weight:800;letter-spacing:-.04em;font-size:23px;line-height:1.05;text-transform:lowercase;}
+  .brand h1 b{color:var(--amber);font-weight:800;}
+  .brand p{margin:3px 0 0;color:var(--muted);font-size:12.5px;font-family:var(--mono);letter-spacing:.01em;}
+  .top .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .pill{font-family:var(--mono);font-size:11.5px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:6px 12px;background:var(--panel);white-space:nowrap;}
+  .pill b{color:var(--green);font-weight:500;}
+  a.home{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:6px 13px;background:var(--panel);transition:all .14s ease;}
+  a.home:hover{color:var(--amber);border-color:var(--amber-line);}
+
+  .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:26px;align-items:start;}
+  @media(max-width:980px){.grid{grid-template-columns:1fr;}}
+  .card{background:linear-gradient(180deg,var(--panel),var(--bg-2));border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 24px 60px -40px rgba(0,0,0,.9);}
+  .card .pad{padding:22px 22px 24px;}
+
+  .section-h{display:flex;align-items:baseline;gap:10px;margin:0 0 16px;}
+  .section-h .n{font-family:var(--mono);color:var(--amber);font-size:12px;font-weight:700;border:1px solid var(--amber-line);background:var(--amber-soft);border-radius:7px;padding:2px 8px;letter-spacing:.05em;}
+  .section-h h2{margin:0;font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:-.02em;text-transform:lowercase;}
+  .section-h .hint{margin-left:auto;color:var(--muted-2);font-size:11.5px;font-family:var(--mono);}
+
+  .field{margin-bottom:20px;}.field:last-child{margin-bottom:0;}
+  label.lbl{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px;font-family:var(--mono);}
+  label.lbl .req{color:var(--amber);font-size:13px;line-height:0;}
+  label.lbl .tag{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted-2);font-size:11px;}
+
+  .providers{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;}
+  .prov{cursor:pointer;border:1px solid var(--border);border-radius:11px;background:var(--panel-2);padding:12px 12px 11px;text-align:left;transition:transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;position:relative;display:flex;flex-direction:column;gap:9px;min-height:78px;}
+  .prov:hover{transform:translateY(-2px);border-color:var(--border-2);background:var(--panel-3);}
+  .prov.sel{border-color:var(--amber-line);background:linear-gradient(180deg,var(--amber-soft),transparent);box-shadow:0 0 0 1px var(--amber-line), 0 12px 30px -18px rgba(92,200,255,.6);}
+  .prov.sel::after{content:"●";position:absolute;top:9px;right:11px;color:var(--amber);font-size:9px;}
+  .prov .mono-badge{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:11px;color:#0a0b0e;flex:none;}
+  .prov .pname{font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--text);line-height:1.2;}
+  .prov .ptype{font-family:var(--mono);font-size:10px;color:var(--muted-2);}
+  .prov .kindtag{position:absolute;bottom:9px;right:10px;font-family:var(--mono);font-size:8.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;}
+
+  select,input[type=text],input[type=number]{width:100%;background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13.5px;border:1px solid var(--border-2);border-radius:9px;padding:11px 12px;outline:none;transition:border-color .14s ease, box-shadow .14s ease;}
+  select:focus,input:focus{border-color:var(--amber-line);box-shadow:0 0 0 3px var(--amber-soft);}
+  .hintline{margin-top:7px;font-size:11.5px;color:var(--muted-2);font-family:var(--mono);line-height:1.45;}
+  .hintline b{color:var(--cyan);font-weight:500;}
+  .hintline.warn b{color:var(--orange);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:520px){.row2{grid-template-columns:1fr;}}
+
+  .seg{display:inline-flex;background:var(--bg);border:1px solid var(--border-2);border-radius:9px;padding:3px;gap:3px;flex-wrap:wrap;}
+  .seg button{border:0;background:transparent;color:var(--muted);font-family:var(--mono);font-size:12.5px;padding:7px 13px;border-radius:7px;cursor:pointer;transition:all .12s ease;font-weight:500;}
+  .seg button:hover{color:var(--text);}
+  .seg button.on{background:var(--amber);color:#0a0b0e;font-weight:700;}
+  .seg.green button.on{background:var(--green);}
+  .seg.cyan button.on{background:var(--cyan);}
+  .seg.red button.on{background:var(--red);color:#fff;}
+
+  .adorn{position:relative;}
+  .adorn .pre{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--amber);font-family:var(--mono);font-size:13.5px;pointer-events:none;}
+  .adorn input{padding-left:24px;}
+
+  .check{display:flex;align-items:flex-start;gap:11px;cursor:pointer;padding:11px 13px;border:1px solid var(--border);border-radius:10px;background:var(--panel-2);transition:border-color .14s ease;}
+  .check:hover{border-color:var(--border-2);}
+  .check input{appearance:none;width:18px;height:18px;flex:none;border:1px solid var(--border-2);border-radius:5px;background:var(--bg);margin-top:1px;cursor:pointer;position:relative;transition:all .14s ease;}
+  .check input:checked{background:var(--amber);border-color:var(--amber);}
+  .check input:checked::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#0a0b0e;font-size:12px;font-weight:800;}
+  .check.danger input:checked{background:var(--red);border-color:var(--red);}
+  .check .ctxt{font-size:12.5px;color:var(--text);}
+  .check .ctxt span{display:block;color:var(--muted-2);font-size:11.5px;font-family:var(--mono);margin-top:2px;}
+
+  .divider{height:1px;background:var(--border);margin:22px 0;position:relative;}
+  .divider::after{content:"";position:absolute;left:0;top:0;width:40px;height:1px;background:var(--amber-line);}
+
+  .out-col{position:sticky;top:18px;display:flex;flex-direction:column;gap:16px;}
+  @media(max-width:980px){.out-col{position:static;}}
+
+  .term{background:#08090c;border:1px solid var(--border-2);border-radius:var(--radius);overflow:hidden;box-shadow:0 30px 70px -40px rgba(0,0,0,1), inset 0 0 0 1px rgba(255,255,255,.02);}
+  .term .bar{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#0d0f14;border-bottom:1px solid var(--border);}
+  .term .bar .dot{width:11px;height:11px;border-radius:50%;}
+  .dot.r{background:#ff5f57;}.dot.y{background:#febc2e;}.dot.g{background:#28c840;}
+  .term .bar .ttl{margin-left:8px;font-family:var(--mono);font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .term .bar .ttl b{color:var(--amber);font-weight:500;}
+  .term pre{margin:0;padding:16px 18px 18px;font-family:var(--mono);font-size:12.7px;line-height:1.7;color:#cfd3da;white-space:pre-wrap;word-break:break-word;overflow-x:auto;max-height:38vh;}
+  .c-com{color:var(--muted-2);font-style:italic;}
+  .c-str{color:var(--green);}
+  .c-sec{color:var(--amber);font-weight:700;}
+  .c-key{color:var(--cyan);}
+  .c-val{color:var(--violet);}
+  .c-cmd{color:#fff;font-weight:700;}
+  .c-flag{color:var(--cyan);}
+  .out-actions{display:flex;gap:9px;padding:12px 14px;background:#0d0f14;border-top:1px solid var(--border);flex-wrap:wrap;}
+  .btn{font-family:var(--mono);font-size:12.5px;font-weight:600;border-radius:9px;padding:10px 15px;cursor:pointer;border:1px solid var(--border-2);background:var(--panel-2);color:var(--text);transition:all .14s ease;display:inline-flex;align-items:center;gap:8px;}
+  .btn:hover{border-color:var(--border-2);background:var(--panel-3);transform:translateY(-1px);}
+  .btn.primary{background:var(--amber);border-color:var(--amber);color:#0a0b0e;}
+  .btn.primary:hover{box-shadow:0 10px 26px -12px rgba(92,200,255,.8);}
+  .btn.ghost{background:transparent;}
+  .btn.ok{background:var(--green);border-color:var(--green);color:#08090c;}
+  .btn.flex{flex:1;justify-content:center;}
+
+  .note-card{border:1px solid var(--border);border-radius:11px;background:var(--panel-2);padding:13px 14px;font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.5;}
+  .note-card b{color:var(--green);font-weight:500;}
+  .out-label{font-family:var(--mono);font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;display:flex;align-items:center;gap:8px;}
+  .out-label .path{color:var(--amber);text-transform:none;letter-spacing:0;}
+
+  .summary{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px;}
+  .chip{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel-2);border:1px solid var(--border);border-radius:7px;padding:4px 9px;}
+  .chip b{color:var(--text);font-weight:500;}
+  .chip.warn{border-color:rgba(255,106,106,.4);color:#ffb3b3;background:rgba(255,106,106,.08);}
+
+  .crosslink{border:1px dashed var(--border-2);border-radius:11px;background:var(--panel-2);padding:12px 14px;font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:12px;}
+  .crosslink a{color:var(--orange);text-decoration:none;border-bottom:1px solid rgba(255,180,84,.45);}
+  .crosslink a:hover{color:var(--text);}
+  .crosslink b{color:var(--text);font-weight:500;}
+
+  footer{margin-top:42px;text-align:center;color:var(--muted-2);font-size:11.5px;font-family:var(--mono);line-height:1.7;}
+  footer b{color:var(--muted);font-weight:500;}
+  footer .disc{max-width:720px;margin:10px auto 0;}
+  footer a{color:var(--amber);text-decoration:none;}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#08090c;font-family:var(--mono);font-weight:700;font-size:13px;padding:11px 20px;border-radius:10px;opacity:0;pointer-events:none;transition:all .25s ease;z-index:50;box-shadow:0 16px 40px -14px rgba(116,224,160,.7);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .fade{opacity:0;transform:translateY(10px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards;}
+  @keyframes rise{to{opacity:1;transform:none;}}
+  .d1{animation-delay:.04s;}.d2{animation-delay:.12s;}.d3{animation-delay:.2s;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top fade d1">
+    <div class="brand">
+      <div class="glyph"><span class="chev">&gt;</span></div>
+      <div>
+        <h1>codex <b>config</b> forge</h1>
+        <p>// byok profile generator for the openai codex cli</p>
+      </div>
+    </div>
+    <div class="meta">
+      <span class="pill"><b>responses</b> api</span>
+      <span class="pill">~/.codex/&lt;profile&gt;.config.toml</span>
+      <a class="home" href="index.html">⊞ all tools</a>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- ================= CONFIG ================= -->
+    <div class="card fade d2">
+      <div class="pad">
+
+        <div class="field">
+          <div class="section-h"><span class="n">01</span><h2>provider</h2><span class="hint">responses-api only</span></div>
+          <div class="providers" id="providers"></div>
+          <div class="hintline" id="provHint" style="margin-top:11px;"></div>
+          <div class="crosslink">↪ Need a <b>Chat-Completions-only</b> provider (Mistral, DeepSeek, Anthropic, Gemini…)? Codex speaks the Responses API only — spin up a proxy with the <a href="litellm.html">LiteLLM Config Forge</a>, then add it here as a <b>Custom</b> provider.</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <div class="section-h"><span class="n">02</span><h2>model</h2><span class="hint" id="modelHint"></span></div>
+          <label class="lbl" for="model" id="modelLbl">model <span class="req">*</span></label>
+          <input type="text" id="model" list="modelList" autocomplete="off" spellcheck="false" />
+          <datalist id="modelList"></datalist>
+          <div class="hintline" id="modelMeta"></div>
+        </div>
+
+        <div class="field hidden" id="deploymentField">
+          <label class="lbl" for="deployment">Azure deployment name <span class="req">*</span></label>
+          <input type="text" id="deployment" autocomplete="off" spellcheck="false" />
+          <div class="hintline">For Azure, <b>model</b> = your deployment name.</div>
+        </div>
+
+        <!-- effort -->
+        <div class="field">
+          <label class="lbl">model_reasoning_effort <span class="tag">reasoning models only</span></label>
+          <div class="seg green" id="effortSeg"></div>
+          <div class="hintline" id="effortHint"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- provider details -->
+        <div class="field" id="providerDetails">
+          <div class="section-h"><span class="n">03</span><h2>provider details</h2><span class="hint" id="provKind"></span></div>
+
+          <div class="field" id="providerIdField">
+            <label class="lbl" for="providerId">provider id <span class="tag">[model_providers.&lt;id&gt;]</span></label>
+            <input type="text" id="providerId" autocomplete="off" spellcheck="false" />
+          </div>
+
+          <div class="field" id="resourceField">
+            <label class="lbl" for="resource">Azure resource <span class="req">*</span></label>
+            <input type="text" id="resource" value="my-resource" autocomplete="off" spellcheck="false" />
+            <div class="hintline">→ <b id="azureUrlPreview"></b></div>
+          </div>
+
+          <div class="field" id="baseUrlField">
+            <label class="lbl" for="baseUrl">base_url <span class="req">*</span></label>
+            <input type="text" id="baseUrl" autocomplete="off" spellcheck="false" />
+            <div class="hintline" id="baseUrlHint"></div>
+          </div>
+
+          <div class="field" id="apiVersionField">
+            <label class="lbl" for="apiVersion">api-version <span class="tag">azure query param</span></label>
+            <input type="text" id="apiVersion" value="2025-04-01-preview" autocomplete="off" spellcheck="false" />
+          </div>
+
+          <div class="field" id="envField">
+            <label class="lbl" for="envKey">env_key <span class="tag">name of env var holding the key</span></label>
+            <div class="adorn"><span class="pre">$</span><input type="text" id="envKey" autocomplete="off" spellcheck="false" placeholder="OPENAI_API_KEY" /></div>
+            <div class="hintline">Codex reads the key from this env var at runtime — <b>export</b> it in your shell. The key itself is never written to disk.</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- profile + launch -->
+        <div class="field">
+          <div class="section-h"><span class="n">04</span><h2>profile &amp; launch</h2></div>
+          <div class="row2">
+            <div>
+              <label class="lbl" for="profileName">profile name <span class="req">*</span></label>
+              <input type="text" id="profileName" autocomplete="off" spellcheck="false" />
+              <div class="hintline">→ <b id="profilePath"></b></div>
+            </div>
+            <div>
+              <label class="lbl">reasoning summary</label>
+              <div class="seg cyan" id="summarySeg">
+                <button data-sm="omit" class="on">omit</button>
+                <button data-sm="concise">concise</button>
+                <button data-sm="detailed">detailed</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="lbl">approval_policy</label>
+          <div class="seg" id="approvalSeg" style="margin-bottom:14px;">
+            <button data-ap="untrusted">untrusted</button>
+            <button data-ap="on-request" class="on">on-request</button>
+            <button data-ap="never">never</button>
+          </div>
+          <label class="lbl">sandbox_mode</label>
+          <div class="seg red" id="sandboxSeg" style="margin-bottom:14px;">
+            <button data-sb="read-only">read-only</button>
+            <button data-sb="workspace-write" class="on">workspace-write</button>
+            <button data-sb="danger-full-access">danger-full-access</button>
+          </div>
+          <label class="check danger">
+            <input type="checkbox" id="yolo" checked />
+            <span class="ctxt">--yolo<span>add to launch command — alias for --dangerously-bypass-approvals-and-sandbox (skips approvals &amp; sandbox).</span></span>
+          </label>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= OUTPUT ================= -->
+    <div class="out-col fade d3">
+
+      <div class="summary" id="summary"></div>
+
+      <!-- provider block / builtin note -->
+      <div>
+        <p class="out-label">① provider block · append to <span class="path">~/.codex/config.toml</span></p>
+        <div id="providerBlockWrap">
+          <div class="term">
+            <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">~/.codex/<b>config.toml</b></span></div>
+            <pre id="providerOut"></pre>
+            <div class="out-actions">
+              <button class="btn primary flex" id="copyProviderBtn">⧉ copy block</button>
+            </div>
+          </div>
+        </div>
+        <div id="builtinNote" class="note-card hidden"></div>
+      </div>
+
+      <!-- profile file -->
+      <div>
+        <p class="out-label">② profile file <span class="path" id="profileLabelPath"></span></p>
+        <div class="term">
+          <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl" id="profileTtl"></span></div>
+          <pre id="profileOut"></pre>
+          <div class="out-actions">
+            <button class="btn primary flex" id="copyProfileBtn">⧉ copy</button>
+            <button class="btn ok" id="downloadBtn">⤓ download .config.toml</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- launch -->
+      <div>
+        <p class="out-label">③ launch</p>
+        <div class="term">
+          <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">~ <b>terminal</b></span></div>
+          <pre id="launchOut"></pre>
+          <div class="out-actions">
+            <button class="btn primary flex" id="copyLaunchBtn">⧉ copy command</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div><b>Codex Config Forge</b> · generates <span style="color:var(--amber)">~/.codex/&lt;profile&gt;.config.toml</span> BYOK profiles for the OpenAI Codex CLI</div>
+    <div class="disc">Codex speaks the <b>Responses API</b> only (<code style="color:var(--amber)">wire_api = "chat"</code> was removed) — providers must expose <code style="color:var(--amber)">/v1/responses</code> (OpenAI, Azure, Ollama ≥0.9, LM Studio ≥0.3, Groq, vLLM, OpenRouter, xAI). Chat-only providers need a proxy — see the <a href="litellm.html">LiteLLM Config Forge</a>. Model names &amp; defaults are best-effort for mid-2026; verify with <b>codex --help</b>. Keys stay in your env, never on disk.</div>
+  </footer>
+</div>
+<div class="toast" id="toast">copied ✓</div>
+
+<script>
+"use strict";
+
+/* =========================================================================
+   DATA — Codex CLI BYOK providers (Responses-API capable only).
+   kind: "builtin" (no [model_providers] block; uses reserved id) |
+         "custom"  (emit a [model_providers.<id>] block)
+   ========================================================================= */
+const PROVIDERS = [
+  { id:"openai", name:"OpenAI", kind:"builtin", providerId:"openai", color:"#74e0a0", badge:"AI",
+    baseUrl:"https://api.openai.com/v1", keyRequired:true, env:"OPENAI_API_KEY",
+    note:`Built-in provider <b>openai</b> — no [model_providers] block needed. Authenticate with <b>codex login</b> (ChatGPT) or <b>export OPENAI_API_KEY</b>.`,
+    models:[ {id:"gpt-5.5",eff:"high"},{id:"gpt-5.4",eff:"high"},{id:"gpt-5.3-codex",eff:"high"},{id:"gpt-5",eff:"medium"},{id:"o3",eff:"high"},{id:"o4-mini",eff:"medium"} ]},
+  { id:"azure", name:"Azure OpenAI", kind:"custom", providerId:"azure", color:"#56b6c2", badge:"AZ",
+    baseUrlTemplate:"https://{resource}.openai.azure.com/openai", needsResource:true, modelIsDeployment:true,
+    apiVersion:"2025-04-01-preview", keyRequired:true, env:"AZURE_OPENAI_API_KEY",
+    models:[ {id:"gpt-5.5",eff:"high"},{id:"gpt-5.4",eff:"high"},{id:"gpt-5.3-codex",eff:"high"},{id:"gpt-5",eff:"medium"} ]},
+  { id:"ollama", name:"Ollama (local)", kind:"builtin", providerId:"ollama", color:"#e9e7e0", badge:"OL",
+    baseUrl:"http://localhost:11434/v1", keyRequired:false, env:"",
+    note:`Built-in provider <b>ollama</b> — no block needed (needs Ollama ≥0.9 for the Responses API). No API key required.`,
+    models:[ {id:"qwen3-coder:30b",eff:"omit"},{id:"qwen3:14b",eff:"omit"},{id:"gpt-oss:120b",eff:"high"},{id:"deepseek-r1:8b",eff:"high"},{id:"devstral",eff:"omit"},{id:"llama3.3:70b",eff:"omit"} ]},
+  { id:"lmstudio", name:"LM Studio (local)", kind:"builtin", providerId:"lmstudio", color:"#b48ead", badge:"LM",
+    baseUrl:"http://localhost:1234/v1", keyRequired:false, env:"",
+    note:`Built-in provider <b>lmstudio</b> — no block needed (needs LM Studio ≥0.3 for the Responses API). No API key required.`,
+    models:[ {id:"qwen2.5-coder-32b",eff:"omit"},{id:"gpt-oss-20b",eff:"high"},{id:"glm-4-32b",eff:"omit"} ]},
+  { id:"ollama-cloud", name:"Ollama Cloud", kind:"custom", providerId:"ollama-cloud", color:"#74e0a0", badge:"OC",
+    baseUrl:"https://ollama.com/v1", keyRequired:true, env:"OLLAMA_API_KEY",
+    models:[ {id:"glm-5.2:cloud",eff:"high"},{id:"glm-5.1",eff:"high"},{id:"kimi-k2.6",eff:"omit"},{id:"qwen3-coder:480b-cloud",eff:"omit"},{id:"gpt-oss:120b-cloud",eff:"high"},{id:"minimax-m3",eff:"omit"} ]},
+  { id:"groq", name:"Groq", kind:"custom", providerId:"groq", color:"#ff6a6a", badge:"GQ", beta:true,
+    baseUrl:"https://api.groq.com/openai/v1", keyRequired:true, env:"GROQ_API_KEY",
+    models:[ {id:"openai/gpt-oss-120b",eff:"high"},{id:"openai/gpt-oss-20b",eff:"high"},{id:"llama-3.3-70b-versatile",eff:"omit"},{id:"moonshotai/kimi-k2-instruct",eff:"omit"},{id:"qwen-3-32b",eff:"omit"} ]},
+  { id:"vllm", name:"vLLM", kind:"custom", providerId:"vllm", color:"#5cc8ff", badge:"VL",
+    baseUrl:"http://localhost:8000/v1", keyRequired:false, env:"VLLM_API_KEY",
+    models:[ {id:"Qwen/Qwen3-Coder-30B-A3B-Instruct",eff:"omit"},{id:"openai/gpt-oss-120b",eff:"high"},{id:"deepseek-ai/DeepSeek-V3.1",eff:"omit"} ]},
+  { id:"openrouter", name:"OpenRouter", kind:"custom", providerId:"openrouter", color:"#b48ead", badge:"OR", beta:true,
+    baseUrl:"https://openrouter.ai/api/v1", keyRequired:true, env:"OPENROUTER_API_KEY",
+    models:[ {id:"openai/gpt-5.5",eff:"high"},{id:"x-ai/grok-4.3",eff:"medium"},{id:"openai/o3",eff:"high"} ]},
+  { id:"xai", name:"xAI Grok", kind:"custom", providerId:"xai", color:"#e9e7e0", badge:"X",
+    baseUrl:"https://api.x.ai/v1", keyRequired:true, env:"XAI_API_KEY",
+    models:[ {id:"grok-4.3",eff:"medium"},{id:"grok-code-fast",eff:"omit"} ]},
+  { id:"custom", name:"Custom", kind:"custom", providerId:"myprovider", color:"#5cc8ff", badge:"+", custom:true,
+    baseUrl:"http://localhost:4000/v1", keyRequired:true, env:"MY_API_KEY",
+    models:[ {id:"your-model",eff:"omit"} ]},
+];
+
+const EFFORTS = ["omit","minimal","low","medium","high","xhigh","max"];
+
+/* =========================================================================
+   STATE
+   ========================================================================= */
+const state = {
+  providerId:"ollama-cloud",
+  model:"glm-5.2:cloud",
+  deployment:"gpt-5.5",
+  providerIdField:"ollama-cloud",
+  resource:"my-resource",
+  baseUrl:"https://ollama.com/v1",
+  apiVersion:"2025-04-01-preview",
+  envKey:"OLLAMA_API_KEY",
+  effort:"high",
+  summary:"omit",
+  approval:"on-request",
+  sandbox:"workspace-write",
+  yolo:true,
+  profileName:"ollama-glm-5-2",
+  profileEdited:false,
+};
+
+const $ = id => document.getElementById(id);
+const provider = () => PROVIDERS.find(p => p.id === state.providerId);
+const knownModel = () => provider().models.find(m => m.id === state.model);
+
+function slug(s){ return (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""); }
+function suggestedProfile(){
+  const base = provider().id.replace(/-cloud$/,"").replace(/-/g,"");
+  return slug(base + "-" + state.model) || "my-profile";
+}
+function baseUrl(){
+  const p = provider();
+  if(p.needsResource) return p.baseUrlTemplate.replace("{resource}", (state.resource||"YOUR-RESOURCE").trim()||"YOUR-RESOURCE");
+  return state.baseUrl;
+}
+function modelString(){ return provider().modelIsDeployment ? ((state.deployment||state.model).trim()||state.model) : (state.model.trim()||"your-model"); }
+function providerIdStr(){ return (state.providerIdField||provider().providerId).trim()||provider().providerId; }
+
+/* =========================================================================
+   GENERATION
+   ========================================================================= */
+function genProviderBlock(){
+  const p = provider();
+  if(p.kind === "builtin") return null;
+  const pid = providerIdStr();
+  const lines = [];
+  lines.push(`# Append to ~/.codex/config.toml`);
+  lines.push(`[model_providers.${pid}]`);
+  lines.push(`name = "${p.name}"`);
+  lines.push(`base_url = "${baseUrl()}"`);
+  if(p.keyRequired) lines.push(`env_key = "${(state.envKey||p.env||"API_KEY").trim()||"API_KEY"}"`);
+  if(p.needsResource) lines.push(`query_params = { api-version = "${(state.apiVersion||"").trim()}" }`);
+  lines.push(`wire_api = "responses"`);
+  if(p.beta && p.id==="openrouter") lines.push(`http_headers = { "HTTP-Referer" = "https://your-site.example", "X-Title" = "Codex CLI" }`);
+  return lines.join("\n");
+}
+
+function genProfile(){
+  const p = provider();
+  const lines = [];
+  lines.push(`# ~/.codex/${state.profileName||"my-profile"}.config.toml`);
+  lines.push(`model = "${modelString()}"`);
+  lines.push(`model_provider = "${p.kind==="builtin" ? p.providerId : providerIdStr()}"`);
+  if(state.effort && state.effort !== "omit") lines.push(`model_reasoning_effort = "${state.effort}"`);
+  if(state.summary && state.summary !== "omit") lines.push(`model_reasoning_summary = "${state.summary}"`);
+  lines.push(`approval_policy = "${state.approval}"`);
+  lines.push(`sandbox_mode = "${state.sandbox}"`);
+  return lines.join("\n");
+}
+
+function genLaunch(){
+  const name = state.profileName || "my-profile";
+  const yolo = state.yolo ? " --yolo" : "";
+  const p = provider();
+  const out = [];
+  if(p.keyRequired && p.env){
+    out.push(`# export your key once (Codex reads it from the env var):`);
+    out.push(`export ${(state.envKey||p.env).trim()||p.env}="<your-api-key>"`);
+    out.push(``);
+  }
+  out.push(`# interactive session with this profile:`);
+  out.push(`codex -p ${name}${yolo}`);
+  out.push(``);
+  out.push(`# or run a one-off task non-interactively:`);
+  out.push(`codex exec -p ${name}${yolo} "summarize this repo"`);
+  return out.join("\n");
+}
+
+/* =========================================================================
+   HIGHLIGHTERS
+   ========================================================================= */
+function esch(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function hlToml(code){
+  return code.split("\n").map(line => {
+    if(line.trimStart().startsWith("#")) return `<span class="c-com">${esch(line)}</span>`;
+    let h = esch(line);
+    if(/^\s*\[.*\]\s*$/.test(line)) return `<span class="c-sec">${h}</span>`;
+    h = h.replace(/"[^"]*"/g, m => `<span class="c-str">${m}</span>`);
+    h = h.replace(/^(\s*)([A-Za-z0-9_.\-]+)(\s*=)/, (m,sp,k,eq) => `${sp}<span class="c-key">${k}</span>${eq}`);
+    h = h.replace(/\b(true|false)\b/g, m => `<span class="c-val">${m}</span>`);
+    h = h.replace(/(=\s*)(\d+)/g, (m,a,n) => `${a}<span class="c-val">${n}</span>`);
+    return h;
+  }).join("\n");
+}
+function hlShell(code){
+  return code.split("\n").map(line => {
+    if(line.trimStart().startsWith("#")) return `<span class="c-com">${esch(line)}</span>`;
+    let h = esch(line);
+    h = h.replace(/"[^"]*"/g, m => `<span class="c-str">${m}</span>`);
+    h = h.replace(/\b(codex|export)\b/g, m => `<span class="c-cmd">${m}</span>`);
+    h = h.replace(/(\s)(-{1,2}[a-z][a-z-]*)/g, (m,sp,fl) => `${sp}<span class="c-flag">${fl}</span>`);
+    return h;
+  }).join("\n");
+}
+
+/* =========================================================================
+   RENDER
+   ========================================================================= */
+function renderProviders(){
+  const wrap = $("providers"); wrap.innerHTML = "";
+  PROVIDERS.forEach(p => {
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "prov" + (p.id===state.providerId ? " sel" : "");
+    el.innerHTML =
+      `<span class="mono-badge" style="background:${p.color}">${p.badge}</span>` +
+      `<span class="pname">${p.name}</span>` +
+      `<span class="ptype">${p.kind==="builtin"?"built-in":"id="+p.providerId}</span>` +
+      `<span class="kindtag">${p.kind==="builtin"?"no block":"+ block"}</span>`;
+    el.addEventListener("click", () => selectProvider(p.id));
+    wrap.appendChild(el);
+  });
+  const p = provider();
+  $("provHint").className = "hintline" + (p.beta ? " warn" : "");
+  $("provHint").innerHTML = p.beta
+    ? `⚠ <b>${p.name}</b>'s Responses API is in beta — verify it serves <b>/v1/responses</b>.`
+    : `<b>${p.name}</b> speaks the Responses API directly — no proxy needed.`;
+}
+
+function renderModelList(){
+  const dl = $("modelList"); dl.innerHTML = "";
+  provider().models.forEach(m => { const o=document.createElement("option"); o.value=m.id; dl.appendChild(o); });
+}
+
+function renderEffort(){
+  const seg = $("effortSeg"); seg.innerHTML = "";
+  EFFORTS.forEach(e => {
+    const b = document.createElement("button"); b.type="button"; b.textContent=e;
+    b.className = state.effort===e ? "on" : "";
+    b.addEventListener("click", () => { state.effort=e; renderEffort(); refresh(); });
+    seg.appendChild(b);
+  });
+  $("effortHint").innerHTML = state.effort==="omit"
+    ? `<b>model_reasoning_effort</b> omitted. Add it for o-series / GPT-5 reasoning models.`
+    : `Sets <b>model_reasoning_effort = "${state.effort}"</b> (ignored by non-reasoning models).`;
+}
+
+function renderConditional(){
+  const p = provider();
+  const builtin = p.kind === "builtin";
+
+  $("deploymentField").classList.toggle("hidden", !p.modelIsDeployment);
+  if(p.modelIsDeployment) $("deployment").value = state.deployment;
+
+  $("provKind").textContent = builtin ? "built-in · no block" : "custom · emits block";
+  $("providerIdField").classList.toggle("hidden", builtin);
+  $("resourceField").classList.toggle("hidden", !p.needsResource);
+  $("baseUrlField").classList.toggle("hidden", builtin || p.needsResource);
+  $("apiVersionField").classList.toggle("hidden", !p.needsResource);
+  $("envField").classList.toggle("hidden", builtin || !p.keyRequired);
+
+  if(!builtin){
+    $("providerId").value = state.providerIdField;
+    $("baseUrl").value = state.baseUrl;
+    $("baseUrlHint").innerHTML = p.custom ? `Must serve <b>/v1/responses</b> (e.g. a LiteLLM proxy).` : `Editable if your endpoint differs.`;
+    if(p.needsResource) $("azureUrlPreview").textContent = baseUrl();
+    if(p.keyRequired) $("envKey").value = state.envKey;
+  }
+
+  const block = genProviderBlock();
+  if(block === null){
+    $("providerBlockWrap").classList.add("hidden");
+    $("builtinNote").classList.remove("hidden");
+    $("builtinNote").innerHTML = "✓ " + p.note;
+  } else {
+    $("providerBlockWrap").classList.remove("hidden");
+    $("builtinNote").classList.add("hidden");
+  }
+
+  reflect("approvalSeg","ap",state.approval);
+  reflect("sandboxSeg","sb",state.sandbox);
+  reflect("summarySeg","sm",state.summary);
+}
+function reflect(segId, attr, val){
+  Array.from($(segId).children).forEach(b => b.classList.toggle("on", b.dataset[attr]===val));
+}
+
+function renderModelMeta(){
+  const km = knownModel();
+  $("modelMeta").innerHTML = km
+    ? `known model · suggested effort <b>${km.eff==="omit"?"none":km.eff}</b>`
+    : `custom model id — type any slug your provider serves`;
+  $("modelHint").textContent = provider().models.length + " presets";
+}
+
+function renderSummaryChips(){
+  const sum = $("summary"); sum.innerHTML = "";
+  const p = provider();
+  const chips = [
+    ["provider", p.kind==="builtin"?p.providerId:providerIdStr()],
+    ["model", modelString()],
+    ["sandbox", state.sandbox],
+  ];
+  if(state.effort!=="omit") chips.push(["effort", state.effort]);
+  chips.forEach(([k,v])=>{ const c=document.createElement("span"); c.className="chip"; c.innerHTML=`${k} <b>${v}</b>`; sum.appendChild(c); });
+  if(state.yolo){ const c=document.createElement("span"); c.className="chip warn"; c.innerHTML="⚠ <b>--yolo</b>"; sum.appendChild(c); }
+}
+
+function renderPaths(){
+  const path = `~/.codex/${state.profileName||"my-profile"}.config.toml`;
+  $("profilePath").textContent = path;
+  $("profileLabelPath").textContent = path;
+  $("profileTtl").innerHTML = `~/.codex/<b>${state.profileName||"my-profile"}.config.toml</b>`;
+}
+
+function refresh(){
+  const block = genProviderBlock();
+  if(block !== null){ $("providerOut").innerHTML = hlToml(block); $("providerOut").dataset.raw = block; }
+  const prof = genProfile();
+  $("profileOut").innerHTML = hlToml(prof); $("profileOut").dataset.raw = prof;
+  const launch = genLaunch();
+  $("launchOut").innerHTML = hlShell(launch); $("launchOut").dataset.raw = launch;
+  renderSummaryChips(); renderModelMeta(); renderPaths();
+  if(provider().needsResource) $("azureUrlPreview").textContent = baseUrl();
+}
+
+/* =========================================================================
+   ACTIONS
+   ========================================================================= */
+function selectProvider(id){
+  state.providerId = id;
+  const p = provider();
+  state.model = p.models[0].id;
+  state.providerIdField = p.providerId;
+  state.baseUrl = p.needsResource ? "" : (p.baseUrl||"");
+  state.envKey = p.env || "";
+  if(p.modelIsDeployment) state.deployment = p.models[0].id;
+  applyModelDefaults();
+  if(!state.profileEdited) state.profileName = suggestedProfile();
+  $("model").value = state.model;
+  $("profileName").value = state.profileName;
+  renderProviders(); renderModelList(); renderEffort(); renderConditional(); refresh();
+}
+function applyModelDefaults(){
+  const km = knownModel();
+  state.effort = km ? km.eff : "omit";
+  if(provider().modelIsDeployment) state.deployment = state.model;
+}
+
+function copyText(text, btn, okLabel){
+  const done = ()=>{ if(btn){ const o=btn.textContent; btn.textContent=okLabel||"copied ✓"; btn.classList.add("ok"); setTimeout(()=>{btn.textContent=o;btn.classList.remove("ok");},1300);} showToast(); };
+  if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
+  else fallbackCopy(text,done);
+}
+function fallbackCopy(text,cb){ const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");}catch(e){} document.body.removeChild(ta); cb&&cb(); }
+let toastT;
+function showToast(){ const t=$("toast"); t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),1400); }
+
+function download(filename, text, mime){
+  const blob = new Blob([text], {type:mime||"text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 120);
+}
+
+/* =========================================================================
+   BIND
+   ========================================================================= */
+function bind(){
+  $("model").addEventListener("input", e => { state.model=e.target.value; applyModelDefaults(); if(!state.profileEdited) state.profileName=suggestedProfile(); $("profileName").value=state.profileName; renderEffort(); renderConditional(); refresh(); });
+  $("deployment").addEventListener("input", e => { state.deployment=e.target.value; refresh(); });
+  $("providerId").addEventListener("input", e => { state.providerIdField=e.target.value; refresh(); });
+  $("resource").addEventListener("input", e => { state.resource=e.target.value; refresh(); $("azureUrlPreview").textContent=baseUrl(); });
+  $("baseUrl").addEventListener("input", e => { state.baseUrl=e.target.value; refresh(); });
+  $("apiVersion").addEventListener("input", e => { state.apiVersion=e.target.value; refresh(); });
+  $("envKey").addEventListener("input", e => { state.envKey=e.target.value; refresh(); });
+  $("profileName").addEventListener("input", e => { state.profileName=e.target.value.replace(/[^A-Za-z0-9_-]/g,""); e.target.value=state.profileName; state.profileEdited=true; refresh(); });
+
+  $("approvalSeg").addEventListener("click", e => { const b=e.target.closest("button"); if(!b)return; state.approval=b.dataset.ap; renderConditional(); refresh(); });
+  $("sandboxSeg").addEventListener("click", e => { const b=e.target.closest("button"); if(!b)return; state.sandbox=b.dataset.sb; renderConditional(); refresh(); });
+  $("summarySeg").addEventListener("click", e => { const b=e.target.closest("button"); if(!b)return; state.summary=b.dataset.sm; renderConditional(); refresh(); });
+  $("yolo").addEventListener("change", e => { state.yolo=e.target.checked; refresh(); });
+
+  $("copyProviderBtn").addEventListener("click", () => copyText($("providerOut").dataset.raw||"", $("copyProviderBtn"), "⧉ copied ✓"));
+  $("copyProfileBtn").addEventListener("click", () => copyText($("profileOut").dataset.raw||"", $("copyProfileBtn"), "⧉ copied ✓"));
+  $("copyLaunchBtn").addEventListener("click", () => copyText($("launchOut").dataset.raw||"", $("copyLaunchBtn"), "⧉ copied ✓"));
+  $("downloadBtn").addEventListener("click", () => { download(`${state.profileName||"my-profile"}.config.toml`, $("profileOut").dataset.raw||"", "application/toml"); showToast(); });
+}
+
+/* =========================================================================
+   INIT
+   ========================================================================= */
+function init(){
+  renderProviders(); renderModelList(); renderEffort(); renderConditional(); bind();
+  $("model").value = state.model;
+  $("profileName").value = state.profileName;
+  refresh();
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
