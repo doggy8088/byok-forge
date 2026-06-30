@@ -9,10 +9,11 @@ referenced by environment-variable name and never leave the page.
 
 | File | Tool | Output |
 |------|------|--------|
-| [`index.html`](index.html) | **Landing / hub** | Links to all three generators |
+| [`index.html`](index.html) | **Landing / hub** | Links to all generators |
 | [`copilot-cli.html`](copilot-cli.html) | **Copilot Alias Forge** | Shell / PowerShell launch aliases for the GitHub Copilot CLI |
 | [`codex-cli.html`](codex-cli.html) | **Codex Config Forge** | `~/.codex/<profile>.config.toml` profiles for the OpenAI Codex CLI |
 | [`litellm.html`](litellm.html) | **LiteLLM Config Forge** | `litellm-config.yaml` proxy that exposes `/v1/responses` for chat-only providers |
+| [`opencode.html`](opencode.html) | **OpenCode Config Forge** | `~/.config/opencode/opencode.json` BYOK config for OpenCode |
 
 ## Usage
 
@@ -24,7 +25,7 @@ open index.html      # macOS
 ```
 
 Each tool is a self-contained HTML file; you can also open `copilot-cli.html`,
-`codex-cli.html`, or `litellm.html` directly, or host the folder on any static web server.
+`codex-cli.html`, `litellm.html`, or `opencode.html` directly, or host the folder on any static web server.
 
 ## Internationalization
 
@@ -104,6 +105,25 @@ Chat Completions, so **chat-only providers become usable from any Responses-API 
 
 **Where to put it:** save `litellm-config.yaml` anywhere, `export` the referenced key env
 vars, start the proxy, then point Codex (or any client) at `http://localhost:<port>/v1`.
+
+---
+
+## opencode.html — OpenCode Config Forge
+
+Generates **OpenCode BYOK config** (`opencode.json`) and a companion shell snippet.
+Output includes:
+
+1. A top-level `model` value (`<provider-id>/<model>`).
+2. A `provider` block with `npm`, `name`, `options`, and per-model settings.
+3. A runnable snippet that writes `opencode.json`, exports `OPENCODE_CONFIG`, and optionally
+   sets the chosen key env var.
+
+- **Provider presets** — OpenAI, Anthropic, OpenRouter, DeepSeek, Gemini, Ollama, and custom.
+- **Model presets + manual input** — preset models are prefilled; you can replace with custom
+  IDs and still keep manual limit/name settings.
+
+**Where to put it:** write the JSON to `~/.config/opencode/opencode.json` (or set
+`OPENCODE_CONFIG` to a custom path), then run OpenCode from terminal.
 
 ---
 

@@ -127,6 +127,7 @@
   .fade{opacity:0;transform:translateY(12px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards;}
   @keyframes rise{to{opacity:1;transform:none;}}
   .d1{animation-delay:.04s;}.d2{animation-delay:.12s;}.d3{animation-delay:.2s;}.d4{animation-delay:.28s;}.d5{animation-delay:.36s;}
+  .d6{animation-delay:.44s;}
 </style>
 <script src="translations.js?v=20260630"></script>
 <script src="i18n.js?v=20260630"></script>
@@ -199,6 +200,22 @@
           <span class="feat" data-i18n="index.cardLitellmFeat2">multi-model</span>
           <span class="feat" data-i18n="index.cardLitellmFeat3">config.yaml</span>
           <span class="feat" data-i18n="index.cardLitellmFeat4">codex hookup</span>
+        </div>
+        <span class="go"><span data-i18n="common.openGenerator">open generator</span> <span class="arrow">→</span></span>
+      </div>
+    </a>
+
+    <a class="tool sky fade d6" href="opencode.html?v=20260630">
+      <div class="head"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname"><b>opencode</b>.html</span></div>
+      <div class="body">
+        <div class="mono-badge">OC</div>
+        <h3>opencode config forge</h3>
+        <p class="desc">Generate <b>OpenCode</b> BYOK config in <b>~/.config/opencode/opencode.json</b> with provider package, model, limits, and an optional snippet to run OpenCode directly.</p>
+        <div class="feats">
+          <span class="feat">provider id + model</span>
+          <span class="feat">api-key env vars</span>
+          <span class="feat">optional limits</span>
+          <span class="feat">copy / download</span>
         </div>
         <span class="go"><span data-i18n="common.openGenerator">open generator</span> <span class="arrow">→</span></span>
       </div>
