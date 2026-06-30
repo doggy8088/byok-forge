@@ -945,7 +945,11 @@
     }
 
     $("model").addEventListener("input", function () {
-      state.model = this.value.trim() || fallbackModel;
+      state.model = this.value.trim();
+      if (!state.model) {
+        refresh();
+        return;
+      }
       const matched = applyModelDefaults(state.model);
       if (matched) {
         syncInputs();
