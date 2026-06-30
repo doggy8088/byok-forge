@@ -198,6 +198,75 @@
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
 
+  .providers {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .prov {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--panel-2);
+    padding: 12px;
+    text-align: left;
+    transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 78px;
+  }
+  .prov:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-2);
+    background: var(--panel-3);
+  }
+  .prov.sel {
+    border-color: var(--amber-line);
+    background: linear-gradient(180deg, var(--amber-soft), transparent);
+    box-shadow: 0 0 0 1px var(--amber-line), 0 12px 30px -18px rgba(255, 180, 84, .6);
+  }
+  .prov.sel::after {
+    content: "●";
+    position: absolute;
+    top: 9px;
+    right: 11px;
+    color: var(--amber);
+    font-size: 9px;
+  }
+  .mono-badge {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 13px;
+    color: #0a0b0e;
+    flex: none;
+  }
+  .prov .pname {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .prov .ptype {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   select, input[type="text"], input[type="number"] {
     width: 100%;
     background: var(--bg);
@@ -282,11 +351,11 @@
 
   .out-actions {
     display: flex;
-    gap: 9px;
-    padding: 12px 14px;
+    gap: 10px;
+    padding: 13px 14px;
     background: #0d0f14;
     border-top: 1px solid var(--border);
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
   .btn {
     font-family: var(--mono);
@@ -370,17 +439,8 @@
         <div class="field">
           <div class="section-h"><span class="n">01</span><h2 data-i18n="opencode.sectionProvider">provider</h2><span class="hint" data-i18n="opencode.sectionProviderHint">set provider id, SDK, endpoint</span></div>
 
-          <label class="lbl" for="preset" data-i18n="opencode.labelPreset">quick preset</label>
-          <select id="preset">
-            <option value="openai">openai</option>
-            <option value="anthropic">anthropic</option>
-            <option value="openrouter">openrouter</option>
-            <option value="deepseek">deepseek</option>
-            <option value="gemini">gemini</option>
-            <option value="ollamaCloud">ollama cloud</option>
-            <option value="ollama">ollama</option>
-            <option value="custom" data-i18n="opencode.presetCustom">custom (manual)</option>
-          </select>
+          <label class="lbl" data-i18n="opencode.labelPreset">quick preset</label>
+          <div class="providers" id="providers"></div>
           <div class="descline" data-i18n="opencode.presetHint">Presets set package, base URL and defaults. Choose <b>custom</b> for your own endpoint.</div>
         </div>
 
@@ -537,15 +597,18 @@
       baseURL: "https://openrouter.ai/api/v1",
       keyEnv: "OPENROUTER_API_KEY",
       requireKey: true,
-      defaultModel: "openai/gpt-5.5",
+      defaultModel: "deepseek/deepseek-v4-flash",
       models: [
-        { id: "openai/gpt-5.5", name: "OpenAI GPT-5.5", limit: { context: 200000, output: 65536 } },
-        { id: "xai/grok-4.3", name: "xAI Grok 4.3", limit: { context: 120000, output: 32000 } },
-        { id: "deepseek/deepseek-reasoner", name: "DeepSeek Reasoner", limit: { context: 120000, output: 32000 } },
-        { id: "openai/o3", name: "OpenAI o3", limit: { context: 120000, output: 64000 } },
-        { id: "openai/o4-mini", name: "OpenAI o4-mini", limit: { context: 120000, output: 64000 } },
-        { id: "openai/gpt-oss-120b", name: "OpenAI gpt-oss 120B", limit: { context: 200000, output: 64000 } },
-        { id: "openai/gpt-oss-20b", name: "OpenAI gpt-oss 20B", limit: { context: 200000, output: 64000 } },
+        { id: "deepseek/deepseek-v4-flash", name: "DeepSeek V4 Flash", limit: { context: 1048576, output: 65536 } },
+        { id: "xiaomi/mimo-v2.5", name: "Xiaomi MiMo v2.5", limit: { context: 1048576, output: 65536 } },
+        { id: "minimax/minimax-m3", name: "MiniMax M3", limit: { context: 1048576, output: 512000 } },
+        { id: "tencent/hy3-preview", name: "Tencent Hy3 preview", limit: { context: 262144, output: 65536 } },
+        { id: "z-ai/glm-5.2", name: "Z.ai GLM 5.2", limit: { context: 1048576, output: 65536 } },
+        { id: "anthropic/claude-opus-4.7", name: "Anthropic Claude Opus 4.7", limit: { context: 1000000, output: 128000 } },
+        { id: "deepseek/deepseek-v4-pro", name: "DeepSeek V4 Pro", limit: { context: 1048576, output: 384000 } },
+        { id: "anthropic/claude-opus-4.8", name: "Anthropic Claude Opus 4.8", limit: { context: 1000000, output: 128000 } },
+        { id: "anthropic/claude-sonnet-4.6", name: "Anthropic Claude Sonnet 4.6", limit: { context: 1000000, output: 128000 } },
+        { id: "stepfun/step-3.7-flash", name: "StepFun Step 3.7 Flash", limit: { context: 256000, output: 256000 } },
       ],
     },
     deepseek: {
@@ -617,6 +680,7 @@
       ],
     },
   };
+  const PRESET_IDS = Object.keys(PRESETS);
 
   const state = {
     preset: "openai",
@@ -639,6 +703,55 @@
     return Number.isFinite(n) && n >= 0 ? n : null;
   };
 
+  function presetBadge(value) {
+    const map = {
+      openai: "O",
+      anthropic: "A",
+      openrouter: "O",
+      deepseek: "D",
+      gemini: "G",
+      ollama: "O",
+      ollamaCloud: "O",
+      custom: "C",
+    };
+    return map[value] || String(value || "").slice(0, 2).toUpperCase();
+  }
+
+  function presetColor(value) {
+    const map = {
+      openai: "var(--amber)",
+      anthropic: "#56b6c2",
+      openrouter: "#b48ead",
+      deepseek: "#ffb454",
+      gemini: "#74e0a0",
+      ollama: "#a1a7ff",
+      ollamaCloud: "#a1a7ff",
+      custom: "var(--panel-3)",
+    };
+    return map[value] || "var(--panel-2)";
+  }
+
+  function renderPresetCards() {
+    const container = $("providers");
+    if (!container) return;
+    const frag = document.createDocumentFragment();
+    PRESET_IDS.forEach(function (presetId) {
+      const preset = PRESETS[presetId];
+      if (!preset) return;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "prov" + (presetId === state.preset ? " sel" : "");
+      button.dataset.preset = presetId;
+      button.innerHTML =
+        '<span class="mono-badge" style="background:' + presetColor(presetId) + '">' + presetBadge(presetId) + '</span>'
+        + '<span class="pname">' + preset.name + '</span>'
+        + '<span class="ptype">' + (preset.baseURL || "") + '</span>';
+      frag.appendChild(button);
+    });
+    container.innerHTML = "";
+    container.appendChild(frag);
+  }
+
   function syncFromPreset(id) {
     const preset = PRESETS[id] || PRESETS.custom;
     state.preset = id;
@@ -657,6 +770,7 @@
     refreshInputs();
     refreshModels();
     refresh();
+    renderPresetCards();
   }
 
   function refreshInputs() {
@@ -671,7 +785,6 @@
     $("contextLimit").value = state.contextLimit;
     $("outputLimit").value = state.outputLimit;
     $("configPath").value = state.configPath;
-    $("preset").value = state.preset;
   }
 
   function refreshModels() {
@@ -873,16 +986,19 @@
   }
 
   function bind() {
-    $("preset").addEventListener("change", function () {
-      const v = this.value;
-      state.preset = v;
-      syncFromPreset(v);
+    renderPresetCards();
+    $("providers").addEventListener("click", function (event) {
+      const el = event.target.closest(".prov");
+      if (!el) return;
+      const presetId = el.dataset.preset;
+      if (!presetId) return;
+      syncFromPreset(presetId);
     });
 
     $("providerId").addEventListener("input", function () {
       state.providerId = this.value.trim();
       state.preset = "custom";
-      $("preset").value = "custom";
+      renderPresetCards();
       refresh();
     });
 
@@ -954,7 +1070,14 @@
   function init() {
     syncFromPreset("openai");
     bind();
-    window.I18NEngine.init({page: "opencode", titleKey: "opencode.title", onChange: function(){ refresh(); }});
+    window.I18NEngine.init({
+      page: "opencode",
+      titleKey: "opencode.title",
+      onChange: function () {
+        renderPresetCards();
+        refresh();
+      },
+    });
   }
 
   init();

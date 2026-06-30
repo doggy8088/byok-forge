@@ -258,6 +258,75 @@
   }
   @media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
 
+  .providers {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .prov {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--panel-2);
+    padding: 12px;
+    text-align: left;
+    transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 78px;
+  }
+  .prov:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-2);
+    background: var(--panel-3);
+  }
+  .prov.sel {
+    border-color: var(--amber-line);
+    background: linear-gradient(180deg, var(--amber-soft), transparent);
+    box-shadow: 0 0 0 1px var(--amber-line), 0 12px 30px -18px rgba(255, 180, 84, .6);
+  }
+  .prov.sel::after {
+    content: "●";
+    position: absolute;
+    top: 9px;
+    right: 11px;
+    color: var(--amber);
+    font-size: 9px;
+  }
+  .mono-badge {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 13px;
+    color: #0a0b0e;
+    flex: none;
+  }
+  .prov .pname {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .prov .ptype {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   input[type='text'], select {
     width: 100%;
     background: var(--bg);
@@ -353,11 +422,10 @@
     overflow-x: auto;
   }
 
-  .actions {
+  .out-actions {
     display: flex;
-    flex-wrap: wrap;
-    gap: 9px;
-    padding: 12px 14px;
+    gap: 10px;
+    padding: 13px 14px;
     border-top: 1px solid var(--border);
     background: #0d0f14;
   }
@@ -412,7 +480,7 @@
 
   <main class="grid">
     <div class="left-col">
-      <section class="panel">
+  <section class="panel">
         <div class="pad">
           <div class="section-h">
             <span class="n">01</span>
@@ -421,8 +489,8 @@
           </div>
 
           <div class="field">
-            <label class="lbl" for="preset" data-i18n="cursor.labelPreset">quick preset</label>
-            <select id="preset"></select>
+            <label class="lbl" data-i18n="cursor.labelPreset">quick preset</label>
+            <div class="providers" id="providers"></div>
             <div class="descline" data-i18n-html="cursor.presetHint">Use presets to fill URL and key reference together.</div>
           </div>
 
@@ -447,7 +515,8 @@
             </div>
             <div class="field">
               <label class="lbl" for="model" data-i18n="cursor.labelModel">model</label>
-              <input id="model" type="text" />
+              <input id="model" type="text" list="modelList" autocomplete="off" spellcheck="false" />
+              <datalist id="modelList"></datalist>
               <div class="descline" data-i18n-html="cursor.modelHint">If your Cursor model list differs, adjust in Cursor settings UI.</div>
             </div>
           </div>
@@ -499,7 +568,7 @@
           <div class="term">
             <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">settings<b>.json</b></span></div>
             <pre id="settingsOut"></pre>
-            <div class="actions">
+            <div class="out-actions">
               <button class="btn primary" id="copySettingsBtn" data-i18n="cursor.copySettings">⧉ copy settings</button>
               <button class="btn" id="downloadSettingsBtn" data-i18n="cursor.downloadSettings">⤓ download settings.json</button>
             </div>
@@ -513,7 +582,7 @@
           <div class="term">
             <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">shell <b>command</b></span></div>
             <pre id="runOut"></pre>
-            <div class="actions">
+            <div class="out-actions">
               <button class="btn primary" id="copyRunBtn" data-i18n="cursor.copyCommand">⧉ copy commands</button>
             </div>
           </div>
@@ -545,7 +614,7 @@
       providerId: "openrouter",
       baseURL: "https://openrouter.ai/api/v1",
       keyEnv: "OPENROUTER_API_KEY",
-      model: "openai/gpt-4.1",
+      model: "deepseek/deepseek-v4-flash",
       includeKey: true,
       schema: "openai-legacy"
     },
@@ -587,6 +656,19 @@
     { value: "cursor-aiprovider", nameKey: "cursor.schemaCursorAiprovider" }
   ];
 
+  const OPENROUTER_TOP_MODELS = [
+    "deepseek/deepseek-v4-flash",
+    "xiaomi/mimo-v2.5",
+    "minimax/minimax-m3",
+    "tencent/hy3-preview",
+    "z-ai/glm-5.2",
+    "anthropic/claude-opus-4.7",
+    "deepseek/deepseek-v4-pro",
+    "anthropic/claude-opus-4.8",
+    "anthropic/claude-sonnet-4.6",
+    "stepfun/step-3.7-flash",
+  ];
+
   const DEFAULT_PATH = "~/.config/cursor/settings.json";
 
   const state = {
@@ -604,22 +686,34 @@
     return document.getElementById(id);
   };
 
-  const inputIds = ["preset", "providerId", "baseURL", "keyEnv", "model", "configPath", "schema", "includeKey"];
+  const inputIds = ["providerId", "baseURL", "keyEnv", "model", "configPath", "schema", "includeKey"];
+
+  function getColorForProvider(value) {
+    if (!value) return "⚙";
+    const map = {
+      openai: "O",
+      openrouter: "R",
+      deepseek: "D",
+      "ollama-cloud": "O",
+      custom: "C"
+    };
+    return map[value] || String(value).slice(0, 2).toUpperCase();
+  }
+
+  function getProviderColor(value) {
+    const map = {
+      openai: "var(--amber)",
+      openrouter: "#56b6c2",
+      deepseek: "#b48ead",
+      "ollama-cloud": "#74e0a0",
+      custom: "var(--panel-3)"
+    };
+    return map[value] || "var(--panel-2)";
+  }
 
   function renderSelectOptions() {
-    const presetSelect = $("preset");
     const schemaSelect = $("schema");
-    if (!presetSelect || !schemaSelect) return;
-
-    const fragment = document.createDocumentFragment();
-    PRESETS.forEach(function (preset) {
-      const option = document.createElement("option");
-      option.value = preset.value;
-      option.textContent = t(preset.nameKey);
-      fragment.appendChild(option);
-    });
-    presetSelect.innerHTML = "";
-    presetSelect.appendChild(fragment);
+    if (!schemaSelect) return;
 
     const schemaFrag = document.createDocumentFragment();
     SCHEMAS.forEach(function (schema) {
@@ -630,9 +724,44 @@
     });
     schemaSelect.innerHTML = "";
     schemaSelect.appendChild(schemaFrag);
-
-    presetSelect.value = state.preset;
     schemaSelect.value = state.schema;
+  }
+
+  function renderModelList() {
+    const modelList = $("modelList");
+    if (!modelList) return;
+    modelList.innerHTML = "";
+    if (state.preset !== "openrouter") return;
+
+    const modelFrag = document.createDocumentFragment();
+    OPENROUTER_TOP_MODELS.forEach(function (model) {
+      const option = document.createElement("option");
+      option.value = model;
+      modelFrag.appendChild(option);
+    });
+    modelList.appendChild(modelFrag);
+  }
+
+  function renderProviderCards() {
+    const providers = $("providers");
+    if (!providers) return;
+
+    const frag = document.createDocumentFragment();
+    PRESETS.forEach(function (preset) {
+      const button = document.createElement("button");
+      const displayName = t(preset.nameKey || preset.value);
+      button.type = "button";
+      button.className = "prov" + (preset.value === state.preset ? " sel" : "");
+      button.dataset.preset = preset.value;
+      button.innerHTML = ''
+        + '<span class="mono-badge" style="background:' + getProviderColor(preset.value) + '">' + getColorForProvider(preset.value) + '</span>'
+        + '<span class="pname">' + displayName + '</span>'
+        + '<span class="ptype">' + (preset.baseURL || "") + '</span>';
+      frag.appendChild(button);
+    });
+
+    providers.innerHTML = "";
+    providers.appendChild(frag);
   }
 
   function getPreset(value) {
@@ -643,7 +772,7 @@
   }
 
   function syncStateFromPreset() {
-    const preset = getPreset($("preset").value);
+    const preset = getPreset(state.preset);
     state.preset = preset.value;
     if (state.preset !== "custom") {
       state.providerId = preset.providerId;
@@ -656,6 +785,8 @@
     }
     syncInputValues();
     render();
+    renderProviderCards();
+    renderModelList();
   }
 
   function syncInputValues() {
@@ -801,9 +932,18 @@
 
   function bind() {
     renderSelectOptions();
+    renderProviderCards();
     syncStateFromPreset();
 
-    $("preset").addEventListener("change", syncStateFromPreset);
+    if ($("providers")) {
+      $("providers").addEventListener("click", function (event) {
+        const el = event.target.closest(".prov");
+        if (!el) return;
+        state.preset = el.dataset.preset || state.preset;
+        syncStateFromPreset();
+      });
+    }
+
     $("schema").addEventListener("change", function () {
       state.schema = $("schema").value;
       render();
@@ -813,7 +953,6 @@
       const el = $(id);
       if (!el) return;
       el.addEventListener("input", function () {
-        if (id === "preset") return;
         collectState();
         if (id === "keyEnv" && state.preset !== "custom") {
           var p = getPreset(state.preset);
@@ -822,7 +961,6 @@
         render();
       });
       el.addEventListener("change", function () {
-        if (id === "preset") return;
         collectState();
         if (id === "keyEnv" && state.preset !== "custom") {
           var p = getPreset(state.preset);
@@ -864,6 +1002,7 @@
 
     window.addEventListener("i18n:changed", function () {
       renderSelectOptions();
+      renderProviderCards();
       render();
     });
   }
@@ -873,6 +1012,7 @@
     titleKey: "cursor.title",
     onChange: function () {
       renderSelectOptions();
+      renderProviderCards();
       render();
     }
   });
