@@ -37,9 +37,10 @@
     --violet:#a78bfa; --violet-soft:rgba(167,139,250,.14); --violet-line:rgba(167,139,250,.42);
     --green:#74e0a0; --cyan:#56b6c2; --red:#ff6a6a;
     --radius:16px;
-    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
-    --display:'Martian Mono',var(--mono);
-    --sans:'IBM Plex Sans',system-ui,sans-serif;
+    --cjk:'';
+    --mono:'JetBrains Mono',var(--cjk),ui-monospace,SFMono-Regular,Menlo,monospace;
+    --display:'Martian Mono',var(--cjk),var(--mono);
+    --sans:'IBM Plex Sans',var(--cjk),system-ui,sans-serif;
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -62,6 +63,10 @@
   .brand p{margin:4px 0 0;color:var(--muted);font-size:12.5px;font-family:var(--mono);letter-spacing:.01em;}
   a.gh{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:7px 14px;background:var(--panel);transition:all .14s ease;display:inline-flex;gap:8px;align-items:center;}
   a.gh:hover{color:var(--text);border-color:var(--border-2);}
+  .meta-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .lang-switch{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+  .lang-switch .lang-select{appearance:none;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:6px 30px 6px 12px;font-family:var(--mono);font-size:11px;outline:none;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 16px) 11px,calc(100% - 11px) 11px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;}
+  .lang-switch .lang-select:focus{border-color:var(--sky-line);box-shadow:0 0 0 2px var(--sky-soft);}
 
   .hero{padding:38px 0 30px;max-width:760px;}
   .kicker{font-family:var(--mono);font-size:12px;color:var(--sky);letter-spacing:.16em;text-transform:uppercase;margin:0 0 16px;display:inline-flex;align-items:center;gap:9px;border:1px solid var(--sky-line);background:var(--sky-soft);border-radius:999px;padding:6px 14px;}
@@ -120,25 +125,30 @@
   @keyframes rise{to{opacity:1;transform:none;}}
   .d1{animation-delay:.04s;}.d2{animation-delay:.12s;}.d3{animation-delay:.2s;}.d4{animation-delay:.28s;}.d5{animation-delay:.36s;}
 </style>
+<script src="translations.js"></script>
+<script src="i18n.js"></script>
 </head>
-<body>
+<body data-page="index">
 <div class="wrap">
 
   <header class="top fade d1">
     <div class="brand">
       <div class="glyph"><span class="chev">&gt;</span></div>
       <div>
-        <h1><b>byok</b> <i>forge</i></h1>
-        <p>// launch-config generators for ai coding clis</p>
+        <h1 data-i18n-html="index.brandTitle"><b>byok</b> <i>forge</i></h1>
+        <p data-i18n="index.brandSubtitle">// launch-config generators for ai coding clis</p>
       </div>
     </div>
-    <a class="gh" href="https://github.com/openai/codex" target="_blank" rel="noopener">⌁ bring your own key</a>
+    <div class="meta-right">
+      <div id="langSwitcher"></div>
+      <a class="gh" href="https://github.com/openai/codex" target="_blank" rel="noopener" data-i18n="common.bringYourOwnKey">⌁ bring your own key</a>
+    </div>
   </header>
 
   <section class="hero fade d2">
-    <span class="kicker"><span class="blip"></span>self-hosted · client-side · no telemetry</span>
-    <h2>Point your <span class="a">Copilot</span> &amp; <span class="b">Codex</span> CLIs at any model.</h2>
-    <p>Pick a provider and model, tweak the options, and copy a ready-to-paste launch config. Everything runs in your browser — your API keys are referenced as <code>$ENV_VARS</code> and never leave the page.</p>
+    <span class="kicker"><span class="blip"></span><span data-i18n="index.heroKicker">self-hosted · client-side · no telemetry</span></span>
+    <h2 data-i18n-html="index.heroHeading">Point your <span class="a">Copilot</span> &amp; <span class="b">Codex</span> CLIs at any model.</h2>
+    <p data-i18n-html="index.heroBody">Pick a provider and model, tweak the options, and copy a ready-to-paste launch config. Everything runs in your browser — your API keys are referenced as <code>$ENV_VARS</code> and never leave the page.</p>
   </section>
 
   <div class="cards">
@@ -147,15 +157,15 @@
       <div class="head"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname"><b>copilot-cli</b>.html</span></div>
       <div class="body">
         <div class="mono-badge">CP</div>
-        <h3>copilot alias forge</h3>
-        <p class="desc">Generate GitHub <b>Copilot CLI</b> launch aliases &amp; functions that wire up <b>COPILOT_*</b> env vars for any BYOK provider — then copy &amp; paste into your shell profile.</p>
+        <h3 data-i18n="index.cardCopilotTitle">copilot alias forge</h3>
+        <p class="desc" data-i18n-html="index.cardCopilotBody">Generate GitHub <b>Copilot CLI</b> launch aliases &amp; functions that wire up <b>COPILOT_*</b> env vars for any BYOK provider — then copy &amp; paste into your shell profile.</p>
         <div class="feats">
-          <span class="feat">14 providers</span>
-          <span class="feat">shell + powershell</span>
-          <span class="feat">alias · function</span>
-          <span class="feat">token limits</span>
+          <span class="feat" data-i18n="index.cardCopilotFeat1">14 providers</span>
+          <span class="feat" data-i18n="index.cardCopilotFeat2">shell + powershell</span>
+          <span class="feat" data-i18n="index.cardCopilotFeat3">alias · function</span>
+          <span class="feat" data-i18n="index.cardCopilotFeat4">token limits</span>
         </div>
-        <span class="go">open generator <span class="arrow">→</span></span>
+        <span class="go"><span data-i18n="common.openGenerator">open generator</span> <span class="arrow">→</span></span>
       </div>
     </a>
 
@@ -163,15 +173,15 @@
       <div class="head"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname"><b>codex-cli</b>.html</span></div>
       <div class="body">
         <div class="mono-badge">CX</div>
-        <h3>codex config forge</h3>
-        <p class="desc">Generate OpenAI <b>Codex CLI</b> BYOK profiles — a <b>[model_providers]</b> block plus a downloadable <b>~/.codex/&lt;profile&gt;.config.toml</b>, with the matching <b>codex -p</b> launch command.</p>
+        <h3 data-i18n="index.cardCodexTitle">codex config forge</h3>
+        <p class="desc" data-i18n-html="index.cardCodexBody">Generate OpenAI <b>Codex CLI</b> BYOK profiles — a <b>[model_providers]</b> block plus a downloadable <b>~/.codex/&lt;profile&gt;.config.toml</b>, with the matching <b>codex -p</b> launch command.</p>
         <div class="feats">
-          <span class="feat">responses api</span>
-          <span class="feat">profile.config.toml</span>
-          <span class="feat">10 providers</span>
-          <span class="feat">downloadable</span>
+          <span class="feat" data-i18n="index.cardCodexFeat1">responses api</span>
+          <span class="feat" data-i18n="index.cardCodexFeat2">profile.config.toml</span>
+          <span class="feat" data-i18n="index.cardCodexFeat3">10 providers</span>
+          <span class="feat" data-i18n="index.cardCodexFeat4">downloadable</span>
         </div>
-        <span class="go">open generator <span class="arrow">→</span></span>
+        <span class="go"><span data-i18n="common.openGenerator">open generator</span> <span class="arrow">→</span></span>
       </div>
     </a>
 
@@ -179,15 +189,15 @@
       <div class="head"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname"><b>litellm</b>.html</span></div>
       <div class="body">
         <div class="mono-badge">LL</div>
-        <h3>litellm config forge</h3>
-        <p class="desc">Build a multi-model <b>litellm-config.yaml</b> proxy that exposes <b>/v1/responses</b> for any chat-only provider (Mistral, DeepSeek, Anthropic, Gemini…) — then plug it into Codex or Copilot as a custom endpoint.</p>
+        <h3 data-i18n="index.cardLitellmTitle">litellm config forge</h3>
+        <p class="desc" data-i18n-html="index.cardLitellmBody">Build a multi-model <b>litellm-config.yaml</b> proxy that exposes <b>/v1/responses</b> for any chat-only provider (Mistral, DeepSeek, Anthropic, Gemini…) — then plug it into Codex or Copilot as a custom endpoint.</p>
         <div class="feats">
-          <span class="feat">14 providers</span>
-          <span class="feat">multi-model</span>
-          <span class="feat">config.yaml</span>
-          <span class="feat">codex hookup</span>
+          <span class="feat" data-i18n="index.cardLitellmFeat1">14 providers</span>
+          <span class="feat" data-i18n="index.cardLitellmFeat2">multi-model</span>
+          <span class="feat" data-i18n="index.cardLitellmFeat3">config.yaml</span>
+          <span class="feat" data-i18n="index.cardLitellmFeat4">codex hookup</span>
         </div>
-        <span class="go">open generator <span class="arrow">→</span></span>
+        <span class="go"><span data-i18n="common.openGenerator">open generator</span> <span class="arrow">→</span></span>
       </div>
     </a>
 
@@ -195,14 +205,17 @@
 
   <div class="strip fade d5">
     <span class="ic">⚉</span>
-    <p><b>How it works.</b> Each tool is a single, self-contained HTML file — no build, no server, no install. Open them locally or host them anywhere static. API keys are referenced by environment-variable name (e.g. <code>$OLLAMA_API_KEY</code>); the generated configs contain references, not secrets.</p>
+    <p data-i18n-html="index.stripBody"><b>How it works.</b> Each tool is a single, self-contained HTML file — no build, no server, no install. Open them locally or host them anywhere static. API keys are referenced by environment-variable name (e.g. <code>$OLLAMA_API_KEY</code>); the generated configs contain references, not secrets.</p>
   </div>
 
 </div>
 
 <footer>
-  <div><b>BYOK Forge</b> · a small toolkit for bring-your-own-key AI coding CLIs</div>
-  <div>Model names &amp; token defaults are best-effort for mid-2026 — always verify against <b>copilot --help</b> / <b>codex --help</b>.</div>
+  <div data-i18n="index.footerLine1"><b>BYOK Forge</b> · a small toolkit for bring-your-own-key AI coding CLIs</div>
+  <div data-i18n-html="index.footerLine2">Model names &amp; token defaults are best-effort for mid-2026 — always verify against <b>copilot --help</b> / <b>codex --help</b>.</div>
 </footer>
+<script>
+window.I18NEngine.init({page:'index', titleKey:'index.title', onChange: function(){}});
+</script>
 </body>
 </html>

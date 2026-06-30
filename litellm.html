@@ -36,9 +36,10 @@
     --amber:#a78bfa; --amber-soft:rgba(167,139,250,.15); --amber-line:rgba(167,139,250,.45);
     --green:#74e0a0; --cyan:#56b6c2; --violet:#b48ead; --red:#ff6a6a; --orange:#ffb454;
     --radius:14px;
-    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
-    --display:'Martian Mono',var(--mono);
-    --sans:'IBM Plex Sans',system-ui,sans-serif;
+    --cjk:'';
+    --mono:'JetBrains Mono',var(--cjk),ui-monospace,SFMono-Regular,Menlo,monospace;
+    --display:'Martian Mono',var(--cjk),var(--mono);
+    --sans:'IBM Plex Sans',var(--cjk),system-ui,sans-serif;
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -59,6 +60,9 @@
   .brand h1 b{color:var(--amber);font-weight:800;}
   .brand p{margin:3px 0 0;color:var(--muted);font-size:12.5px;font-family:var(--mono);letter-spacing:.01em;}
   .top .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  #langSwitcher{display:inline-flex;align-items:center;}
+  #langSwitcher select{appearance:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 10px;color:var(--text);font:inherit;font-size:12px;line-height:1;}
+  #langSwitcher select:focus{outline:none;border-color:var(--amber);}  
   .pill{font-family:var(--mono);font-size:11.5px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:6px 12px;background:var(--panel);white-space:nowrap;}
   .pill b{color:var(--green);font-weight:500;}
   a.home{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:6px 13px;background:var(--panel);transition:all .14s ease;}
@@ -165,21 +169,24 @@
   .d1{animation-delay:.04s;}.d2{animation-delay:.12s;}.d3{animation-delay:.2s;}
   .hidden{display:none !important;}
 </style>
+<script src="translations.js"></script>
+<script src="i18n.js"></script>
 </head>
-<body>
+<body data-page="litellm">
 <div class="wrap">
 
   <header class="top fade d1">
     <div class="brand">
       <div class="glyph"><span class="chev">&gt;</span></div>
       <div>
-        <h1>litellm <b>config</b> forge</h1>
-        <p>// build a litellm-config.yaml proxy for any provider</p>
+        <h1 data-i18n-html="litellm.brandTitle">litellm <b>config</b> forge</h1>
+        <p data-i18n="litellm.brandSubtitle">// build a litellm-config.yaml proxy for any provider</p>
       </div>
     </div>
     <div class="meta">
-      <span class="pill"><b>responses</b> ⇄ chat bridge</span>
-      <a class="home" href="index.html">⊞ all tools</a>
+      <div id="langSwitcher"></div>
+      <span class="pill" data-i18n-html="litellm.metaBridge"><b>responses</b> ⇄ chat bridge</span>
+      <a class="home" href="index.html" data-i18n="common.allTools">⊞ all tools</a>
     </div>
   </header>
 
@@ -190,32 +197,32 @@
       <div class="pad">
 
         <div class="field">
-          <div class="section-h"><span class="n">01</span><h2>models</h2><span class="hint" id="modelCount"></span></div>
+          <div class="section-h"><span class="n">01</span><h2 data-i18n="litellm.sectionModels">models</h2><span class="hint" id="modelCount"></span></div>
           <div id="entries"></div>
-          <button class="addbtn" id="addBtn">＋ add another model</button>
+          <button class="addbtn" id="addBtn" data-i18n="litellm.addAnotherModel">＋ add another model</button>
         </div>
 
         <div class="divider"></div>
 
         <div class="field">
-          <div class="section-h"><span class="n">02</span><h2>proxy settings</h2></div>
+          <div class="section-h"><span class="n">02</span><h2 data-i18n="litellm.sectionProxySettings">proxy settings</h2></div>
           <div class="row2" style="margin-bottom:16px;">
             <div>
-              <label class="lbl" for="port">port</label>
+              <label class="lbl" for="port" data-i18n="litellm.labelPort">port</label>
               <input type="text" id="port" value="4000" autocomplete="off" spellcheck="false" />
             </div>
             <div>
-              <label class="lbl" for="masterKey">master key env <span class="tag">optional</span></label>
+              <label class="lbl" for="masterKey" id="masterKeyLabel">master key env <span class="tag">optional</span></label>
               <div class="adorn"><span class="pre">$</span><input type="text" id="masterKey" placeholder="LITELLM_MASTER_KEY" autocomplete="off" spellcheck="false" /></div>
             </div>
           </div>
           <label class="check" style="margin-bottom:12px;">
             <input type="checkbox" id="dropParams" checked />
-            <span class="ctxt">drop_params<span>silently drop params a provider doesn't support (avoids 400s when bridging).</span></span>
+            <span class="ctxt" id="dropParamsLabel">drop_params<span>silently drop params a provider doesn't support (avoids 400s when bridging).</span></span>
           </label>
           <label class="check">
             <input type="checkbox" id="detailedDebug" />
-            <span class="ctxt">detailed_debug<span>add --detailed_debug to the run command for verbose proxy logs.</span></span>
+            <span class="ctxt" id="detailedDebugLabel">detailed_debug<span>add --detailed_debug to the run command for verbose proxy logs.</span></span>
           </label>
         </div>
 
@@ -228,7 +235,7 @@
       <div class="summary" id="summary"></div>
 
       <div>
-        <p class="out-label">proxy config · <span class="path">litellm-config.yaml</span></p>
+        <p class="out-label" id="yamlLabel">proxy config · <span class="path">litellm-config.yaml</span></p>
         <div class="term">
           <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">litellm-config<b>.yaml</b></span></div>
           <pre id="yamlOut"></pre>
@@ -240,7 +247,7 @@
       </div>
 
       <div>
-        <p class="out-label">start the proxy</p>
+        <p class="out-label" id="runLabel">start the proxy</p>
         <div class="term">
           <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">~ <b>terminal</b></span></div>
           <pre id="runOut"></pre>
@@ -251,7 +258,7 @@
       </div>
 
       <div>
-        <p class="out-label">use it from codex · <span class="path">~/.codex/config.toml</span></p>
+        <p class="out-label" id="codexLabel">use it from codex · <span class="path">~/.codex/config.toml</span></p>
         <div class="term">
           <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">~/.codex/<b>config.toml</b></span></div>
           <pre id="codexOut"></pre>
@@ -473,17 +480,23 @@ function renderEntries(){
     card.className = "entry";
     card.dataset.uid = e.uid;
     const opts = LL_PROVIDERS.map(pp => `<option value="${pp.id}"${pp.id===e.provider?" selected":""}>${pp.name}</option>`).join("");
-    const modelLbl = p.modelLabel || "model";
+    const modelLbl = p.modelLabel || t("litellm.modelLabel");
+    const providerLabel = t("litellm.providerLabel");
+    const aliasLabel = t("litellm.aliasLabel");
+    const apiKeyLabel = t("litellm.apiKeyEnvLabel");
+    const apiBaseLabel = t("litellm.apiBaseLabel");
+    const apiVersionLabel = t("litellm.apiVersionLabel");
+    const removeTitle = t("litellm.removeTitle");
     card.innerHTML = `
       <div class="ehead">
         <span class="ebadge" style="background:${p.color}">${p.badge}</span>
-        <span class="etitle">model <b>#${i+1}</b></span>
+        <span class="etitle">${t("litellm.modelLabel")} <b>#${i+1}</b></span>
         <span class="ealias">${(e.alias||"").trim()||defaultAlias(e.model)}</span>
-        ${state.entries.length>1?`<button class="rm" data-act="rm" title="remove">✕</button>`:""}
+        ${state.entries.length>1?`<button class="rm" data-act="rm" title="${removeTitle}">✕</button>`:""}
       </div>
       <div class="erow">
         <div class="ecell">
-          <span class="mini">provider</span>
+          <span class="mini">${providerLabel}</span>
           <select data-field="provider">${opts}</select>
         </div>
         <div class="ecell">
@@ -493,48 +506,63 @@ function renderEntries(){
       </div>
       <div class="erow">
         <div class="ecell">
-          <span class="mini">model_name (alias)</span>
+          <span class="mini">${aliasLabel}</span>
           <input type="text" data-field="alias" value="${escAttr(e.alias)}" autocomplete="off" spellcheck="false" />
         </div>
         <div class="ecell ${p.keyless?"hidden":""}">
-          <span class="mini">api key env</span>
+          <span class="mini">${apiKeyLabel}</span>
           <div class="adorn"><span class="pre">$</span><input type="text" data-field="env" value="${escAttr(e.env)}" autocomplete="off" spellcheck="false" /></div>
         </div>
       </div>
       <div class="erow full ${p.needsBase?"":"hidden"}">
         <div class="ecell">
-          <span class="mini">api_base</span>
+          <span class="mini">${apiBaseLabel}</span>
           <input type="text" data-field="base" value="${escAttr(e.base)}" autocomplete="off" spellcheck="false" />
         </div>
       </div>
       <div class="erow full ${p.needsVersion?"":"hidden"}">
         <div class="ecell">
-          <span class="mini">api_version</span>
+          <span class="mini">${apiVersionLabel}</span>
           <input type="text" data-field="version" value="${escAttr(e.version)}" autocomplete="off" spellcheck="false" />
         </div>
       </div>
-      <div class="hintline">→ routes as <b>${entryModelString(e)}</b></div>
+      <div class="hintline">${t("litellm.routeHint", { route: entryModelString(e) })}</div>
     `;
     wrap.appendChild(card);
   });
-  $("modelCount").textContent = state.entries.length + (state.entries.length===1?" model":" models");
+  $("modelCount").textContent = t("litellm.modelCount", { count: state.entries.length });
 }
 function escAttr(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 
 function renderSummary(){
   const sum = $("summary"); sum.innerHTML = "";
-  const chips = [["models", state.entries.length], ["port", (state.port||"4000").trim()]];
+  const chips = [[t("litellm.summaryModels"), state.entries.length], [t("litellm.summaryPort"), (state.port||"4000").trim()]];
   const keys = uniqueEnvs().length;
-  chips.push(["keys", keys]);
-  if((state.masterKey||"").trim()) chips.push(["auth", "master key"]);
+  chips.push([t("litellm.summaryKeys"), keys]);
+  if((state.masterKey||"").trim()) chips.push([t("litellm.summaryAuth"), t("litellm.labelMasterKey")]);
   chips.forEach(([k,v])=>{ const c=document.createElement("span"); c.className="chip"; c.innerHTML=`${k} <b>${v}</b>`; sum.appendChild(c); });
+}
+
+function renderLabels(){
+  $("masterKeyLabel").innerHTML = `${t("litellm.labelMasterKey")} <span class="tag">${t("common.optional") || "optional"}</span>`;
+  $("dropParamsLabel").innerHTML = `${t("litellm.labelDropParams")}<span>${t("litellm.dropParamsHint") || "silently drop params a provider doesn't support (avoids 400s when bridging)."}</span>`;
+  $("detailedDebugLabel").innerHTML = `${t("litellm.labelDetailedDebug")}<span>${t("litellm.detailedDebugHint") || "add --detailed_debug to the run command for verbose proxy logs."}</span>`;
+  $("yamlLabel").innerHTML = `${t("litellm.outputConfig")} <span class="path">litellm-config.yaml</span>`;
+  $("runLabel").textContent = t("litellm.outputStart");
+  $("codexLabel").innerHTML = `${t("litellm.outputUseFromCodex")} <span class="path">~/.codex/config.toml</span>`;
+  $("copyYamlBtn").textContent = t("litellm.copyYaml");
+  $("downloadYamlBtn").innerHTML = t("litellm.downloadYaml");
+  $("copyRunBtn").textContent = t("litellm.copyCommands");
+  $("copyCodexBtn").textContent = t("litellm.copyBlock");
+  $("toast").textContent = t("litellm.copiedToast");
 }
 
 function refresh(){
   const yaml = genYaml(); $("yamlOut").innerHTML = hlYaml(yaml); $("yamlOut").dataset.raw = yaml;
   const run = genRun(); $("runOut").innerHTML = hlShell(run); $("runOut").dataset.raw = run;
   const codex = genCodex(); $("codexOut").innerHTML = hlToml(codex); $("codexOut").dataset.raw = codex;
-  renderSummary();
+  renderSummary(); renderLabels();
+  if(window.I18NEngine && window.I18NEngine.applyTranslations) window.I18NEngine.applyTranslations(document.body);
 }
 
 /* =========================================================================
@@ -626,7 +654,11 @@ function bind(){
 /* =========================================================================
    INIT
    ========================================================================= */
-function init(){ renderDatalists(); renderEntries(); bind(); refresh(); }
+function init(){
+  if(window.I18NEngine) window.I18NEngine.init({ page:"litellm", titleKey:"litellm.title" });
+  document.addEventListener("i18n:changed", function () { refresh(); });
+  renderDatalists(); renderEntries(); bind(); refresh();
+}
 document.addEventListener("DOMContentLoaded", init);
 </script>
 </body>

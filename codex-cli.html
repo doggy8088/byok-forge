@@ -36,9 +36,10 @@
     --amber:#5cc8ff; --amber-soft:rgba(92,200,255,.14); --amber-line:rgba(92,200,255,.42);
     --green:#74e0a0; --cyan:#56b6c2; --violet:#b48ead; --red:#ff6a6a; --orange:#ffb454;
     --radius:14px;
-    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
-    --display:'Martian Mono',var(--mono);
-    --sans:'IBM Plex Sans',system-ui,sans-serif;
+    --cjk:'';
+    --mono:'JetBrains Mono',var(--cjk),ui-monospace,SFMono-Regular,Menlo,monospace;
+    --display:'Martian Mono',var(--cjk),var(--mono);
+    --sans:'IBM Plex Sans',var(--cjk),system-ui,sans-serif;
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -59,6 +60,9 @@
   .brand h1 b{color:var(--amber);font-weight:800;}
   .brand p{margin:3px 0 0;color:var(--muted);font-size:12.5px;font-family:var(--mono);letter-spacing:.01em;}
   .top .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  #langSwitcher{display:inline-flex;align-items:center;}
+  #langSwitcher select{appearance:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 10px;color:var(--text);font:inherit;font-size:12px;line-height:1;}
+  #langSwitcher select:focus{outline:none;border-color:var(--amber);}
   .pill{font-family:var(--mono);font-size:11.5px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:6px 12px;background:var(--panel);white-space:nowrap;}
   .pill b{color:var(--green);font-weight:500;}
   a.home{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:6px 13px;background:var(--panel);transition:all .14s ease;}
@@ -173,22 +177,25 @@
   .d1{animation-delay:.04s;}.d2{animation-delay:.12s;}.d3{animation-delay:.2s;}
   .hidden{display:none !important;}
 </style>
+<script src="translations.js"></script>
+<script src="i18n.js"></script>
 </head>
-<body>
+<body data-page="codex">
 <div class="wrap">
 
   <header class="top fade d1">
     <div class="brand">
       <div class="glyph"><span class="chev">&gt;</span></div>
       <div>
-        <h1>codex <b>config</b> forge</h1>
-        <p>// byok profile generator for the openai codex cli</p>
+        <h1 data-i18n-html="codex.brandTitle">codex <b>config</b> forge</h1>
+        <p data-i18n="codex.brandSubtitle">// byok profile generator for the openai codex cli</p>
       </div>
     </div>
     <div class="meta">
-      <span class="pill"><b>responses</b> api</span>
-      <span class="pill">~/.codex/&lt;profile&gt;.config.toml</span>
-      <a class="home" href="index.html">⊞ all tools</a>
+      <div id="langSwitcher"></div>
+      <span class="pill" data-i18n-html="codex.metaResponses"><b>responses</b> api</span>
+      <span class="pill" data-i18n-html="codex.metaConfigPath">~/.codex/&lt;profile&gt;.config.toml</span>
+      <a class="home" href="index.html" data-i18n="codex.home">⊞ all tools</a>
     </div>
   </header>
 
@@ -199,7 +206,7 @@
       <div class="pad">
 
         <div class="field">
-          <div class="section-h"><span class="n">01</span><h2>provider</h2><span class="hint">responses-api only</span></div>
+          <div class="section-h"><span class="n">01</span><h2 data-i18n="codex.sectionProvider">provider</h2><span class="hint" data-i18n="codex.sectionProviderHint">responses-api only</span></div>
           <div class="providers" id="providers"></div>
           <div class="hintline" id="provHint" style="margin-top:11px;"></div>
           <div class="crosslink">↪ Need a <b>Chat-Completions-only</b> provider (Mistral, DeepSeek, Anthropic, Gemini…)? Codex speaks the Responses API only — spin up a proxy with the <a href="litellm.html">LiteLLM Config Forge</a>, then add it here as a <b>Custom</b> provider.</div>
@@ -208,7 +215,7 @@
         <div class="divider"></div>
 
         <div class="field">
-          <div class="section-h"><span class="n">02</span><h2>model</h2><span class="hint" id="modelHint"></span></div>
+          <div class="section-h"><span class="n">02</span><h2 data-i18n="codex.sectionModel">model</h2><span class="hint" id="modelHint"></span></div>
           <label class="lbl" for="model" id="modelLbl">model <span class="req">*</span></label>
           <input type="text" id="model" list="modelList" autocomplete="off" spellcheck="false" />
           <datalist id="modelList"></datalist>
@@ -232,32 +239,32 @@
 
         <!-- provider details -->
         <div class="field" id="providerDetails">
-          <div class="section-h"><span class="n">03</span><h2>provider details</h2><span class="hint" id="provKind"></span></div>
+          <div class="section-h"><span class="n">03</span><h2 data-i18n="codex.sectionProviderDetails">provider details</h2><span class="hint" id="provKind"></span></div>
 
           <div class="field" id="providerIdField">
-            <label class="lbl" for="providerId">provider id <span class="tag">[model_providers.&lt;id&gt;]</span></label>
+            <label class="lbl" for="providerId" id="providerIdLbl">provider id <span class="tag">[model_providers.&lt;id&gt;]</span></label>
             <input type="text" id="providerId" autocomplete="off" spellcheck="false" />
           </div>
 
           <div class="field" id="resourceField">
-            <label class="lbl" for="resource">Azure resource <span class="req">*</span></label>
+            <label class="lbl" for="resource" id="resourceLbl">Azure resource <span class="req">*</span></label>
             <input type="text" id="resource" value="my-resource" autocomplete="off" spellcheck="false" />
             <div class="hintline">→ <b id="azureUrlPreview"></b></div>
           </div>
 
           <div class="field" id="baseUrlField">
-            <label class="lbl" for="baseUrl">base_url <span class="req">*</span></label>
+            <label class="lbl" for="baseUrl" id="baseUrlLbl">base_url <span class="req">*</span></label>
             <input type="text" id="baseUrl" autocomplete="off" spellcheck="false" />
             <div class="hintline" id="baseUrlHint"></div>
           </div>
 
           <div class="field" id="apiVersionField">
-            <label class="lbl" for="apiVersion">api-version <span class="tag">azure query param</span></label>
+            <label class="lbl" for="apiVersion" id="apiVersionLbl">api-version <span class="tag">azure query param</span></label>
             <input type="text" id="apiVersion" value="2025-04-01-preview" autocomplete="off" spellcheck="false" />
           </div>
 
           <div class="field" id="envField">
-            <label class="lbl" for="envKey">env_key <span class="tag">name of env var holding the key</span></label>
+            <label class="lbl" for="envKey" id="envKeyLbl">env_key <span class="tag">name of env var holding the key</span></label>
             <div class="adorn"><span class="pre">$</span><input type="text" id="envKey" autocomplete="off" spellcheck="false" placeholder="OPENAI_API_KEY" /></div>
             <div class="hintline">Codex reads the key from this env var at runtime — <b>export</b> it in your shell. The key itself is never written to disk.</div>
           </div>
@@ -267,38 +274,38 @@
 
         <!-- profile + launch -->
         <div class="field">
-          <div class="section-h"><span class="n">04</span><h2>profile &amp; launch</h2></div>
+          <div class="section-h"><span class="n">04</span><h2 data-i18n="codex.sectionProfileLaunch">profile &amp; launch</h2></div>
           <div class="row2">
             <div>
-              <label class="lbl" for="profileName">profile name <span class="req">*</span></label>
+              <label class="lbl" for="profileName" id="profileNameLbl">profile name <span class="req">*</span></label>
               <input type="text" id="profileName" autocomplete="off" spellcheck="false" />
               <div class="hintline">→ <b id="profilePath"></b></div>
             </div>
             <div>
-              <label class="lbl">reasoning summary</label>
+              <label class="lbl" id="summaryLbl">reasoning summary</label>
               <div class="seg cyan" id="summarySeg">
-                <button data-sm="omit" class="on">omit</button>
-                <button data-sm="concise">concise</button>
-                <button data-sm="detailed">detailed</button>
+                <button data-sm="omit" class="on" data-i18n="codex.omit">omit</button>
+                <button data-sm="concise" data-i18n="codex.concise">concise</button>
+                <button data-sm="detailed" data-i18n="codex.detailed">detailed</button>
               </div>
             </div>
           </div>
         </div>
 
         <div class="field">
-          <label class="lbl">approval_policy</label>
+          <label class="lbl" id="approvalLbl">approval_policy</label>
           <div class="seg" id="approvalSeg" style="margin-bottom:14px;">
-            <button data-ap="untrusted">untrusted</button>
-            <button data-ap="on-request" class="on">on-request</button>
-            <button data-ap="never">never</button>
+            <button data-ap="untrusted" data-i18n="codex.untrusted">untrusted</button>
+            <button data-ap="on-request" class="on" data-i18n="codex.onRequest">on-request</button>
+            <button data-ap="never" data-i18n="codex.never">never</button>
           </div>
-          <label class="lbl">sandbox_mode</label>
+          <label class="lbl" id="sandboxLbl">sandbox_mode</label>
           <div class="seg red" id="sandboxSeg" style="margin-bottom:14px;">
-            <button data-sb="read-only">read-only</button>
-            <button data-sb="workspace-write" class="on">workspace-write</button>
-            <button data-sb="danger-full-access">danger-full-access</button>
+            <button data-sb="read-only" data-i18n="codex.readOnly">read-only</button>
+            <button data-sb="workspace-write" class="on" data-i18n="codex.workspaceWrite">workspace-write</button>
+            <button data-sb="danger-full-access" data-i18n="codex.dangerFullAccess">danger-full-access</button>
           </div>
-          <label class="check danger">
+          <label class="check danger" id="yoloLabel">
             <input type="checkbox" id="yolo" checked />
             <span class="ctxt">--yolo<span>add to launch command — alias for --dangerously-bypass-approvals-and-sandbox (skips approvals &amp; sandbox).</span></span>
           </label>
@@ -314,7 +321,7 @@
 
       <!-- provider block / builtin note -->
       <div>
-        <p class="out-label">① provider block · append to <span class="path">~/.codex/config.toml</span></p>
+        <p class="out-label" id="providerBlockLabel">① provider block · append to <span class="path">~/.codex/config.toml</span></p>
         <div id="providerBlockWrap">
           <div class="term">
             <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">~/.codex/<b>config.toml</b></span></div>
@@ -329,7 +336,7 @@
 
       <!-- profile file -->
       <div>
-        <p class="out-label">② profile file <span class="path" id="profileLabelPath"></span></p>
+        <p class="out-label" id="profileFileLabel">② profile file <span class="path" id="profileLabelPath"></span></p>
         <div class="term">
           <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl" id="profileTtl"></span></div>
           <pre id="profileOut"></pre>
@@ -342,7 +349,7 @@
 
       <!-- launch -->
       <div>
-        <p class="out-label">③ launch</p>
+        <p class="out-label" id="launchLabel">③ launch</p>
         <div class="term">
           <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">~ <b>terminal</b></span></div>
           <pre id="launchOut"></pre>
@@ -355,7 +362,7 @@
     </div>
   </div>
 
-  <footer>
+  <footer id="footer">
     <div><b>Codex Config Forge</b> · generates <span style="color:var(--amber)">~/.codex/&lt;profile&gt;.config.toml</span> BYOK profiles for the OpenAI Codex CLI</div>
     <div class="disc">Codex speaks the <b>Responses API</b> only (<code style="color:var(--amber)">wire_api = "chat"</code> was removed) — providers must expose <code style="color:var(--amber)">/v1/responses</code> (OpenAI, Azure, Ollama ≥0.9, LM Studio ≥0.3, Groq, vLLM, OpenRouter, xAI). Chat-only providers need a proxy — see the <a href="litellm.html">LiteLLM Config Forge</a>. Model names &amp; defaults are best-effort for mid-2026; verify with <b>codex --help</b>. Keys stay in your env, never on disk.</div>
   </footer>
@@ -544,8 +551,8 @@ function renderProviders(){
   const p = provider();
   $("provHint").className = "hintline" + (p.beta ? " warn" : "");
   $("provHint").innerHTML = p.beta
-    ? `⚠ <b>${p.name}</b>'s Responses API is in beta — verify it serves <b>/v1/responses</b>.`
-    : `<b>${p.name}</b> speaks the Responses API directly — no proxy needed.`;
+    ? t("codex.providerHintBeta", { provider: p.name })
+    : t("codex.providerHintDirect", { provider: p.name });
 }
 
 function renderModelList(){
@@ -556,14 +563,15 @@ function renderModelList(){
 function renderEffort(){
   const seg = $("effortSeg"); seg.innerHTML = "";
   EFFORTS.forEach(e => {
-    const b = document.createElement("button"); b.type="button"; b.textContent=e;
+    const label = e === "omit" ? t("codex.omit") : (t(`codex.${e}`) || e);
+    const b = document.createElement("button"); b.type="button"; b.textContent=label;
     b.className = state.effort===e ? "on" : "";
     b.addEventListener("click", () => { state.effort=e; renderEffort(); refresh(); });
     seg.appendChild(b);
   });
   $("effortHint").innerHTML = state.effort==="omit"
-    ? `<b>model_reasoning_effort</b> omitted. Add it for o-series / GPT-5 reasoning models.`
-    : `Sets <b>model_reasoning_effort = "${state.effort}"</b> (ignored by non-reasoning models).`;
+    ? t("codex.effortHintOmit")
+    : t("codex.effortHintSet", { effort: state.effort });
 }
 
 function renderConditional(){
@@ -573,7 +581,7 @@ function renderConditional(){
   $("deploymentField").classList.toggle("hidden", !p.modelIsDeployment);
   if(p.modelIsDeployment) $("deployment").value = state.deployment;
 
-  $("provKind").textContent = builtin ? "built-in · no block" : "custom · emits block";
+  $("provKind").textContent = builtin ? t("codex.providerKindBuiltin") : t("codex.providerKindCustom");
   $("providerIdField").classList.toggle("hidden", builtin);
   $("resourceField").classList.toggle("hidden", !p.needsResource);
   $("baseUrlField").classList.toggle("hidden", builtin || p.needsResource);
@@ -583,7 +591,7 @@ function renderConditional(){
   if(!builtin){
     $("providerId").value = state.providerIdField;
     $("baseUrl").value = state.baseUrl;
-    $("baseUrlHint").innerHTML = p.custom ? `Must serve <b>/v1/responses</b> (e.g. a LiteLLM proxy).` : `Editable if your endpoint differs.`;
+    $("baseUrlHint").innerHTML = p.custom ? t("codex.providerHintCustom") : t("codex.providerHintEditable");
     if(p.needsResource) $("azureUrlPreview").textContent = baseUrl();
     if(p.keyRequired) $("envKey").value = state.envKey;
   }
@@ -592,10 +600,14 @@ function renderConditional(){
   if(block === null){
     $("providerBlockWrap").classList.add("hidden");
     $("builtinNote").classList.remove("hidden");
-    $("builtinNote").innerHTML = "✓ " + p.note;
+    $("builtinNote").innerHTML = t("codex.providerBuiltInNote", { note: p.note });
   } else {
     $("providerBlockWrap").classList.remove("hidden");
     $("builtinNote").classList.add("hidden");
+  }
+
+  if(p.modelIsDeployment && $("deploymentField").querySelector(".hintline")){
+    $("deploymentField").querySelector(".hintline").innerHTML = t("codex.deploymentHint");
   }
 
   reflect("approvalSeg","ap",state.approval);
@@ -609,18 +621,18 @@ function reflect(segId, attr, val){
 function renderModelMeta(){
   const km = knownModel();
   $("modelMeta").innerHTML = km
-    ? `known model · suggested effort <b>${km.eff==="omit"?"none":km.eff}</b>`
-    : `custom model id — type any slug your provider serves`;
-  $("modelHint").textContent = provider().models.length + " presets";
+    ? t("codex.modelMeta", { effort: km.eff==="omit"?"none":km.eff })
+    : t("codex.modelMetaCustom");
+  $("modelHint").textContent = t("codex.modelCount", { count: provider().models.length });
 }
 
 function renderSummaryChips(){
   const sum = $("summary"); sum.innerHTML = "";
   const p = provider();
   const chips = [
-    ["provider", p.kind==="builtin"?p.providerId:providerIdStr()],
-    ["model", modelString()],
-    ["sandbox", state.sandbox],
+    [t("codex.sectionProvider"), p.kind==="builtin"?p.providerId:providerIdStr()],
+    [t("codex.sectionModel"), modelString()],
+    [t("codex.labelSandboxMode"), state.sandbox],
   ];
   if(state.effort!=="omit") chips.push(["effort", state.effort]);
   chips.forEach(([k,v])=>{ const c=document.createElement("span"); c.className="chip"; c.innerHTML=`${k} <b>${v}</b>`; sum.appendChild(c); });
@@ -628,10 +640,36 @@ function renderSummaryChips(){
 }
 
 function renderPaths(){
-  const path = `~/.codex/${state.profileName||"my-profile"}.config.toml`;
+  const path = t("codex.pathLabel", { profile: state.profileName||"my-profile" });
   $("profilePath").textContent = path;
   $("profileLabelPath").textContent = path;
   $("profileTtl").innerHTML = `~/.codex/<b>${state.profileName||"my-profile"}.config.toml</b>`;
+}
+
+function renderLabels(){
+  const req = '<span class="req">*</span>';
+  $("modelLbl").innerHTML = `${t("codex.labelModel")} ${req}`;
+  const deploymentLabel = $("deploymentField") && $("deploymentField").querySelector("label");
+  if(deploymentLabel) deploymentLabel.innerHTML = `${t("codex.labelDeployment")} ${req}`;
+  $("providerIdLbl").innerHTML = `${t("codex.labelProviderId")} <span class="tag">[model_providers.&lt;id&gt;]</span>`;
+  $("resourceLbl").innerHTML = `${t("codex.labelAzureResource")} ${req}`;
+  $("baseUrlLbl").innerHTML = `${t("codex.labelBaseUrl")} ${req}`;
+  $("apiVersionLbl").innerHTML = `${t("codex.labelApiVersion")} <span class="tag">${t("codex.apiVersionTag")}</span>`;
+  $("envKeyLbl").innerHTML = `${t("codex.labelEnvKey")} <span class="tag">${t("codex.envKeyTag")}</span>`;
+  $("profileNameLbl").innerHTML = `${t("codex.labelProfileName")} ${req}`;
+  $("summaryLbl").textContent = t("codex.labelReasoningSummary");
+  $("approvalLbl").textContent = t("codex.labelApprovalPolicy");
+  $("sandboxLbl").textContent = t("codex.labelSandboxMode");
+  const yoloText = $("yoloLabel").querySelector(".ctxt");
+  if(yoloText) yoloText.innerHTML = `${t("codex.labelYolo")}<span>${t("codex.yoloHint")}</span>`;
+  $("providerBlockLabel").innerHTML = `${t("codex.providerBlock")} <span class="path">~/.codex/config.toml</span>`;
+  $("profileFileLabel").innerHTML = `${t("codex.profileFile")} <span class="path" id="profileLabelPath"></span>`;
+  $("launchLabel").textContent = t("codex.launch");
+  $("copyProviderBtn").textContent = t("codex.copyProvider");
+  $("copyProfileBtn").textContent = t("codex.copyProfile");
+  $("copyLaunchBtn").textContent = t("codex.copyLaunch");
+  $("downloadBtn").innerHTML = t("codex.downloadProfile");
+  $("toast").textContent = t("codex.copiedToast");
 }
 
 function refresh(){
@@ -641,8 +679,9 @@ function refresh(){
   $("profileOut").innerHTML = hlToml(prof); $("profileOut").dataset.raw = prof;
   const launch = genLaunch();
   $("launchOut").innerHTML = hlShell(launch); $("launchOut").dataset.raw = launch;
-  renderSummaryChips(); renderModelMeta(); renderPaths();
+  renderSummaryChips(); renderModelMeta(); renderPaths(); renderLabels();
   if(provider().needsResource) $("azureUrlPreview").textContent = baseUrl();
+  if(window.I18NEngine && window.I18NEngine.applyTranslations) window.I18NEngine.applyTranslations(document.body);
 }
 
 /* =========================================================================
@@ -713,6 +752,8 @@ function bind(){
    INIT
    ========================================================================= */
 function init(){
+  if(window.I18NEngine) window.I18NEngine.init({ page:"codex", titleKey:"codex.title" });
+  document.addEventListener("i18n:changed", function () { refresh(); });
   renderProviders(); renderModelList(); renderEffort(); renderConditional(); bind();
   $("model").value = state.model;
   $("profileName").value = state.profileName;

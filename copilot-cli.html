@@ -47,9 +47,10 @@
     --violet:#b48ead;
     --red:#ff6a6a;
     --radius:14px;
-    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
-    --display:'Martian Mono',var(--mono);
-    --sans:'IBM Plex Sans',system-ui,sans-serif;
+    --cjk:'';
+    --mono:'JetBrains Mono',var(--cjk),ui-monospace,SFMono-Regular,Menlo,monospace;
+    --display:'Martian Mono',var(--cjk),var(--mono);
+    --sans:'IBM Plex Sans',var(--cjk),system-ui,sans-serif;
   }
 
   *{box-sizing:border-box;}
@@ -121,6 +122,10 @@
   .pill b{color:var(--green);font-weight:500;}
   a.home{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:6px 13px;background:var(--panel);white-space:nowrap;transition:all .14s ease;}
   a.home:hover{color:var(--amber);border-color:var(--amber-line);}
+  .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .lang-switch{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+  .lang-switch .lang-select{appearance:none;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:6px 28px 6px 12px;font-family:var(--mono);font-size:11px;outline:none;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 16px) 11px,calc(100% - 11px) 11px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;}
+  .lang-switch .lang-select:focus{border-color:var(--amber-line);box-shadow:0 0 0 2px var(--amber-soft);}
   a.gh{color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--muted-2);}
   a.gh:hover{color:var(--amber);border-color:var(--amber);}
 
@@ -298,22 +303,25 @@
   .d1{animation-delay:.04s;} .d2{animation-delay:.12s;} .d3{animation-delay:.2s;}
   .hidden{display:none !important;}
 </style>
+<script src="translations.js"></script>
+<script src="i18n.js"></script>
 </head>
-<body>
+<body data-page="copilot">
 <div class="wrap">
 
   <header class="top fade d1">
     <div class="brand">
       <div class="glyph"><span class="chev">&gt;</span></div>
       <div>
-        <h1>copilot <b>alias</b> forge</h1>
-        <p>// byok launch-alias generator for the copilot cli</p>
+        <h1 data-i18n-html="copilot.brandTitle">copilot <b>alias</b> forge</h1>
+        <p data-i18n="copilot.brandSubtitle">// byok launch-alias generator for the copilot cli</p>
       </div>
     </div>
     <div class="meta">
-      <span class="pill"><b>14</b> providers</span>
-      <span class="pill"><b>shell</b> + powershell</span>
-      <a class="home" href="index.html">⊞ all tools</a>
+      <span class="pill"><b>14</b> <span data-i18n="copilot.metaProviders">providers</span></span>
+      <span class="pill"><b data-i18n="copilot.metaShellLabel">shell</b> <span data-i18n="copilot.metaShells">+ powershell</span></span>
+      <div id="langSwitcher"></div>
+      <a class="home" href="index.html" data-i18n="common.allTools">⊞ all tools</a>
     </div>
   </header>
 
@@ -326,8 +334,8 @@
         <!-- 01 provider -->
         <div class="field">
           <div class="section-h">
-            <span class="n">01</span><h2>provider</h2>
-            <span class="hint">sets type · base url · key</span>
+            <span class="n">01</span><h2 data-i18n="copilot.sectionProvider">provider</h2>
+            <span class="hint" data-i18n="copilot.sectionProviderHint">sets type · base url · key</span>
           </div>
           <div class="providers" id="providers"></div>
         </div>
@@ -336,7 +344,7 @@
 
         <!-- 02 model -->
         <div class="field">
-          <div class="section-h"><span class="n">02</span><h2>model</h2><span class="hint" id="modelHint"></span></div>
+          <div class="section-h"><span class="n">02</span><h2 data-i18n="copilot.sectionModel">model</h2><span class="hint" id="modelHint"></span></div>
           <label class="lbl" for="model">COPILOT_MODEL <span class="req">*</span></label>
           <select id="model"></select>
           <div class="hintline" id="modelMeta"></div>
@@ -346,14 +354,14 @@
         <div class="field hidden" id="azureFields">
           <div class="row2">
             <div>
-              <label class="lbl" for="resource">Azure resource <span class="req">*</span></label>
+              <label class="lbl" for="resource" data-i18n="copilot.labelAzureResource">Azure resource <span class="req">*</span></label>
               <input type="text" id="resource" value="my-resource" autocomplete="off" spellcheck="false" />
               <div class="hintline">→ <b id="azureUrlPreview"></b></div>
             </div>
             <div>
-              <label class="lbl" for="deployment">Deployment name <span class="req">*</span></label>
+              <label class="lbl" for="deployment" data-i18n="copilot.labelDeploymentName">Deployment name <span class="req">*</span></label>
               <input type="text" id="deployment" autocomplete="off" spellcheck="false" />
-              <div class="hintline">Used as <b>COPILOT_MODEL</b></div>
+              <div class="hintline" data-i18n="copilot.azureDeploymentNote">Used as <b>COPILOT_MODEL</b></div>
             </div>
           </div>
         </div>
@@ -371,53 +379,53 @@
             <span class="tag" id="keyReqTag"></span>
           </label>
           <div class="seg" id="keyMode" style="margin-bottom:10px;">
-            <button data-km="env" class="on">$ env reference</button>
-            <button data-km="literal">literal value</button>
+            <button data-km="env" class="on" data-i18n="copilot.labelKeyModeEnv">$ env reference</button>
+            <button data-km="literal" data-i18n="copilot.labelKeyModeLiteral">literal value</button>
           </div>
           <div id="keyEnvWrap" class="adorn">
             <span class="pre">$</span>
             <input type="text" id="keyEnv" autocomplete="off" spellcheck="false" placeholder="OPENAI_API_KEY" />
           </div>
           <input type="password" id="keyLiteral" class="hidden" autocomplete="off" spellcheck="false" placeholder="sk-..." />
-          <div class="hintline" id="keyHint">Recommended: reference an env var so your key never lands in shared dotfiles.</div>
+          <div class="hintline" id="keyHint" data-i18n="copilot.keyHint">Recommended: reference an env var so your key never lands in shared dotfiles.</div>
         </div>
 
         <div class="field hidden" id="keyNote">
-          <div class="hintline">🔓 <b id="keyNoteText">This provider runs locally and needs no API key.</b></div>
+          <div class="hintline">🔓 <b id="keyNoteText" data-i18n="copilot.keyNoteText">This provider runs locally and needs no API key.</b></div>
         </div>
 
         <div class="divider"></div>
 
         <!-- 03 tuning -->
         <div class="field">
-          <div class="section-h"><span class="n">03</span><h2>tuning</h2><span class="hint">prefilled from model</span></div>
+          <div class="section-h"><span class="n">03</span><h2 data-i18n="copilot.sectionTuning">tuning</h2><span class="hint" data-i18n="copilot.tuningHint">prefilled from model</span></div>
           <div class="row2">
             <div>
-              <label class="lbl" for="maxPrompt">MAX_PROMPT_TOKENS <span class="tag">context</span></label>
+              <label class="lbl" for="maxPrompt">MAX_PROMPT_TOKENS <span class="tag" data-i18n="copilot.tagContext">context</span></label>
               <input type="number" id="maxPrompt" min="1" />
             </div>
             <div>
-              <label class="lbl" for="maxOutput">MAX_OUTPUT_TOKENS <span class="tag">output</span></label>
+              <label class="lbl" for="maxOutput">MAX_OUTPUT_TOKENS <span class="tag" data-i18n="copilot.tagOutput">output</span></label>
               <input type="number" id="maxOutput" min="1" />
             </div>
           </div>
-          <div class="hintline">Optional but recommended — explicit limits prevent silent context truncation or a wrong output cap.</div>
+          <div class="hintline" data-i18n="copilot.tuningHelp">Optional but recommended — explicit limits prevent silent context truncation or a wrong output cap.</div>
         </div>
 
         <!-- wire api -->
         <div class="field">
           <label class="lbl">COPILOT_PROVIDER_WIRE_API <span class="tag" id="wireAuto"></span></label>
           <div class="seg cyan" id="wireMode">
-            <button data-w="auto" class="on">auto</button>
-            <button data-w="responses">responses</button>
-            <button data-w="completions">completions</button>
+            <button data-w="auto" class="on" data-i18n="copilot.wireAuto">auto</button>
+            <button data-w="responses" data-i18n="copilot.wireResponses">responses</button>
+            <button data-w="completions" data-i18n="copilot.wireCompletions">completions</button>
           </div>
           <div class="hintline" id="wireHint"></div>
         </div>
 
         <!-- effort -->
         <div class="field" id="effortField">
-          <label class="lbl">reasoning effort <span class="tag">--effort flag</span></label>
+          <label class="lbl" data-i18n="copilot.labelReasoningEffort">reasoning effort <span class="tag" data-i18n="copilot.effortFlag">--effort flag</span></label>
           <div class="seg green" id="effortSeg"></div>
           <div class="hintline" id="effortHint"></div>
         </div>
@@ -426,40 +434,40 @@
 
         <!-- 04 launch -->
         <div class="field">
-          <div class="section-h"><span class="n">04</span><h2>launch &amp; output</h2></div>
+          <div class="section-h"><span class="n">04</span><h2 data-i18n="copilot.sectionLaunchOutput">launch &amp; output</h2></div>
           <div class="row2">
             <div>
-              <label class="lbl" for="aliasName">alias / function name <span class="req">*</span></label>
+              <label class="lbl" for="aliasName" data-i18n="copilot.labelAliasName">alias / function name <span class="req">*</span></label>
               <input type="text" id="aliasName" value="cc" autocomplete="off" spellcheck="false" />
             </div>
             <div>
-              <label class="lbl">shape</label>
+              <label class="lbl" data-i18n="copilot.labelShape">shape</label>
               <div class="seg" id="kindSeg">
-                <button data-k="alias" class="on">alias</button>
-                <button data-k="function">function</button>
+                <button data-k="alias" class="on" data-i18n="copilot.kindAlias">alias</button>
+                <button data-k="function" data-i18n="copilot.kindFunction">function</button>
               </div>
             </div>
           </div>
         </div>
 
         <div class="field">
-          <label class="lbl">target shell</label>
+          <label class="lbl" data-i18n="copilot.labelTargetShell">target shell</label>
           <div class="seg" id="shellSeg" style="margin-bottom:14px;">
-            <button data-s="bash" class="on">shell · bash/zsh</button>
-            <button data-s="powershell">powershell</button>
+            <button data-s="bash" class="on" data-i18n="copilot.shellBash">shell · bash/zsh</button>
+            <button data-s="powershell" data-i18n="copilot.shellPwsh">powershell</button>
           </div>
           <div style="display:flex;flex-direction:column;gap:10px;">
             <label class="check danger">
               <input type="checkbox" id="yolo" checked />
-              <span class="ctxt">--yolo<span>enable all permissions (tools + paths + urls). use with care.</span></span>
+              <span class="ctxt" data-i18n-html="copilot.checkYolo">--yolo<span>enable all permissions (tools + paths + urls). use with care.</span></span>
             </label>
             <label class="check">
               <input type="checkbox" id="offline" />
-              <span class="ctxt">COPILOT_OFFLINE=true<span>block all calls to GitHub (air-gapped / local provider only).</span></span>
+              <span class="ctxt" data-i18n-html="copilot.checkOffline">COPILOT_OFFLINE=true<span>block all calls to GitHub (air-gapped / local provider only).</span></span>
             </label>
             <label class="check hidden" id="psCleanupRow">
               <input type="checkbox" id="psCleanup" checked />
-              <span class="ctxt">restore env after run<span>try/finally cleanup so vars don't leak into your PowerShell session.</span></span>
+              <span class="ctxt" data-i18n-html="copilot.checkCleanup">restore env after run<span>try/finally cleanup so vars don't leak into your PowerShell session.</span></span>
             </label>
           </div>
         </div>
@@ -489,11 +497,11 @@
 
       <div class="card">
         <div class="pad">
-          <div class="section-h"><span class="n">★</span><h2>collection</h2><span class="hint" id="collCount">0 aliases</span></div>
+          <div class="section-h"><span class="n">★</span><h2 data-i18n="copilot.collectionTitle">collection</h2><span class="hint" id="collCount">0 aliases</span></div>
           <div id="collList"></div>
           <div style="display:flex;gap:10px;margin-top:6px;">
-            <button class="btn primary flex" id="copyAllBtn">⧉ copy all</button>
-            <button class="btn ghost" id="clearBtn">clear</button>
+            <button class="btn primary flex" id="copyAllBtn" data-i18n="copilot.copyAll">⧉ copy all</button>
+            <button class="btn ghost" id="clearBtn" data-i18n="copilot.clearAll">clear</button>
           </div>
         </div>
       </div>
@@ -508,7 +516,9 @@
 </div>
 
 <div class="toast" id="toast">copied ✓</div>
-
+<script>
+window.I18NEngine.init({page:'copilot', titleKey:'copilot.title', onChange: function(){}});
+</script>
 <script>
 "use strict";
 

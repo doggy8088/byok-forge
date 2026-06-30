@@ -26,6 +26,15 @@ open index.html      # macOS
 Each tool is a self-contained HTML file; you can also open `copilot-cli.html`,
 `codex-cli.html`, or `litellm.html` directly, or host the folder on any static web server.
 
+## Internationalization
+
+The UI is available in Traditional Chinese, Simplified Chinese, Japanese, Korean, Vietnamese,
+Thai, English, Indonesian, German, French, and Spanish. The language switcher sits in the
+upper-right corner of each page, remembers your choice in `localStorage`, auto-detects the
+browser language on first visit, and falls back to Traditional Chinese. The CJK/Thai fonts use
+open-source Noto Sans families so Chinese/Japanese/Korean/Thai text renders cleanly while the
+existing Latin font stack stays unchanged.
+
 ---
 
 ## copilot-cli.html — Copilot Alias Forge
