@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>Cursor BYOK Forge — generate Cursor settings</title>
+<meta name="description" data-i18n-attr="content:cursor.metaDescription" content="Generate BYOK-oriented Cursor settings snippets with provider presets, model hints, and key references." />
+<link rel="canonical" href="https://byok-forge.gh.miniasp.com/cursor.html" />
+<meta name="robots" content="index, follow" />
+<meta name="keywords" content="Cursor, BYOK, settings.json, OpenAI-compatible, API key, model" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="BYOK Forge" />
+<meta name="og:title" data-i18n-attr="content:cursor.metaTitle" content="Cursor BYOK Forge — generate Cursor settings" />
+<meta name="og:description" data-i18n-attr="content:cursor.metaDescription" content="Generate BYOK-oriented Cursor settings snippets with provider presets, model hints, and key references." />
+<meta property="og:url" content="https://byok-forge.gh.miniasp.com/cursor.html" />
+<meta property="og:image" content="https://byok-forge.gh.miniasp.com/og-image.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" data-i18n-attr="content:cursor.metaTitle" content="Cursor BYOK Forge — generate Cursor settings" />
+<meta name="twitter:description" data-i18n-attr="content:cursor.metaDescription" content="Generate BYOK-oriented Cursor settings snippets with provider presets, model hints, and key references." />
+<meta name="twitter:image" content="https://byok-forge.gh.miniasp.com/og-image.jpg" />
+<script src="translations.js?v=20260630"></script>
+<script src="i18n.js?v=20260630"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Martian+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0b0e;
+    --bg-2: #0e1015;
+    --panel: #13151c;
+    --panel-2: #171a22;
+    --panel-3: #1c2029;
+    --border: #262b37;
+    --border-2: #323848;
+    --text: #e9e7e0;
+    --muted: #888e9d;
+    --muted-2: #5d636f;
+    --amber: #ffb454;
+    --amber-soft: rgba(255, 180, 84, 0.14);
+    --amber-line: rgba(255, 180, 84, 0.4);
+    --green: #74e0a0;
+    --cyan: #56b6c2;
+    --violet: #b48ead;
+    --red: #ff6a6a;
+    --radius: 14px;
+    --mono: 'JetBrains Mono', var(--cjk), ui-monospace, SFMono-Regular, Menlo, monospace;
+    --display: 'Martian Mono', var(--cjk), var(--mono);
+    --sans: 'IBM Plex Sans', var(--cjk), system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(900px 500px at 12% -8%, rgba(255, 180, 84, .10), transparent 60%),
+      radial-gradient(820px 520px at 100% 0%, rgba(92, 182, 194, .07), transparent 55%),
+      radial-gradient(700px 700px at 80% 110%, rgba(116, 224, 160, .05), transparent 60%);
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: .5;
+    background-image: linear-gradient(transparent 0 31px, rgba(255,255,255,.018) 31px 32px),
+      linear-gradient(90deg, transparent 0 31px, rgba(255,255,255,.018) 31px 32px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(circle at 50% 30%, #000 0%, transparent 85%);
+  }
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  header.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 30px 0 26px;
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .brand .glyph {
+    width: 54px;
+    height: 54px;
+    flex: none;
+    border-radius: 13px;
+    background: linear-gradient(145deg, #1d2029, #10131a);
+    border: 1px solid var(--border-2);
+    display: grid;
+    place-items: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 8px 24px -12px rgba(255,180,84,.5);
+    position: relative;
+    overflow: hidden;
+  }
+  .brand .glyph::after {
+    content: "_";
+    color: var(--amber);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 26px;
+    animation: blink 1.1s steps(1) infinite;
+    line-height: 1;
+    margin-top: -6px;
+  }
+  .brand .glyph .chev {
+    position: absolute;
+    color: var(--green);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 20px;
+    left: 9px;
+    top: 13px;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  .brand h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 800;
+    letter-spacing: -.04em;
+    font-size: 23px;
+    line-height: 1.05;
+    text-transform: lowercase;
+  }
+  .brand h1 b { color: var(--amber); font-weight: 800; }
+  .brand p {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: 12.5px;
+    font-family: var(--mono);
+    letter-spacing: .01em;
+  }
+
+  .meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .meta a.home {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 13px;
+    background: var(--panel);
+    transition: all .14s ease;
+  }
+  .meta a.home:hover { color: var(--text); border-color: var(--amber-line); }
+
+  #langSwitcher { display: inline-flex; align-items: center; }
+  #langSwitcher select {
+    appearance: none;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 999px;
+    padding: 6px 10px;
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    line-height: 1;
+  }
+  #langSwitcher select:focus { outline: none; border-color: var(--amber-line); }
+
+  .panel {
+    background: linear-gradient(180deg, var(--panel), var(--bg-2));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 24px 60px -40px rgba(0, 0, 0, .9);
+  }
+  .pad { padding: 22px 22px 24px; }
+
+  .grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 26px; align-items: start; }
+  @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+
+  .left-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .section-h {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0 0 16px;
+  }
+  .section-h .n {
+    font-family: var(--mono);
+    color: var(--amber);
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid var(--amber-line);
+    background: var(--amber-soft);
+    border-radius: 7px;
+    padding: 2px 8px;
+    letter-spacing: .05em;
+  }
+  .section-h h2 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -.02em;
+    text-transform: lowercase;
+  }
+  .section-h .hint {
+    margin-left: auto;
+    color: var(--muted-2);
+    font-size: 11.5px;
+    font-family: var(--mono);
+  }
+
+  .field { margin-bottom: 20px; }
+  .field:last-child { margin-bottom: 0; }
+  .lbl {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin-bottom: 9px;
+    font-family: var(--mono);
+  }
+  .row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
+
+  input[type='text'], select {
+    width: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    border: 1px solid var(--border-2);
+    border-radius: 9px;
+    padding: 10px 11px;
+    outline: none;
+    transition: border-color .14s ease, box-shadow .14s ease;
+  }
+  input:focus, select:focus { border-color: var(--amber-line); box-shadow: 0 0 0 3px var(--amber-soft); }
+  select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 16px) 17px, calc(100% - 11px) 17px; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+
+  .check-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  input[type='checkbox'] { margin: 0; transform: translateY(-1px); }
+
+  .descline {
+    margin-top: 7px;
+    font-size: 11.5px;
+    color: var(--muted-2);
+    font-family: var(--mono);
+    line-height: 1.45;
+  }
+  .descline b { color: var(--cyan); }
+
+  .warn {
+    margin: 12px 0 0;
+    padding: 9px 11px;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 10px;
+    background: rgba(255,255,255,.02);
+    color: var(--muted-2);
+    font-size: 11.5px;
+    font-family: var(--mono);
+    line-height: 1.5;
+  }
+  .warn b { color: var(--yellow, #ffd166); font-weight: 600; }
+
+  .out-col { position: sticky; top: 18px; display: flex; flex-direction: column; gap: 16px; }
+  @media (max-width: 980px) { .out-col { position: static; } }
+
+  .out-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted-2);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .out-label .path {
+    color: var(--amber);
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: var(--mono);
+  }
+
+  .term {
+    background: #08090c;
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 30px 70px -40px rgba(0,0,0,1), inset 0 0 0 1px rgba(255,255,255,.02);
+  }
+  .term .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 14px;
+    background: #0d0f14;
+    border-bottom: 1px solid var(--border);
+  }
+  .term .bar .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .term .bar .dot.r { background: #ff5f57; }
+  .term .bar .dot.y { background: #febc2e; }
+  .term .bar .dot.g { background: #28c840; }
+  .term .bar .ttl { margin-left: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  pre {
+    margin: 0;
+    padding: 14px;
+    max-height: 42vh;
+    overflow: auto;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #cfd3da;
+    overflow-x: auto;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+    background: #0d0f14;
+  }
+  .btn {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    font-weight: 600;
+    border-radius: 9px;
+    padding: 10px 15px;
+    cursor: pointer;
+    border: 1px solid var(--border-2);
+    background: var(--panel-2);
+    color: var(--text);
+    transition: all .14s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn:hover { border-color: var(--border-2); background: var(--panel-3); transform: translateY(-1px); }
+  .btn.primary { background: var(--amber); border-color: var(--amber); color: #0a0b0e; }
+  .btn.primary:hover { box-shadow: 0 10px 26px -12px rgba(255, 180, 84, .8); }
+
+  footer {
+    margin-top: 28px;
+    text-align: center;
+    color: var(--muted-2);
+    font-size: 11.5px;
+    font-family: var(--mono);
+    padding: 10px 4px 2px;
+    line-height: 1.7;
+  }
+  footer b { color: var(--muted); font-weight: 500; }
+</style>
+</head>
+
+<body data-page="cursor">
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="glyph"><span class="chev">&gt;</span></div>
+      <div>
+        <h1 data-i18n-html="cursor.brandTitle">cursor <b>byok</b> forge</h1>
+        <p data-i18n="cursor.brandSubtitle">// byok settings helper for Cursor</p>
+      </div>
+    </div>
+    <div class="meta">
+      <div id="langSwitcher"></div>
+      <a class="home" href="index.html?v=20260630" data-i18n="common.allTools">⊞ all tools</a>
+    </div>
+  </header>
+
+  <main class="grid">
+    <div class="left-col">
+      <section class="panel">
+        <div class="pad">
+          <div class="section-h">
+            <span class="n">01</span>
+            <h2 data-i18n="cursor.sectionProvider">provider</h2>
+            <span class="hint" data-i18n="cursor.sectionProviderHint">preset and endpoint</span>
+          </div>
+
+          <div class="field">
+            <label class="lbl" for="preset" data-i18n="cursor.labelPreset">quick preset</label>
+            <select id="preset"></select>
+            <div class="descline" data-i18n-html="cursor.presetHint">Use presets to fill URL and key reference together.</div>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label class="lbl" for="providerId" data-i18n="cursor.labelProviderId">provider id</label>
+              <input id="providerId" type="text" />
+              <div class="descline" data-i18n-html="cursor.providerIdHint">Kept as metadata and shown in generated snippets.</div>
+            </div>
+            <div class="field">
+              <label class="lbl" for="baseURL" data-i18n="cursor.labelBaseUrl">base URL</label>
+              <input id="baseURL" type="text" />
+              <div class="descline" data-i18n-html="cursor.baseUrlHint">Typically a compatible endpoint like <b>/v1</b>.</div>
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label class="lbl" for="keyEnv" data-i18n="cursor.labelKeyEnv">api key environment variable</label>
+              <input id="keyEnv" type="text" />
+              <div class="descline" data-i18n-html="cursor.keyEnvHint">Generated references use this env name instead of a secret.</div>
+            </div>
+            <div class="field">
+              <label class="lbl" for="model" data-i18n="cursor.labelModel">model</label>
+              <input id="model" type="text" />
+              <div class="descline" data-i18n-html="cursor.modelHint">If your Cursor model list differs, adjust in Cursor settings UI.</div>
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label class="lbl" for="schema" data-i18n="cursor.labelSchema">settings schema</label>
+              <select id="schema"></select>
+              <div class="descline" data-i18n-html="cursor.schemaHint">Schema keys differ by Cursor version and install channel.</div>
+            </div>
+            <div class="field">
+              <label class="lbl" data-i18n="cursor.labelIncludeKey">include key reference</label>
+              <div class="check-row">
+                <input id="includeKey" type="checkbox" checked />
+                <span data-i18n="cursor.checkLabel">set <b>api key placeholder</b> in settings</span>
+              </div>
+              <div class="descline" data-i18n-html="cursor.keyRequiredHint">Uncheck if endpoint and model do not need an API key.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="pad">
+          <div class="section-h">
+            <span class="n">02</span>
+            <h2 data-i18n="cursor.sectionTarget">target</h2>
+            <span class="hint" data-i18n="cursor.sectionTargetHint">where to place settings</span>
+          </div>
+
+          <div class="field">
+            <label class="lbl" for="configPath" data-i18n="cursor.labelConfigPath">settings file path</label>
+            <input id="configPath" type="text" />
+            <div class="descline" data-i18n-html="cursor.configPathHint">Default path is platform-dependent; replace with your actual Cursor settings file path.</div>
+          </div>
+
+          <p class="warn" data-i18n-html="cursor.warning">Cursor settings schema varies by version. Verify fields in your local `settings.json` before restarting.</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="out-col">
+      <div class="panel">
+        <div class="pad">
+          <p class="out-label">
+            <span data-i18n="cursor.outSettings">settings.json</span>
+            <span class="path" id="configPathLabel"></span>
+          </p>
+          <div class="term">
+            <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">settings<b>.json</b></span></div>
+            <pre id="settingsOut"></pre>
+            <div class="actions">
+              <button class="btn primary" id="copySettingsBtn" data-i18n="cursor.copySettings">⧉ copy settings</button>
+              <button class="btn" id="downloadSettingsBtn" data-i18n="cursor.downloadSettings">⤓ download settings.json</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="pad">
+          <p class="out-label" data-i18n="cursor.outCommand">write command</p>
+          <div class="term">
+            <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">shell <b>command</b></span></div>
+            <pre id="runOut"></pre>
+            <div class="actions">
+              <button class="btn primary" id="copyRunBtn" data-i18n="cursor.copyCommand">⧉ copy commands</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer data-i18n-html="cursor.footer">Verify field names in your local Cursor settings before restart.</footer>
+
+</div>
+
+<script>
+(function () {
+  const PRESETS = [
+    {
+      value: "openai",
+      nameKey: "cursor.presetOpenAI",
+      providerId: "openai",
+      baseURL: "https://api.openai.com/v1",
+      keyEnv: "OPENAI_API_KEY",
+      model: "gpt-4.1",
+      includeKey: true,
+      schema: "cursor-general"
+    },
+    {
+      value: "openrouter",
+      nameKey: "cursor.presetOpenRouter",
+      providerId: "openrouter",
+      baseURL: "https://openrouter.ai/api/v1",
+      keyEnv: "OPENROUTER_API_KEY",
+      model: "openai/gpt-4.1",
+      includeKey: true,
+      schema: "openai-legacy"
+    },
+    {
+      value: "deepseek",
+      nameKey: "cursor.presetDeepSeek",
+      providerId: "deepseek",
+      baseURL: "https://api.deepseek.com/v1",
+      keyEnv: "DEEPSEEK_API_KEY",
+      model: "deepseek-chat",
+      includeKey: true,
+      schema: "cursor-aiprovider"
+    },
+    {
+      value: "ollama-cloud",
+      nameKey: "cursor.presetOllamaCloud",
+      providerId: "ollama-cloud",
+      baseURL: "https://ollama.deepinfra.com/v1",
+      keyEnv: "OLLAMA_API_KEY",
+      model: "llama-3.1",
+      includeKey: true,
+      schema: "cursor-general"
+    },
+    {
+      value: "custom",
+      nameKey: "cursor.presetCustom",
+      providerId: "",
+      baseURL: "",
+      keyEnv: "",
+      model: "",
+      includeKey: true,
+      schema: "cursor-general"
+    }
+  ];
+
+  const SCHEMAS = [
+    { value: "cursor-general", nameKey: "cursor.schemaCursorGeneral" },
+    { value: "openai-legacy", nameKey: "cursor.schemaOpenAi" },
+    { value: "cursor-aiprovider", nameKey: "cursor.schemaCursorAiprovider" }
+  ];
+
+  const DEFAULT_PATH = "~/.config/cursor/settings.json";
+
+  const state = {
+    preset: PRESETS[0].value,
+    providerId: PRESETS[0].providerId,
+    baseURL: PRESETS[0].baseURL,
+    keyEnv: PRESETS[0].keyEnv,
+    model: PRESETS[0].model,
+    includeKey: PRESETS[0].includeKey,
+    schema: PRESETS[0].schema,
+    configPath: DEFAULT_PATH
+  };
+
+  const $ = function (id) {
+    return document.getElementById(id);
+  };
+
+  const inputIds = ["preset", "providerId", "baseURL", "keyEnv", "model", "configPath", "schema", "includeKey"];
+
+  function renderSelectOptions() {
+    const presetSelect = $("preset");
+    const schemaSelect = $("schema");
+    if (!presetSelect || !schemaSelect) return;
+
+    const fragment = document.createDocumentFragment();
+    PRESETS.forEach(function (preset) {
+      const option = document.createElement("option");
+      option.value = preset.value;
+      option.textContent = t(preset.nameKey);
+      fragment.appendChild(option);
+    });
+    presetSelect.innerHTML = "";
+    presetSelect.appendChild(fragment);
+
+    const schemaFrag = document.createDocumentFragment();
+    SCHEMAS.forEach(function (schema) {
+      const option = document.createElement("option");
+      option.value = schema.value;
+      option.textContent = t(schema.nameKey);
+      schemaFrag.appendChild(option);
+    });
+    schemaSelect.innerHTML = "";
+    schemaSelect.appendChild(schemaFrag);
+
+    presetSelect.value = state.preset;
+    schemaSelect.value = state.schema;
+  }
+
+  function getPreset(value) {
+    for (var i = 0; i < PRESETS.length; i++) {
+      if (PRESETS[i].value === value) return PRESETS[i];
+    }
+    return PRESETS[PRESETS.length - 1];
+  }
+
+  function syncStateFromPreset() {
+    const preset = getPreset($("preset").value);
+    state.preset = preset.value;
+    if (state.preset !== "custom") {
+      state.providerId = preset.providerId;
+      state.baseURL = preset.baseURL;
+      state.keyEnv = preset.keyEnv;
+      state.model = preset.model;
+      state.includeKey = preset.includeKey;
+      state.schema = preset.schema;
+      state.configPath = state.configPath || DEFAULT_PATH;
+    }
+    syncInputValues();
+    render();
+  }
+
+  function syncInputValues() {
+    $("providerId").value = state.providerId;
+    $("baseURL").value = state.baseURL;
+    $("keyEnv").value = state.keyEnv;
+    $("model").value = state.model;
+    $("configPath").value = state.configPath;
+    $("schema").value = state.schema;
+    $("includeKey").checked = !!state.includeKey;
+    $("configPathLabel").textContent = state.configPath || DEFAULT_PATH;
+  }
+
+  function collectState() {
+    state.providerId = $("providerId").value.trim();
+    state.baseURL = $("baseURL").value.trim();
+    state.keyEnv = $("keyEnv").value.trim();
+    state.model = $("model").value.trim();
+    state.configPath = $("configPath").value.trim() || DEFAULT_PATH;
+    state.schema = $("schema").value;
+    state.includeKey = $("includeKey").checked;
+    $("configPathLabel").textContent = state.configPath;
+  }
+
+  function q(value) {
+    return JSON.stringify(String(value));
+  }
+
+  function buildSettingsJson() {
+    const base = state.baseURL || "";
+    const keyRef = "${" + state.keyEnv + "}";
+    const model = state.model || "";
+    const lines = [];
+
+    if (state.schema === "cursor-general") {
+      lines.push("  \"cursor.general.openAIBaseURL\": " + q(base));
+      if (state.includeKey && state.keyEnv) {
+        lines.push("  \"cursor.general.openAIAPIKey\": " + q(keyRef));
+      }
+      if (model) {
+        lines.push("  \"cursor.general.model\": " + q(model));
+      }
+      if (state.providerId) {
+        lines.push("  \"cursor.general.provider\": " + q(state.providerId));
+      }
+    }
+
+    if (state.schema === "openai-legacy") {
+      lines.push("  \"openAiBaseUrl\": " + q(base));
+      if (state.includeKey && state.keyEnv) {
+        lines.push("  \"openAiApiKey\": " + q(keyRef));
+      }
+      if (model) {
+        lines.push("  \"openAiModel\": " + q(model));
+      }
+      if (state.providerId) {
+        lines.push("  \"openAiProvider\": " + q(state.providerId));
+      }
+    }
+
+    if (state.schema === "cursor-aiprovider") {
+      lines.push("  \"cursor.aiprovider.openai.baseUrl\": " + q(base));
+      if (state.includeKey && state.keyEnv) {
+        lines.push("  \"cursor.aiprovider.openai.apiKey\": " + q(keyRef));
+      }
+      if (state.providerId) {
+        lines.push("  \"cursor.aiprovider.openai.provider\": " + q(state.providerId));
+      }
+      if (model) {
+        lines.push("  \"cursor.aiprovider.openai.model\": " + q(model));
+      }
+    }
+
+    if (!lines.length) {
+      return "{}\n";
+    }
+
+    return "{\n" + lines.join(",\n") + "\n}\n";
+  }
+
+  function buildRunText(settingsText) {
+    const path = state.configPath || DEFAULT_PATH;
+    const run = [];
+    run.push("# Write settings.json to Cursor configuration file");
+    run.push('cat <<\'JSON\' > "' + path + '"');
+    run.push(settingsText.replace(/\n$/, ""));
+    run.push("JSON");
+    run.push("");
+    run.push("# Restart Cursor to reload settings.");
+    if (state.includeKey && state.keyEnv) {
+      run.push("# Ensure env var is exported in your shell or launch profile before start:");
+      run.push('export ' + state.keyEnv + '="' + state.keyEnv + '_value"');
+    } else {
+      run.push("# No API key variable required for this preset.");
+    }
+    return run.join("\n") + "\n";
+  }
+
+  function copyTextFrom(id, fallbackMsgKey) {
+    const el = $(id);
+    if (!el) return;
+    const text = el.dataset && el.dataset.raw ? el.dataset.raw : el.textContent || "";
+    navigator.clipboard.writeText(text).then(function () {
+      const prev = $("copySettingsBtn") ? $("copySettingsBtn").textContent : "";
+      const label = t("common.copied") || fallbackMsgKey;
+      if (prev) {
+        const target = $("copySettingsBtn");
+        target.textContent = label;
+        setTimeout(function () {
+          target.textContent = t(fallbackMsgKey);
+        }, 900);
+      }
+    }).catch(function () {
+      window.alert("copy failed");
+    });
+  }
+
+  function download(filename, text) {
+    const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    a.remove();
+  }
+
+  function render() {
+    collectState();
+    const settingsText = buildSettingsJson();
+    const runText = buildRunText(settingsText);
+    $("settingsOut").textContent = settingsText;
+    $("settingsOut").dataset.raw = settingsText;
+    $("runOut").textContent = runText;
+    $("runOut").dataset.raw = runText;
+    $("copySettingsBtn").textContent = t("cursor.copySettings");
+    $("downloadSettingsBtn").textContent = t("cursor.downloadSettings");
+    $("copyRunBtn").textContent = t("cursor.copyCommand");
+    $("configPathLabel").textContent = state.configPath;
+  }
+
+  function bind() {
+    renderSelectOptions();
+    syncStateFromPreset();
+
+    $("preset").addEventListener("change", syncStateFromPreset);
+    $("schema").addEventListener("change", function () {
+      state.schema = $("schema").value;
+      render();
+    });
+
+    inputIds.forEach(function (id) {
+      const el = $(id);
+      if (!el) return;
+      el.addEventListener("input", function () {
+        if (id === "preset") return;
+        collectState();
+        if (id === "keyEnv" && state.preset !== "custom") {
+          var p = getPreset(state.preset);
+          p.keyEnv = state.keyEnv;
+        }
+        render();
+      });
+      el.addEventListener("change", function () {
+        if (id === "preset") return;
+        collectState();
+        if (id === "keyEnv" && state.preset !== "custom") {
+          var p = getPreset(state.preset);
+          p.keyEnv = state.keyEnv;
+        }
+        render();
+      });
+    });
+
+    $("copySettingsBtn").addEventListener("click", function () {
+      const el = $("settingsOut");
+      if (!el) return;
+      navigator.clipboard.writeText(el.dataset.raw || "").then(function () {
+        $("copySettingsBtn").textContent = t("common.copied");
+        setTimeout(function () {
+          $("copySettingsBtn").textContent = t("cursor.copySettings");
+        }, 900);
+      }).catch(function () {
+        window.alert("copy failed");
+      });
+    });
+
+    $("copyRunBtn").addEventListener("click", function () {
+      const el = $("runOut");
+      if (!el) return;
+      navigator.clipboard.writeText(el.dataset.raw || "").then(function () {
+        $("copyRunBtn").textContent = t("common.copied");
+        setTimeout(function () {
+          $("copyRunBtn").textContent = t("cursor.copyCommand");
+        }, 900);
+      }).catch(function () {
+        window.alert("copy failed");
+      });
+    });
+
+    $("downloadSettingsBtn").addEventListener("click", function () {
+      download("cursor-settings.json", $("settingsOut").dataset.raw || "{}\n");
+    });
+
+    window.addEventListener("i18n:changed", function () {
+      renderSelectOptions();
+      render();
+    });
+  }
+
+  window.I18NEngine.init({
+    page: "cursor",
+    titleKey: "cursor.title",
+    onChange: function () {
+      renderSelectOptions();
+      render();
+    }
+  });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bind);
+  } else {
+    bind();
+  }
+})();
+</script>
+</body>
+</html>

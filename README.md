@@ -15,6 +15,7 @@ referenced by environment-variable name and never leave the page.
 | [`litellm.html`](litellm.html) | **LiteLLM Config Forge** | `litellm-config.yaml` proxy that exposes `/v1/responses` for chat-only providers |
 | [`opencode.html`](opencode.html) | **OpenCode Config Forge** | `~/.config/opencode/opencode.json` BYOK config for OpenCode |
 | [`claude-code.html`](claude-code.html) | **Claude Code Config Forge** | `~/.claude/settings.json` BYOK config for Claude Code |
+| [`cursor.html`](cursor.html) | **Cursor Config Forge** | Cursor `settings.json` BYOK settings reference |
 
 ## Usage
 
@@ -26,7 +27,8 @@ open index.html      # macOS
 ```
 
 Each tool is a self-contained HTML file; you can also open `copilot-cli.html`,
-`codex-cli.html`, `litellm.html`, or `opencode.html` directly, or host the folder on any static web server.
+`codex-cli.html`, `litellm.html`, `opencode.html`, `claude-code.html`, or
+`cursor.html` directly, or host the folder on any static web server.
 
 ## Internationalization
 
@@ -138,6 +140,17 @@ Output includes:
 
 - **BYOK compatibility** — provider URL and model selector for Anthropic-compatible and custom endpoints.
 - **Shell-first flow** — copy config JSON and a launch snippet, then run immediately.
+
+## cursor.html — Cursor Config Forge
+
+Generates **Cursor BYOK-oriented settings snippets** and a companion shell command.
+
+- **Provider presets** — OpenAI, OpenRouter, DeepSeek, Ollama Cloud, and custom entry.
+- **Multiple schema modes** — choose between Cursor settings key formats used in different releases.
+- **Model as hint** — include model id in generated snippets for manual confirmation in Cursor.
+- **Key safety** — generated references keep key usage by variable name (no secret values).
+
+**Where to put it:** paste the generated `settings.json` block to your local Cursor settings file path and restart Cursor.
 
 ---
 
