@@ -14,6 +14,7 @@ referenced by environment-variable name and never leave the page.
 | [`codex-cli.html`](codex-cli.html) | **Codex Config Forge** | `~/.codex/<profile>.config.toml` profiles for the OpenAI Codex CLI |
 | [`litellm.html`](litellm.html) | **LiteLLM Config Forge** | `litellm-config.yaml` proxy that exposes `/v1/responses` for chat-only providers |
 | [`opencode.html`](opencode.html) | **OpenCode Config Forge** | `~/.config/opencode/opencode.json` BYOK config for OpenCode |
+| [`claude-code.html`](claude-code.html) | **Claude Code Config Forge** | `~/.claude/settings.json` BYOK config for Claude Code |
 
 ## Usage
 
@@ -124,6 +125,19 @@ Output includes:
 
 **Where to put it:** write the JSON to `~/.config/opencode/opencode.json` (or set
 `OPENCODE_CONFIG` to a custom path), then run OpenCode from terminal.
+
+## claude-code.html — Claude Code Config Forge
+
+Generates **Claude Code BYOK settings** (`settings.json`) and a companion shell snippet.
+Output includes:
+
+1. A full `settings` JSON payload with `model`, `env.ANTHROPIC_BASE_URL`, and runtime-only
+   placeholders.
+2. A ready-to-run snippet that writes `~/.claude/settings.json` and sets the runtime
+   `ANTHROPIC_API_KEY` mapping.
+
+- **BYOK compatibility** — provider URL and model selector for Anthropic-compatible and custom endpoints.
+- **Shell-first flow** — copy config JSON and a launch snippet, then run immediately.
 
 ---
 

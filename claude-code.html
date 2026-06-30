@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>Claude Code BYOK Forge — generate Claude Code launch config</title>
+<meta name="description" data-i18n-attr="content:claudeCode.metaDescription" content="Generate Claude Code BYOK config (settings.json) with model, base URL and API key variable references." />
+<link rel="canonical" href="https://byok-forge.gh.miniasp.com/claude-code.html" />
+<meta name="robots" content="index, follow" />
+<meta name="keywords" content="Claude Code, BYOK, settings.json, Anthropic, Messages API, apiKey, baseURL" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="BYOK Forge" />
+<meta property="og:title" data-i18n-attr="content:claudeCode.metaTitle" content="Claude Code BYOK Forge — generate Claude Code launch config" />
+<meta property="og:description" data-i18n-attr="content:claudeCode.metaDescription" content="Generate Claude Code BYOK config (settings.json) with model, base URL and API key variable references." />
+<meta property="og:url" content="https://byok-forge.gh.miniasp.com/claude-code.html" />
+<meta property="og:image" content="https://byok-forge.gh.miniasp.com/og-image.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" data-i18n-attr="content:claudeCode.metaTitle" content="Claude Code BYOK Forge — generate Claude Code launch config" />
+<meta name="twitter:description" data-i18n-attr="content:claudeCode.metaDescription" content="Generate Claude Code BYOK config (settings.json) with model, base URL and API key variable references." />
+<meta name="twitter:image" content="https://byok-forge.gh.miniasp.com/og-image.jpg" />
+<script src="translations.js?v=20260630"></script>
+<script src="i18n.js?v=20260630"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Martian+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0b0e;
+    --bg-2: #0e1015;
+    --panel: #13151c;
+    --panel-2: #171a22;
+    --panel-3: #1c2029;
+    --border: #262b37;
+    --border-2: #323848;
+    --text: #e9e7e0;
+    --muted: #888e9d;
+    --muted-2: #5d636f;
+    --amber: #ffb454;
+    --amber-soft: rgba(255, 180, 84, 0.14);
+    --amber-line: rgba(255, 180, 84, 0.4);
+    --green: #74e0a0;
+    --cyan: #56b6c2;
+    --violet: #b48ead;
+    --red: #ff6a6a;
+    --radius: 14px;
+    --mono: 'JetBrains Mono', var(--cjk), ui-monospace, SFMono-Regular, Menlo, monospace;
+    --display: 'Martian Mono', var(--cjk), var(--mono);
+    --sans: 'IBM Plex Sans', var(--cjk), system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(900px 500px at 12% -8%, rgba(255, 180, 84, .10), transparent 60%),
+      radial-gradient(820px 520px at 100% 0%, rgba(92, 182, 194, .07), transparent 55%),
+      radial-gradient(700px 700px at 80% 110%, rgba(116, 224, 160, .05), transparent 60%);
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: .5;
+    background-image: linear-gradient(transparent 0 31px, rgba(255,255,255,.018) 31px 32px),
+      linear-gradient(90deg, transparent 0 31px, rgba(255,255,255,.018) 31px 32px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(circle at 50% 30%, #000 0%, transparent 85%);
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  header.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 30px 0 26px;
+    flex-wrap: wrap;
+  }
+
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .brand .glyph {
+    width: 54px;
+    height: 54px;
+    flex: none;
+    border-radius: 13px;
+    background: linear-gradient(145deg, #1d2029, #10131a);
+    border: 1px solid var(--border-2);
+    display: grid;
+    place-items: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 8px 24px -12px rgba(255,180,84,.5);
+    position: relative;
+    overflow: hidden;
+  }
+  .brand .glyph::after {
+    content: "_";
+    color: var(--amber);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 26px;
+    animation: blink 1.1s steps(1) infinite;
+    line-height: 1;
+    margin-top: -6px;
+  }
+  .brand .glyph .chev { position: absolute; color: var(--green); font-family: var(--mono); font-weight: 700; font-size: 20px; left: 9px; top: 13px; }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .brand h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 800;
+    letter-spacing: -.04em;
+    font-size: 23px;
+    line-height: 1.05;
+    text-transform: lowercase;
+  }
+  .brand h1 b { color: var(--amber); font-weight: 800; }
+  .brand p {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: 12.5px;
+    font-family: var(--mono);
+    letter-spacing: .01em;
+  }
+
+  .meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  #langSwitcher {
+    min-width: 120px;
+  }
+  .home {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 13px;
+    background: var(--panel);
+  }
+  .home:hover { color: var(--text); border-color: var(--border-2); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.05fr .95fr;
+    gap: 26px;
+    align-items: start;
+  }
+  @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: linear-gradient(180deg, var(--panel), var(--bg-2));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 24px 60px -40px rgba(0, 0, 0, .9);
+  }
+  .card .pad { padding: 22px 22px 24px; }
+
+  .section-h {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0 0 16px;
+  }
+  .section-h .n {
+    font-family: var(--mono);
+    color: var(--amber);
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid var(--amber-line);
+    background: var(--amber-soft);
+    border-radius: 7px;
+    padding: 2px 8px;
+    letter-spacing: .05em;
+  }
+  .section-h h2 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -.02em;
+    text-transform: lowercase;
+  }
+  .section-h .hint {
+    margin-left: auto;
+    color: var(--muted-2);
+    font-size: 11.5px;
+    font-family: var(--mono);
+  }
+
+  .field {
+    margin-bottom: 20px;
+  }
+  .field:last-child { margin-bottom: 0; }
+
+  .lbl {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin-bottom: 9px;
+    font-family: var(--mono);
+  }
+
+  .row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 520px) {
+    .row2 { grid-template-columns: 1fr; }
+  }
+
+  select, input[type="text"], input[type="number"] {
+    width: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    border: 1px solid var(--border-2);
+    border-radius: 9px;
+    padding: 10px 11px;
+    outline: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--amber-line);
+    box-shadow: 0 0 0 3px var(--amber-soft);
+  }
+
+  .adorn {
+    position: relative;
+  }
+  .adorn .pre {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--amber);
+    font-family: var(--mono);
+    font-size: 13.5px;
+    pointer-events: none;
+  }
+  .adorn input {
+    padding-left: 24px;
+  }
+
+  .descline {
+    margin-top: 7px;
+    font-size: 11.5px;
+    color: var(--muted-2);
+    font-family: var(--mono);
+    line-height: 1.45;
+  }
+  .descline b { color: var(--cyan); }
+
+  .out-col { position: sticky; top: 18px; display: flex; flex-direction: column; gap: 16px; }
+  @media (max-width: 980px) { .out-col { position: static; } }
+
+  .out-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted-2);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .out-label .path { color: var(--amber); text-transform: none; letter-spacing: 0; }
+
+  .term {
+    background: #08090c;
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 30px 70px -40px rgba(0,0,0,1), inset 0 0 0 1px rgba(255,255,255,.02);
+  }
+  .term .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 14px;
+    background: #0d0f14;
+    border-bottom: 1px solid var(--border);
+  }
+  .term .bar .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .term .bar .dot.r { background: #ff5f57; }
+  .term .bar .dot.y { background: #febc2e; }
+  .term .bar .dot.g { background: #28c840; }
+  .term .bar .ttl {
+    margin-left: 8px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .term .bar .ttl b { color: var(--green); font-weight: 500; }
+
+  .term pre {
+    margin: 0;
+    padding: 16px 18px 18px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #cfd3da;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+    max-height: 42vh;
+  }
+
+  .c-com { color: var(--muted-2); font-style: italic; }
+  .c-str { color: var(--green); }
+  .c-key { color: var(--cyan); }
+  .c-val { color: var(--violet); }
+
+  .out-actions {
+    display: flex;
+    gap: 9px;
+    padding: 12px 14px;
+    background: #0d0f14;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    font-weight: 600;
+    border-radius: 9px;
+    padding: 10px 15px;
+    cursor: pointer;
+    border: 1px solid var(--border-2);
+    background: var(--panel-2);
+    color: var(--text);
+    transition: all .14s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn:hover { border-color: var(--border-2); background: var(--panel-3); transform: translateY(-1px); }
+  .btn.primary { background: var(--amber); border-color: var(--amber); color: #0a0b0e; }
+  .btn.primary:hover { box-shadow: 0 10px 26px -12px rgba(255,180,84,.8); }
+  .btn.ok { background: var(--green); border-color: var(--green); color: #08090c; }
+  .btn.flex { flex: 1; justify-content: center; }
+
+  .toast {
+    position: fixed;
+    bottom: 26px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--green);
+    color: #08090c;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 11px 20px;
+    border-radius: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .25s ease;
+    z-index: 50;
+    box-shadow: 0 16px 40px -14px rgba(116, 224, 160, .7);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  footer {
+    margin-top: 42px;
+    text-align: center;
+    color: var(--muted-2);
+    font-size: 11.5px;
+    font-family: var(--mono);
+    line-height: 1.7;
+  }
+
+  .fade {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: rise .6s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  .d1 { animation-delay: .04s; }
+  .d2 { animation-delay: .12s; }
+  .d3 { animation-delay: .2s; }
+</style>
+</head>
+<body data-page="claude-code">
+<div class="wrap">
+
+  <header class="top fade d1">
+    <div class="brand">
+      <div class="glyph"><span class="chev">&gt;</span></div>
+      <div>
+        <h1 data-i18n-html="claudeCode.brandTitle">claude code <b>byok</b> forge</h1>
+        <p data-i18n="claudeCode.brandSubtitle">// generate BYOK config for the Claude Code CLI</p>
+      </div>
+    </div>
+    <div class="meta">
+      <div id="langSwitcher"></div>
+      <a class="home" href="index.html?v=20260630" data-i18n="common.allTools">⊞ all tools</a>
+    </div>
+  </header>
+
+  <div class="grid">
+    <div class="card fade d2">
+      <div class="pad">
+
+        <div class="field">
+          <div class="section-h"><span class="n">01</span><h2 data-i18n="claudeCode.sectionModel">model</h2><span class="hint" data-i18n="claudeCode.sectionModelHint">model id / alias</span></div>
+          <label class="lbl" for="model" data-i18n="claudeCode.labelModel">model id</label>
+          <input type="text" id="model" list="modelList" autocomplete="off" spellcheck="false" />
+          <datalist id="modelList"></datalist>
+          <div class="descline" data-i18n="claudeCode.modelHint">Top-level value passed to Claude Code model.</div>
+        </div>
+
+        <div class="field row2">
+          <div>
+            <label class="lbl" for="baseURL" data-i18n="claudeCode.labelBaseUrl">baseURL</label>
+            <input type="text" id="baseURL" autocomplete="off" spellcheck="false" />
+            <div class="descline" data-i18n="claudeCode.baseUrlHint">Used as ANTHROPIC_BASE_URL in settings env.</div>
+          </div>
+          <div>
+            <label class="lbl" for="keyEnv" data-i18n="claudeCode.labelKeyEnv">apiKey environment variable</label>
+            <input type="text" id="keyEnv" autocomplete="off" spellcheck="false" />
+            <div class="descline" data-i18n="claudeCode.keyEnvHint">Settings keep only ANTHROPIC_BASE_URL and model; map a different env source for the runtime API key.</div>
+          </div>
+        </div>
+
+        <div class="field row2">
+          <div>
+            <label class="lbl" data-i18n="claudeCode.labelKeyRequired">key required</label>
+            <label class="row2" style="margin-bottom:0;">
+              <label for="requireKey" style="display:flex;align-items:center;gap:9px;margin-bottom:0;">
+                <input type="checkbox" id="requireKey" />
+                <span data-i18n-html="claudeCode.keyRequired">include <b>ANTHROPIC_API_KEY</b> in run snippet</span>
+              </label>
+            </label>
+            <div class="descline" data-i18n="claudeCode.keyOptionalHint">Uncheck only for local endpoints that do not need a key.</div>
+          </div>
+          <div></div>
+        </div>
+
+        <div class="field">
+          <div class="section-h"><span class="n">02</span><h2 data-i18n="claudeCode.sectionTarget">target</h2><span class="hint" data-i18n="claudeCode.sectionTargetHint">where to write settings</span></div>
+          <label class="lbl" for="configPath" data-i18n="claudeCode.labelConfigPath">config file path</label>
+          <input type="text" id="configPath" autocomplete="off" spellcheck="false" />
+          <div class="descline" data-i18n="claudeCode.configPathHint">Default is <b>~/.claude/settings.json</b>.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="out-col fade d3">
+      <div>
+        <p class="out-label"><span data-i18n="claudeCode.outConfig">settings.json</span></p>
+        <div class="term">
+          <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">settings<b>.json</b></span></div>
+          <pre id="jsonOut"></pre>
+          <div class="out-actions">
+            <button class="btn primary" id="copyConfigBtn" data-i18n="claudeCode.copyConfig">⧉ copy config</button>
+            <button class="btn" id="downloadConfigBtn" data-i18n="claudeCode.downloadConfig">⤓ download settings.json</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="out-label"><span data-i18n="claudeCode.outRun">run with CLI</span></p>
+        <div class="term">
+          <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">shell <b>snippet</b></span></div>
+          <pre id="runOut"></pre>
+          <div class="out-actions">
+            <button class="btn primary" id="copyRunBtn" data-i18n="claudeCode.copyRun">⧉ copy snippet</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer data-i18n-html="claudeCode.footer">Claude Code reads settings from <b>~/.claude/settings.json</b> by default, and uses <b>ANTHROPIC_BASE_URL</b> + optional <b>ANTHROPIC_MODEL</b> at runtime.</footer>
+</div>
+
+<div class="toast" id="toast" data-i18n="common.copied">copied ✓</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const MODELS = [
+    { id: "claude-opus-4-1", name: "Claude Opus 4.1", context: 200000, output: 65536 },
+    { id: "claude-sonnet-4.5", name: "Claude Sonnet 4.5", context: 200000, output: 65536 },
+    { id: "claude-3-7-sonnet", name: "Claude 3.7 Sonnet", context: 120000, output: 64000 },
+    { id: "claude-3.5-sonnet", name: "Claude 3.5 Sonnet", context: 200000, output: 8192 },
+    { id: "claude-3-5-haiku", name: "Claude 3.5 Haiku", context: 200000, output: 8192 },
+  ];
+
+  const state = {
+    model: MODELS[0].id,
+    baseURL: "https://api.anthropic.com",
+    keyEnv: "ANTHROPIC_API_KEY",
+    requireKey: true,
+    configPath: "~/.claude/settings.json",
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  function refreshModels() {
+    const list = $("modelList");
+    list.innerHTML = "";
+    MODELS.forEach((entry) => {
+      const o = document.createElement("option");
+      o.value = entry.id;
+      o.textContent = `${entry.id} — ${entry.name}`;
+      list.appendChild(o);
+    });
+
+    if (!MODELS.some((entry) => entry.id === state.model)) {
+      state.model = MODELS[0].id;
+    }
+  }
+
+  function syncInputs() {
+    $("model").value = state.model;
+    $("baseURL").value = state.baseURL;
+    $("keyEnv").value = state.keyEnv;
+    $("requireKey").checked = !!state.requireKey;
+    $("configPath").value = state.configPath;
+  }
+
+  function quote(value) {
+    return JSON.stringify(value);
+  }
+
+  function buildConfig() {
+    const model = (state.model || MODELS[0].id).trim();
+    const baseURL = (state.baseURL || "https://api.anthropic.com").trim();
+    return {
+      "$schema": "https://json.schemastore.org/claude-code-settings.json",
+      "model": model,
+      "env": {
+        "ANTHROPIC_BASE_URL": baseURL,
+      },
+    };
+  }
+
+  function esc(text) {
+    return String(text == null ? "" : text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function hlJSON(code) {
+    return code.split("\n").map((line) => {
+      let h = esc(line);
+      h = h.replace(/"([^"]+)":\s/g, '<span class="c-key">$1</span>:');
+      h = h.replace(/: ("[^"]*")/g, ': <span class="c-str">$1</span>');
+      h = h.replace(/\b(true|false|null|\d+)\b/g, '<span class="c-val">$1</span>');
+      return h;
+    }).join("\n");
+  }
+
+  function hlShell(code) {
+    return code.split("\n").map((line) => {
+      if (line.trimStart().startsWith("#")) return `<span class="c-com">${esc(line)}</span>`;
+      let h = esc(line);
+      h = h.replace(/"([^"]+)"/g, '<span class="c-str">"$1"</span>');
+      return h;
+    }).join("\n");
+  }
+
+  function normalizeConfigPath(raw) {
+    const value = String(raw || "~/.claude/settings.json").trim() || "~/.claude/settings.json";
+    if (value === "~") return "$HOME";
+    if (value.startsWith("~/")) return value.replace(/^~\//, "$HOME/");
+    return value;
+  }
+
+  function quoteShell(value) {
+    const safe = String(value || "").replace(/"/g, "\\\"");
+    return `"${safe}"`;
+  }
+
+  function shellCommand(configText) {
+    const path = normalizeConfigPath(state.configPath);
+    const keyEnv = (state.keyEnv || "ANTHROPIC_API_KEY").trim();
+    const safeKeyEnv = keyEnv.toUpperCase() || "ANTHROPIC_API_KEY";
+    const exportRef = state.requireKey
+      ? (safeKeyEnv === "ANTHROPIC_API_KEY"
+          ? "\"<your-anthropic-api-key>\""
+          : '"${' + safeKeyEnv + '}"')
+      : "";
+
+    const lines = [];
+    lines.push(`# Write settings and run Claude Code`);
+    lines.push(`cat <<'JSON' > ${quoteShell(path)}`);
+    lines.push(configText);
+    lines.push(`JSON`);
+    lines.push(`export ANTHROPIC_BASE_URL=${quoteShell((state.baseURL || "https://api.anthropic.com").trim())}`);
+    if (state.requireKey) {
+      lines.push(`# Key is loaded by environment variable, not stored in settings.json.`);
+      lines.push(`export ANTHROPIC_API_KEY=${exportRef}`);
+    }
+    lines.push(`claude --model ${quote(state.model || MODELS[0].id)}`);
+    return lines.join("\n");
+  }
+
+  function copyText(text, btn, okLabel) {
+    const done = () => {
+      if (!btn) return;
+      const old = btn.textContent;
+      const copied = "⧉ " + (typeof t === "function" ? t("common.copied") : "copied ✓");
+      btn.textContent = okLabel || copied;
+      btn.classList.add("ok");
+      setTimeout(() => {
+        btn.textContent = old;
+        btn.classList.remove("ok");
+      }, 1300);
+      showToast();
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+
+  function fallbackCopy(text, cb) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+    cb && cb();
+  }
+
+  function showToast() {
+    const toast = $("toast");
+    toast.classList.add("show");
+    clearTimeout(window.__ccToastT);
+    window.__ccToastT = setTimeout(() => toast.classList.remove("show"), 1400);
+  }
+
+  function download(filename, text) {
+    const blob = new Blob([text], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 120);
+  }
+
+  function refresh() {
+    const cfg = buildConfig();
+    const cfgText = JSON.stringify(cfg, null, 2);
+
+    $("jsonOut").dataset.raw = cfgText;
+    $("jsonOut").innerHTML = hlJSON(cfgText);
+
+    const runText = shellCommand(cfgText);
+    $("runOut").dataset.raw = runText;
+    $("runOut").innerHTML = hlShell(runText);
+  }
+
+  function bind() {
+    $("model").addEventListener("input", function () {
+      state.model = this.value.trim() || MODELS[0].id;
+      refresh();
+    });
+
+    $("baseURL").addEventListener("input", function () {
+      state.baseURL = this.value.trim();
+      refresh();
+    });
+
+    $("keyEnv").addEventListener("input", function () {
+      state.keyEnv = this.value.trim() || "ANTHROPIC_API_KEY";
+      refresh();
+    });
+
+    $("requireKey").addEventListener("change", function () {
+      state.requireKey = !!this.checked;
+      refresh();
+    });
+
+    $("configPath").addEventListener("input", function () {
+      state.configPath = this.value.trim();
+      refresh();
+    });
+
+    $("copyConfigBtn").addEventListener("click", () => {
+      copyText($("jsonOut").dataset.raw || "", $("copyConfigBtn"));
+    });
+
+    $("downloadConfigBtn").addEventListener("click", () => {
+      download("settings.json", $("jsonOut").dataset.raw || "{}\n");
+      showToast();
+    });
+
+    $("copyRunBtn").addEventListener("click", () => {
+      copyText($("runOut").dataset.raw || "", $("copyRunBtn"));
+    });
+  }
+
+  function init() {
+    refreshModels();
+    syncInputs();
+    bind();
+    window.I18NEngine.init({page: "claudeCode", titleKey: "claudeCode.title", onChange: function() { refresh(); }});
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
