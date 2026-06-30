@@ -183,7 +183,7 @@
     }
     const label = document.createElement("label");
     label.className = "lang-switch";
-    label.innerHTML = '<span class="lang-switch-label" data-i18n="common.languageLabel"></span><select class="lang-select" aria-label="Language"></select>';
+    label.innerHTML = '<select class="lang-select" aria-label="Language"></select>';
     root.appendChild(label);
     const selectEl = label.querySelector("select");
     Object.keys(LANGS).forEach(function (key) {
