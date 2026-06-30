@@ -198,7 +198,7 @@
       <div id="langSwitcher"></div>
       <span class="pill" data-i18n-html="codex.metaResponses"><b>responses</b> api</span>
       <span class="pill" data-i18n-html="codex.metaConfigPath">~/.codex/&lt;profile&gt;.config.toml</span>
-      <a class="home" href="index.html?v=20260630" data-i18n="codex.home">⊞ all tools</a>
+      <a class="home" href="index.html" data-i18n="codex.home">⊞ all tools</a>
     </div>
   </header>
 
@@ -212,7 +212,7 @@
           <div class="section-h"><span class="n">01</span><h2 data-i18n="codex.sectionProvider">provider</h2><span class="hint" data-i18n="codex.sectionProviderHint">responses-api only</span></div>
           <div class="providers" id="providers"></div>
           <div class="hintline" id="provHint" style="margin-top:11px;"></div>
-          <div class="crosslink">↪ Need a <b>Chat-Completions-only</b> provider (Mistral, DeepSeek, Anthropic, Gemini…)? Codex speaks the Responses API only — spin up a proxy with the <a href="litellm.html?v=20260630">LiteLLM Config Forge</a>, then add it here as a <b>Custom</b> provider.</div>
+          <div class="crosslink">↪ Need a <b>Chat-Completions-only</b> provider (Mistral, DeepSeek, Anthropic, Gemini…)? Codex speaks the Responses API only — spin up a proxy with the <a href="litellm.html">LiteLLM Config Forge</a>, then add it here as a <b>Custom</b> provider.</div>
         </div>
 
         <div class="divider"></div>
@@ -367,7 +367,7 @@
 
   <footer id="footer">
     <div><b>Codex Config Forge</b> · generates <span style="color:var(--amber)">~/.codex/&lt;profile&gt;.config.toml</span> BYOK profiles for the OpenAI Codex CLI</div>
-    <div class="disc">Codex speaks the <b>Responses API</b> only (<code style="color:var(--amber)">wire_api = "chat"</code> was removed) — providers must expose <code style="color:var(--amber)">/v1/responses</code> (OpenAI, Azure, Ollama ≥0.9, LM Studio ≥0.3, Groq, vLLM, OpenRouter, xAI). Chat-only providers need a proxy — see the <a href="litellm.html?v=20260630">LiteLLM Config Forge</a>. Model names &amp; defaults are best-effort for mid-2026; verify with <b>codex --help</b>. Keys stay in your env, never on disk.</div>
+    <div class="disc">Codex speaks the <b>Responses API</b> only (<code style="color:var(--amber)">wire_api = "chat"</code> was removed) — providers must expose <code style="color:var(--amber)">/v1/responses</code> (OpenAI, Azure, Ollama ≥0.9, LM Studio ≥0.3, Groq, vLLM, OpenRouter, xAI). Chat-only providers need a proxy — see the <a href="litellm.html">LiteLLM Config Forge</a>. Model names &amp; defaults are best-effort for mid-2026; verify with <b>codex --help</b>. Keys stay in your env, never on disk.</div>
   </footer>
 </div>
 <div class="toast" id="toast">copied ✓</div>
