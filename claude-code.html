@@ -621,13 +621,14 @@
       baseURL: "https://api.anthropic.com",
       keyEnv: "ANTHROPIC_API_KEY",
       requireKey: true,
-      defaultModel: "claude-opus-4-1",
+      defaultModel: "claude-fable-5",
       models: [
-        { id: "claude-opus-4-1", name: "Claude Opus 4.1", context: 200000, output: 65536 },
+        { id: "claude-fable-5", name: "Claude Fable 5", context: 1000000, output: 128000 },
+        { id: "claude-opus-4-8", name: "Claude Opus 4.8", context: 1000000, output: 128000 },
+        { id: "claude-opus-4-7", name: "Claude Opus 4.7", context: 1000000, output: 128000 },
+        { id: "claude-sonnet-4-6", name: "Claude Sonnet 4.6", context: 1000000, output: 128000 },
         { id: "claude-sonnet-4-5", name: "Claude Sonnet 4.5", context: 200000, output: 65536 },
-        { id: "claude-3-7-sonnet", name: "Claude 3.7 Sonnet", context: 120000, output: 64000 },
-        { id: "claude-3-5-sonnet", name: "Claude 3.5 Sonnet", context: 200000, output: 8192 },
-        { id: "claude-3-5-haiku", name: "Claude 3.5 Haiku", context: 200000, output: 8192 },
+        { id: "claude-haiku-4-5", name: "Claude Haiku 4.5", context: 200000, output: 64000 },
       ],
     },
     openrouter: {
@@ -693,7 +694,7 @@
 
   const initialProvider = "anthropic";
   const initialPreset = PROVIDERS[initialProvider];
-  const fallbackModel = initialPreset.defaultModel || (initialPreset.models[0] ? initialPreset.models[0].id : "claude-opus-4-1");
+  const fallbackModel = initialPreset.defaultModel || (initialPreset.models[0] ? initialPreset.models[0].id : "claude-fable-5");
   const state = {
     provider: initialProvider,
     model: fallbackModel,
