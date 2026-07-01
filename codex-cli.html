@@ -356,9 +356,22 @@
         </div>
       </div>
 
+      <!-- model catalog -->
+      <div id="catalogSection" class="hidden">
+        <p class="out-label" id="catalogLabel">③ model catalog · <span class="path" id="catalogLabelPath"></span></p>
+        <div class="term">
+          <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl" id="catalogTtl"></span></div>
+          <pre id="catalogOut" style="max-height:28vh;"></pre>
+          <div class="out-actions">
+            <button class="btn primary flex" id="copyCatalogBtn">⧉ copy catalog</button>
+            <button class="btn ok" id="downloadCatalogBtn">⤓ download .json</button>
+          </div>
+        </div>
+      </div>
+
       <!-- launch -->
       <div>
-        <p class="out-label" id="launchLabel">③ launch</p>
+        <p class="out-label" id="launchLabel">④ launch</p>
         <div class="term">
           <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">~ <b>terminal</b></span></div>
           <pre id="launchOut"></pre>
@@ -405,6 +418,7 @@ const PROVIDERS = [
     models:[ {id:"qwen2.5-coder-32b",eff:"omit"},{id:"gpt-oss-20b",eff:"high"},{id:"glm-4-32b",eff:"omit"} ]},
   { id:"ollama-cloud", name:"Ollama Cloud", kind:"custom", providerId:"ollama-cloud", color:"#74e0a0", badge:"OC",
     baseUrl:"https://ollama.com/v1", keyRequired:true, env:"OLLAMA_API_KEY",
+    modelCatalog:"ollama-cloud",
     models:[ {id:"glm-5.2:cloud",eff:"high"},{id:"glm-5.1:cloud",eff:"high"},{id:"kimi-k2.6:cloud",eff:"omit"},{id:"qwen3-coder:480b-cloud",eff:"omit"},{id:"gpt-oss:120b-cloud",eff:"high"},{id:"minimax-m3:cloud",eff:"omit"} ]},
   { id:"groq", name:"Groq", kind:"custom", providerId:"groq", color:"#ff6a6a", badge:"GQ", beta:true,
     baseUrl:"https://api.groq.com/openai/v1", keyRequired:true, env:"GROQ_API_KEY",
@@ -488,6 +502,7 @@ function genProfile(){
   lines.push(`# ~/.codex/${state.profileName||"my-profile"}.config.toml`);
   lines.push(`model = "${modelString()}"`);
   lines.push(`model_provider = "${p.kind==="builtin" ? p.providerId : providerIdStr()}"`);
+  if(p.modelCatalog) lines.push(`model_catalog_json = "~/.codex/model-catalog.${p.modelCatalog}.json"`);
   if(state.effort && state.effort !== "omit") lines.push(`model_reasoning_effort = "${state.effort}"`);
   if(state.summary && state.summary !== "omit") lines.push(`model_reasoning_summary = "${state.summary}"`);
   lines.push(`approval_policy = "${state.approval}"`);
@@ -536,6 +551,16 @@ function hlShell(code){
     h = h.replace(/"[^"]*"/g, m => `<span class="c-str">${m}</span>`);
     h = h.replace(/\b(codex|export)\b/g, m => `<span class="c-cmd">${m}</span>`);
     h = h.replace(/(\s)(-{1,2}[a-z][a-z-]*)/g, (m,sp,fl) => `${sp}<span class="c-flag">${fl}</span>`);
+    return h;
+  }).join("\n");
+}
+
+function hlJSON(code){
+  return code.split("\n").map(line => {
+    let h = esch(line);
+    h = h.replace(/"([^"]+)":\s/g, '<span class="c-key">"$1"</span>: ');
+    h = h.replace(/: ("[^"]*")/g, ': <span class="c-str">$1</span>');
+    h = h.replace(/\b(true|false|null|\d+)\b/g, '<span class="c-val">$1</span>');
     return h;
   }).join("\n");
 }
@@ -655,6 +680,52 @@ function renderPaths(){
   $("profileTtl").innerHTML = `~/.codex/<b>${state.profileName||"my-profile"}.config.toml</b>`;
 }
 
+const catalogCache = {};
+function renderCatalog() {
+  const p = provider();
+  const sec = $("catalogSection");
+  if (!p.modelCatalog) {
+    sec.classList.add("hidden");
+    return;
+  }
+  sec.classList.remove("hidden");
+  $("catalogLabelPath").textContent = `~/.codex/model-catalog.${p.modelCatalog}.json`;
+  $("catalogTtl").innerHTML = `~/.codex/<b>model-catalog.${p.modelCatalog}.json</b>`;
+
+  const copyBtn = $("copyCatalogBtn");
+  const downloadBtn = $("downloadCatalogBtn");
+  if (copyBtn) copyBtn.textContent = typeof t === "function" && t("codex.copyCatalog") ? t("codex.copyCatalog") : "⧉ copy catalog";
+  if (downloadBtn) downloadBtn.textContent = typeof t === "function" && t("codex.downloadCatalog") ? t("codex.downloadCatalog") : "⤓ download .json";
+
+  const cacheKey = p.modelCatalog;
+  if (catalogCache[cacheKey]) {
+    const raw = catalogCache[cacheKey];
+    $("catalogOut").dataset.raw = raw;
+    $("catalogOut").innerHTML = hlJSON(raw);
+    return;
+  }
+
+  $("catalogOut").textContent = "Loading catalog...";
+
+  fetch(`model-catalog.${p.modelCatalog}.json`)
+    .then(r => {
+      if (!r.ok) throw new Error("Catalog file not found");
+      return r.text();
+    })
+    .then(text => {
+      catalogCache[cacheKey] = text;
+      if (provider().modelCatalog === cacheKey) {
+        $("catalogOut").dataset.raw = text;
+        $("catalogOut").innerHTML = hlJSON(text);
+      }
+    })
+    .catch(err => {
+      if (provider().modelCatalog === cacheKey) {
+        $("catalogOut").textContent = `Error loading catalog: ${err.message}`;
+      }
+    });
+}
+
 function renderLabels(){
   const req = '<span class="req">*</span>';
   $("modelLbl").innerHTML = `${t("codex.labelModel")} ${req}`;
@@ -688,6 +759,7 @@ function refresh(){
   $("profileOut").innerHTML = hlToml(prof); $("profileOut").dataset.raw = prof;
   const launch = genLaunch();
   $("launchOut").innerHTML = hlShell(launch); $("launchOut").dataset.raw = launch;
+  renderCatalog();
   renderSummaryChips(); renderModelMeta(); renderPaths(); renderLabels();
   if(provider().needsResource) $("azureUrlPreview").textContent = baseUrl();
   if(window.I18NEngine && window.I18NEngine.applyTranslations) window.I18NEngine.applyTranslations(document.body);
@@ -753,8 +825,10 @@ function bind(){
 
   $("copyProviderBtn").addEventListener("click", () => copyText($("providerOut").dataset.raw||"", $("copyProviderBtn"), "⧉ copied ✓"));
   $("copyProfileBtn").addEventListener("click", () => copyText($("profileOut").dataset.raw||"", $("copyProfileBtn"), "⧉ copied ✓"));
+  $("copyCatalogBtn").addEventListener("click", () => copyText($("catalogOut").dataset.raw||"", $("copyCatalogBtn"), "⧉ copied ✓"));
   $("copyLaunchBtn").addEventListener("click", () => copyText($("launchOut").dataset.raw||"", $("copyLaunchBtn"), "⧉ copied ✓"));
   $("downloadBtn").addEventListener("click", () => { download(`${state.profileName||"my-profile"}.config.toml`, $("profileOut").dataset.raw||"", "application/toml"); showToast(); });
+  $("downloadCatalogBtn").addEventListener("click", () => { const p=provider(); if(p.modelCatalog){ download(`model-catalog.${p.modelCatalog}.json`, $("catalogOut").dataset.raw||"{}", "application/json"); showToast(); } });
 }
 
 /* =========================================================================
