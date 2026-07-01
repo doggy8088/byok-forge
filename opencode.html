@@ -884,7 +884,7 @@
     return code.split("\n").map((line) => {
       if (line.trim().startsWith("#")) return `<span class="c-com">${es(line)}</span>`;
       let h = es(line);
-      h = h.replace(/"([^"]+)":\s/g, '<span class="c-key">$1</span>:');
+      h = h.replace(/"([^"]+)":\s/g, '<span class="c-key">"$1"</span>: ');
       h = h.replace(/: ("[^"]*")/g, ': <span class="c-str">$1</span>');
       h = h.replace(/\b(true|false|null|\d+)\b/g, '<span class="c-val">$1</span>');
       return h;
