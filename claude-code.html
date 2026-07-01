@@ -651,9 +651,10 @@
     },
     ollamaCloud: {
       name: "Ollama Cloud",
-      baseURL: "https://ollama.com/v1",
+      baseURL: "https://ollama.com",
       keyEnv: "OLLAMA_API_KEY",
       requireKey: true,
+      customHeaders: "Authorization: Bearer",
       defaultModel: "glm-5.2:cloud",
       models: [
         { id: "glm-5.2:cloud", name: "GLM 5.2 Cloud", context: 120000, output: 32000 },
@@ -699,6 +700,7 @@
     baseURL: initialPreset.baseURL,
     keyEnv: initialPreset.keyEnv,
     requireKey: !!initialPreset.requireKey,
+    customHeaders: initialPreset.customHeaders || "",
     configPath: "~/.claude/settings.json",
   };
 
@@ -772,6 +774,7 @@
     state.baseURL = provider.baseURL;
     state.keyEnv = provider.keyEnv;
     state.requireKey = !!provider.requireKey;
+    state.customHeaders = provider.customHeaders || "";
     renderProviderCards();
     return true;
   }
@@ -782,6 +785,7 @@
     state.baseURL = provider.baseURL;
     state.keyEnv = provider.keyEnv;
     state.requireKey = !!provider.requireKey;
+    state.customHeaders = provider.customHeaders || "";
     state.model = provider.defaultModel || (provider.models[0] ? provider.models[0].id : state.model);
     renderProviderCards();
   }
@@ -867,6 +871,10 @@
     if (state.requireKey) {
       lines.push(`# Key is loaded by environment variable, not stored in settings.json.`);
       lines.push(`export ANTHROPIC_API_KEY=${exportRef}`);
+    }
+    if (state.customHeaders && state.requireKey) {
+      lines.push(`# Custom auth header required by this provider.`);
+      lines.push(`export ANTHROPIC_CUSTOM_HEADERS=${quoteShell(state.customHeaders + " $" + safeKeyEnv)}`);
     }
     lines.push(`claude --model ${quote(state.model || fallbackModel)}`);
     return lines.join("\n");
