@@ -1,0 +1,324 @@
+{
+  "models": [
+    {
+      "slug": "llama-3.1-8b-instant",
+      "display_name": "llama-3.1-8b-instant",
+      "description": "llama-3.1-8b-instant via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are llama-3.1-8b-instant running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "llama-3.3-70b-versatile",
+      "display_name": "llama-3.3-70b-versatile",
+      "description": "llama-3.3-70b-versatile via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are llama-3.3-70b-versatile running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "openai/gpt-oss-120b",
+      "display_name": "openai/gpt-oss-120b",
+      "description": "openai/gpt-oss-120b via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are openai/gpt-oss-120b running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "openai/gpt-oss-20b",
+      "display_name": "openai/gpt-oss-20b",
+      "description": "openai/gpt-oss-20b via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are openai/gpt-oss-20b running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "whisper-large-v3",
+      "display_name": "whisper-large-v3",
+      "description": "whisper-large-v3 via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are whisper-large-v3 running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "whisper-large-v3-turbo",
+      "display_name": "whisper-large-v3-turbo",
+      "description": "whisper-large-v3-turbo via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are whisper-large-v3-turbo running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "groq/compound",
+      "display_name": "groq/compound",
+      "description": "groq/compound via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are groq/compound running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "groq/compound-mini",
+      "display_name": "groq/compound-mini",
+      "description": "groq/compound-mini via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are groq/compound-mini running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "canopylabs/orpheus-arabic-saudi",
+      "display_name": "canopylabs/orpheus-arabic-saudi",
+      "description": "canopylabs/orpheus-arabic-saudi via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are canopylabs/orpheus-arabic-saudi running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "canopylabs/orpheus-v1-english",
+      "display_name": "canopylabs/orpheus-v1-english",
+      "description": "canopylabs/orpheus-v1-english via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are canopylabs/orpheus-v1-english running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "meta-llama/llama-4-scout-17b-16e-instruct",
+      "display_name": "meta-llama/llama-4-scout-17b-16e-instruct",
+      "description": "meta-llama/llama-4-scout-17b-16e-instruct via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are meta-llama/llama-4-scout-17b-16e-instruct running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "meta-llama/llama-prompt-guard-2-22m",
+      "display_name": "meta-llama/llama-prompt-guard-2-22m",
+      "description": "meta-llama/llama-prompt-guard-2-22m via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are meta-llama/llama-prompt-guard-2-22m running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "meta-llama/llama-prompt-guard-2-86m",
+      "display_name": "meta-llama/llama-prompt-guard-2-86m",
+      "description": "meta-llama/llama-prompt-guard-2-86m via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are meta-llama/llama-prompt-guard-2-86m running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "openai/gpt-oss-safeguard-20b",
+      "display_name": "openai/gpt-oss-safeguard-20b",
+      "description": "openai/gpt-oss-safeguard-20b via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are openai/gpt-oss-safeguard-20b running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "qwen/qwen3-32b",
+      "display_name": "qwen/qwen3-32b",
+      "description": "qwen/qwen3-32b via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are qwen/qwen3-32b running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "qwen/qwen3.6-27b",
+      "display_name": "qwen/qwen3.6-27b",
+      "description": "qwen/qwen3.6-27b via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are qwen/qwen3.6-27b running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    }
+  ]
+}
