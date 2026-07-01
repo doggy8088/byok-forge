@@ -745,6 +745,10 @@ function renderLabels(){
   if(yoloText) yoloText.innerHTML = `${t("codex.labelYolo")}<span>${t("codex.yoloHint")}</span>`;
   $("providerBlockLabel").innerHTML = `${t("codex.providerBlock")} <span class="path">~/.codex/config.toml</span>`;
   $("profileFileLabel").innerHTML = `${t("codex.profileFile")} <span class="path" id="profileLabelPath"></span>`;
+  const catalogLabel = $("catalogLabel");
+  if (catalogLabel) {
+    catalogLabel.innerHTML = `${t("codex.modelCatalog") || "③ model catalog"} · <span class="path" id="catalogLabelPath"></span>`;
+  }
   $("launchLabel").textContent = t("codex.launch");
   $("copyProviderBtn").textContent = t("codex.copyProvider");
   $("copyProfileBtn").textContent = t("codex.copyProfile");
@@ -760,8 +764,9 @@ function refresh(){
   $("profileOut").innerHTML = hlToml(prof); $("profileOut").dataset.raw = prof;
   const launch = genLaunch();
   $("launchOut").innerHTML = hlShell(launch); $("launchOut").dataset.raw = launch;
+  renderLabels();
   renderCatalog();
-  renderSummaryChips(); renderModelMeta(); renderPaths(); renderLabels();
+  renderSummaryChips(); renderModelMeta(); renderPaths();
   if(provider().needsResource) $("azureUrlPreview").textContent = baseUrl();
   if(window.I18NEngine && window.I18NEngine.applyTranslations) window.I18NEngine.applyTranslations(document.body);
 }
