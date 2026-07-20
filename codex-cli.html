@@ -403,7 +403,7 @@ const PROVIDERS = [
   { id:"openai", name:"OpenAI", kind:"builtin", providerId:"openai", color:"#74e0a0", badge:"AI",
     baseUrl:"https://api.openai.com/v1", keyRequired:true, env:"OPENAI_API_KEY",
     note:`Built-in provider <b>openai</b> — no [model_providers] block needed. Authenticate with <b>codex login</b> (ChatGPT) or <b>export OPENAI_API_KEY</b>.`,
-    models:[ {id:"gpt-5.5",eff:"high"},{id:"gpt-5.4",eff:"high"},{id:"gpt-5.3-codex",eff:"high"},{id:"gpt-5",eff:"medium"},{id:"o3",eff:"high"},{id:"o4-mini",eff:"medium"} ]},
+    models:[ {id:"gpt-5.6-sol",eff:"high"},{id:"gpt-5.6-terra",eff:"high"},{id:"gpt-5.6-luna",eff:"high"},{id:"gpt-5.5",eff:"high"},{id:"gpt-5.4",eff:"high"},{id:"gpt-5.3-codex",eff:"high"},{id:"gpt-5",eff:"medium"},{id:"o3",eff:"high"},{id:"o4-mini",eff:"medium"} ]},
   { id:"azure", name:"Azure OpenAI", kind:"custom", providerId:"azure", color:"#56b6c2", badge:"AZ",
     baseUrlTemplate:"https://{resource}.openai.azure.com/openai", needsResource:true, modelIsDeployment:true,
     apiVersion:"2025-04-01-preview", keyRequired:true, env:"AZURE_OPENAI_API_KEY",

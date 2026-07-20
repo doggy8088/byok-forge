@@ -540,6 +540,9 @@ const PROVIDERS = [
     baseUrl:"https://api.openai.com/v1", supportsResponses:true,
     keyRequired:true, keyEnv:"OPENAI_API_KEY",
     models:[
+      {id:"gpt-5.6-sol",   maxPrompt:1050000, maxOutput:128000, responses:true, effort:["low","medium","high","xhigh"]},
+      {id:"gpt-5.6-terra",  maxPrompt:1050000, maxOutput:128000, responses:true, effort:["low","medium","high","xhigh"]},
+      {id:"gpt-5.6-luna",   maxPrompt:1050000, maxOutput:128000, responses:true, effort:["low","medium","high","xhigh"]},
       {id:"gpt-5.5",       maxPrompt:1050000, maxOutput:128000, responses:true, effort:["low","medium","high","xhigh"]},
       {id:"gpt-5.5-pro",   maxPrompt:1050000, maxOutput:128000, responses:true, effort:["medium","high","xhigh"]},
       {id:"gpt-5.4",       maxPrompt:1050000, maxOutput:128000, responses:true, effort:["low","medium","high","xhigh"]},
