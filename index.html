@@ -130,6 +130,8 @@
 
   footer{position:relative;z-index:1;text-align:center;color:var(--muted-2);font-size:11.5px;font-family:var(--mono);padding:30px 24px 36px;line-height:1.7;}
   footer b{color:var(--muted);font-weight:500;}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#08090c;font-family:var(--mono);font-weight:700;font-size:13px;padding:11px 20px;border-radius:10px;opacity:0;pointer-events:none;transition:all .25s ease;z-index:50;box-shadow:0 16px 40px -14px rgba(116,224,160,.7);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .fade{opacity:0;transform:translateY(12px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards;}
   @keyframes rise{to{opacity:1;transform:none;}}
   .d1{animation-delay:.04s;}.d2{animation-delay:.12s;}.d3{animation-delay:.2s;}.d4{animation-delay:.28s;}.d5{animation-delay:.36s;}
@@ -139,6 +141,7 @@
 </style>
 <script src="translations.js?v=20260630"></script>
 <script src="i18n.js?v=20260630"></script>
+<script src="storage.js?v=20260630"></script>
 </head>
 <body data-page="index">
 <div class="wrap">
@@ -153,7 +156,9 @@
     </div>
     <div class="meta-right">
       <div id="langSwitcher"></div>
-      <a class="gh" href="https://github.com/openai/codex" target="_blank" rel="noopener" data-i18n="common.bringYourOwnKey">⌁ bring your own key</a>
+      <button class="gh" id="btnExport" type="button" data-i18n="common.export" style="cursor:pointer;">⤓ export</button>
+      <button class="gh" id="btnImport" type="button" data-i18n="common.import" style="cursor:pointer;">⤒ import</button>
+      <input type="file" id="importFileInput" accept=".json,application/json" style="display:none;" />
     </div>
   </header>
 
@@ -273,9 +278,26 @@
 <footer>
   <div data-i18n="index.footerLine1"><b>BYOK Forge</b> · a small toolkit for bring-your-own-key AI coding CLIs</div>
   <div data-i18n-html="index.footerLine2">Model names &amp; token defaults are best-effort for mid-2026 — always verify against <b>copilot --help</b> / <b>codex --help</b>.</div>
+  <div style="margin-top:12px;">本工具由 <a href="https://www.facebook.com/will.fans/" target="_blank" rel="noopener noreferrer" style="color:var(--amber);text-decoration:none;border-bottom:1px dotted var(--amber);">Will 保哥的技術交流中心</a> 設計、開發與維護</div>
 </footer>
+<div class="toast" id="toast" data-i18n="common.copied">copied ✓</div>
 <script>
 window.I18NEngine.init({page:'index', titleKey:'index.title', onChange: function(){}});
+
+document.getElementById('btnExport').addEventListener('click', function () {
+  window.BYOKStore.exportBackup();
+});
+
+document.getElementById('btnImport').addEventListener('click', function () {
+  document.getElementById('importFileInput').click();
+});
+
+document.getElementById('importFileInput').addEventListener('change', function (e) {
+  if (e.target.files && e.target.files[0]) {
+    window.BYOKStore.importBackup(e.target.files[0]);
+    e.target.value = '';
+  }
+});
 </script>
 </body>
 </html>

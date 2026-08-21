@@ -76,7 +76,18 @@ window.I18N_TRANSLATIONS = {
       "downloadYaml": "⤓ download .yaml",
       "optional": "optional",
       "remove": "remove",
-      "addAnotherModel": "＋ add another model"
+      "addAnotherModel": "＋ add another model",
+      "export": "⤓ export",
+      "import": "⤒ import",
+      "share": "⎘ share",
+      "addProvider": "＋ add provider",
+      "deleteProvider": "delete provider",
+      "shareCopied": "Share link copied to clipboard ✓",
+      "importSuccess": "Settings imported successfully ✓",
+      "importError": "Failed to import settings",
+      "exportSuccess": "Settings exported ✓",
+      "sharedLoaded": "Settings loaded from share link ✓",
+      "resetDefaults": "reset defaults"
     },
     "index": {
       "title": "BYOK Forge — launch configs for the Copilot & Codex CLIs",
@@ -444,7 +455,18 @@ window.I18N_TRANSLATIONS = {
       "downloadYaml": "⤓ 下載 .yaml",
       "optional": "optional",
       "remove": "移除",
-      "addAnotherModel": "＋ 新增另一個模型"
+      "addAnotherModel": "＋ 新增另一個模型",
+      "export": "⤓ 匯出",
+      "import": "⤒ 匯入",
+      "share": "⎘ 分享",
+      "addProvider": "＋ 新增提供商",
+      "deleteProvider": "刪除提供商",
+      "shareCopied": "分享網址已複製到剪貼簿 ✓",
+      "importSuccess": "設定已成功匯入 ✓",
+      "importError": "匯入失敗，請確認檔案格式",
+      "exportSuccess": "設定已成功匯出 ✓",
+      "sharedLoaded": "已成功載入分享設定 ✓",
+      "resetDefaults": "重設回預設值"
     },
     "index": {
       "title": "BYOK Forge — 為 Copilot & Codex CLI 生成啟動設定",
@@ -812,7 +834,18 @@ window.I18N_TRANSLATIONS = {
       "downloadYaml": "⤓ 下载 .yaml",
       "optional": "optional",
       "remove": "删除",
-      "addAnotherModel": "＋ 添加另一个模型"
+      "addAnotherModel": "＋ 添加另一个模型",
+      "export": "⤓ 导出",
+      "import": "⤒ 导入",
+      "share": "⎘ 分享",
+      "addProvider": "＋ 新增提供商",
+      "deleteProvider": "删除提供商",
+      "shareCopied": "分享网址已复制到剪贴板 ✓",
+      "importSuccess": "设置已成功导入 ✓",
+      "importError": "导入失败，请确认文件格式",
+      "exportSuccess": "设置已成功导出 ✓",
+      "sharedLoaded": "已成功载入分享设置 ✓",
+      "resetDefaults": "重置为默认值"
     },
     "index": {
       "title": "BYOK Forge — 为 Copilot & Codex CLI 生成启动配置",
@@ -1126,7 +1159,18 @@ window.I18N_TRANSLATIONS = {
       "downloadYaml": "⤓ .yaml をダウンロード",
       "optional": "optional",
       "remove": "削除",
-      "addAnotherModel": "＋ モデルを追加"
+      "addAnotherModel": "＋ モデルを追加",
+      "export": "⤓ エクスポート",
+      "import": "⤒ インポート",
+      "share": "⎘ 共有",
+      "addProvider": "＋ プロバイダー追加",
+      "deleteProvider": "プロバイダー削除",
+      "shareCopied": "共有リンクをコピーしました ✓",
+      "importSuccess": "設定をインポートしました ✓",
+      "importError": "インポートに失敗しました",
+      "exportSuccess": "設定をエクスポートしました ✓",
+      "sharedLoaded": "共有設定を読み込みました ✓",
+      "resetDefaults": "デフォルトに戻す"
     },
     "index": {
       "title": "BYOK Forge — Copilot & Codex CLI 用の起動設定を生成",
@@ -1440,7 +1484,18 @@ window.I18N_TRANSLATIONS = {
       "downloadYaml": "⤓ .yaml 다운로드",
       "optional": "optional",
       "remove": "제거",
-      "addAnotherModel": "＋ 모델 추가"
+      "addAnotherModel": "＋ 모델 추가",
+      "export": "⤓ 내보내기",
+      "import": "⤒ 가져오기",
+      "share": "⎘ 공유",
+      "addProvider": "＋ 공급자 추가",
+      "deleteProvider": "공급자 삭제",
+      "shareCopied": "공유 링크가 복사되었습니다 ✓",
+      "importSuccess": "설정을 가져왔습니다 ✓",
+      "importError": "설정 가져오기 실패",
+      "exportSuccess": "설정을 내보냈습니다 ✓",
+      "sharedLoaded": "공유 설정을 불러왔습니다 ✓",
+      "resetDefaults": "기본값으로 재설정"
     },
     "index": {
       "title": "BYOK Forge — Copilot & Codex CLI 용 실행 설정 생성",
@@ -1754,7 +1809,18 @@ window.I18N_TRANSLATIONS = {
       "downloadYaml": "⤓ tải .yaml",
       "optional": "optional",
       "remove": "xóa",
-      "addAnotherModel": "＋ thêm model khác"
+      "addAnotherModel": "＋ thêm model khác",
+      "export": "⤓ xuất",
+      "import": "⤒ nhập",
+      "share": "⎘ chia sẻ",
+      "addProvider": "＋ thêm nhà cung cấp",
+      "deleteProvider": "xóa nhà cung cấp",
+      "shareCopied": "Đã sao chép liên kết chia sẻ ✓",
+      "importSuccess": "Đã nhập cài đặt thành công ✓",
+      "importError": "Nhập cài đặt thất bại",
+      "exportSuccess": "Đã xuất cài đặt ✓",
+      "sharedLoaded": "Đã tải cài đặt được chia sẻ ✓",
+      "resetDefaults": "đặt lại mặc định"
     },
     "index": {
       "title": "BYOK Forge — tạo cấu hình khởi chạy cho Copilot & Codex CLI",
@@ -2068,7 +2134,18 @@ window.I18N_TRANSLATIONS = {
       "downloadYaml": "⤓ ดาวน์โหลด .yaml",
       "optional": "optional",
       "remove": "ลบ",
-      "addAnotherModel": "＋ เพิ่มโมเดลอื่น"
+      "addAnotherModel": "＋ เพิ่มโมเดลอื่น",
+      "export": "⤓ ส่งออก",
+      "import": "⤒ นำเข้า",
+      "share": "⎘ แชร์",
+      "addProvider": "＋ เพิ่มผู้ให้บริการ",
+      "deleteProvider": "ลบผู้ให้บริการ",
+      "shareCopied": "คัดลอกลิงก์แชร์แล้ว ✓",
+      "importSuccess": "นำเข้าการตั้งค่าสำเร็จ ✓",
+      "importError": "นำเข้าการตั้งค่าล้มเหลว",
+      "exportSuccess": "ส่งออกการตั้งค่าสำเร็จ ✓",
+      "sharedLoaded": "โหลดการตั้งค่าที่แชร์แล้ว ✓",
+      "resetDefaults": "คืนค่าเริ่มต้น"
     },
     "index": {
       "title": "BYOK Forge — สร้างการตั้งค่าเปิดใช้สำหรับ Copilot & Codex CLI",
@@ -2382,7 +2459,18 @@ window.I18N_TRANSLATIONS = {
       "downloadYaml": "⤓ unduh .yaml",
       "optional": "optional",
       "remove": "hapus",
-      "addAnotherModel": "＋ tambah model lain"
+      "addAnotherModel": "＋ tambah model lain",
+      "export": "⤓ ekspor",
+      "import": "⤒ impor",
+      "share": "⎘ bagikan",
+      "addProvider": "＋ tambah penyedia",
+      "deleteProvider": "hapus penyedia",
+      "shareCopied": "Tautan berbagi disalin ✓",
+      "importSuccess": "Pengaturan berhasil diimpor ✓",
+      "importError": "Gagal mengimpor pengaturan",
+      "exportSuccess": "Pengaturan berhasil diekspor ✓",
+      "sharedLoaded": "Pengaturan bersama dimuat ✓",
+      "resetDefaults": "setel ulang default"
     },
     "index": {
       "title": "BYOK Forge — buat konfigurasi peluncuran untuk Copilot & Codex CLI",
@@ -2696,7 +2784,18 @@ window.I18N_TRANSLATIONS = {
       "downloadYaml": "⤓ .yaml herunterladen",
       "optional": "optional",
       "remove": "entfernen",
-      "addAnotherModel": "＋ weiteres Modell hinzufügen"
+      "addAnotherModel": "＋ weiteres Modell hinzufügen",
+      "export": "⤓ exportieren",
+      "import": "⤒ importieren",
+      "share": "⎘ teilen",
+      "addProvider": "＋ Anbieter hinzufügen",
+      "deleteProvider": "Anbieter löschen",
+      "shareCopied": "Freigabelink in die Zwischenablage kopiert ✓",
+      "importSuccess": "Einstellungen erfolgreich importiert ✓",
+      "importError": "Fehler beim Importieren der Einstellungen",
+      "exportSuccess": "Einstellungen exportiert ✓",
+      "sharedLoaded": "Freigegebene Einstellungen geladen ✓",
+      "resetDefaults": "auf Standard zurücksetzen"
     },
     "index": {
       "title": "BYOK Forge — Startkonfigurationen für Copilot & Codex CLI generieren",
@@ -3010,7 +3109,18 @@ window.I18N_TRANSLATIONS = {
       "downloadYaml": "⤓ télécharger .yaml",
       "optional": "optionnel",
       "remove": "supprimer",
-      "addAnotherModel": "＋ ajouter un autre modèle"
+      "addAnotherModel": "＋ ajouter un autre modèle",
+      "export": "⤓ exporter",
+      "import": "⤒ importer",
+      "share": "⎘ partager",
+      "addProvider": "＋ ajouter un fournisseur",
+      "deleteProvider": "supprimer le fournisseur",
+      "shareCopied": "Lien de partage copié dans le presse-papiers ✓",
+      "importSuccess": "Paramètres importés avec succès ✓",
+      "importError": "Échec de l'importation des paramètres",
+      "exportSuccess": "Paramètres exportés ✓",
+      "sharedLoaded": "Paramètres partagés chargés ✓",
+      "resetDefaults": "rétablir les paramètres par défaut"
     },
     "index": {
       "title": "BYOK Forge — Générer des configurations de lancement pour Copilot & Codex CLI",
@@ -3324,7 +3434,18 @@ window.I18N_TRANSLATIONS = {
       "downloadYaml": "⤓ descargar .yaml",
       "optional": "opcional",
       "remove": "eliminar",
-      "addAnotherModel": "＋ agregar otro modelo"
+      "addAnotherModel": "＋ agregar otro modelo",
+      "export": "⤓ exportar",
+      "import": "⤒ importar",
+      "share": "⎘ compartir",
+      "addProvider": "＋ agregar proveedor",
+      "deleteProvider": "eliminar proveedor",
+      "shareCopied": "Enlace para compartir copiado ✓",
+      "importSuccess": "Configuraciones importadas con éxito ✓",
+      "importError": "Error al importar configuraciones",
+      "exportSuccess": "Configuraciones exportadas ✓",
+      "sharedLoaded": "Configuraciones compartidas cargadas ✓",
+      "resetDefaults": "restablecer valores predeterminados"
     },
     "index": {
       "title": "BYOK Forge — Generar configuraciones de lanzamiento para Copilot & Codex CLI",

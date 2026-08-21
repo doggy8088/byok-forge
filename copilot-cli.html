@@ -193,6 +193,23 @@
   }
   .prov .pname{font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--text);line-height:1.2;}
   .prov .ptype{font-family:var(--mono);font-size:10px;color:var(--muted-2);}
+  .prov .prov-del{
+    position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:6px;
+    border:1px solid transparent;background:transparent;color:var(--muted-2);
+    display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;
+    opacity:0;transition:all .15s ease;z-index:2;
+  }
+  .prov:hover .prov-del{opacity:1;}
+  .prov .prov-del:hover{background:rgba(255,106,106,.15);color:var(--red);border-color:rgba(255,106,106,.3);}
+  .prov-add{
+    cursor:pointer;border:1px dashed var(--border-2);border-radius:11px;
+    background:var(--panel-2);padding:12px 12px 11px;text-align:center;
+    transition:all .15s ease;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:4px;min-height:78px;color:var(--muted);
+  }
+  .prov-add:hover{border-color:var(--amber-line);background:var(--amber-soft);color:var(--amber);transform:translateY(-2px);}
+  .prov-add .add-icon{font-size:22px;line-height:1;font-family:var(--mono);font-weight:700;}
+  .prov-add .add-text{font-family:var(--mono);font-size:11px;font-weight:600;}
 
   /* generic inputs */
   select,input[type=text],input[type=number],input[type=password]{
@@ -314,6 +331,7 @@
 </style>
 <script src="translations.js?v=20260630"></script>
 <script src="i18n.js?v=20260630"></script>
+<script src="storage.js?v=20260630"></script>
 </head>
 <body data-page="copilot">
 <div class="wrap">
@@ -327,9 +345,10 @@
       </div>
     </div>
     <div class="meta">
-      <span class="pill"><b>14</b> <span data-i18n="copilot.metaProviders">providers</span></span>
+      <span class="pill"><b id="provCount">14</b> <span data-i18n="copilot.metaProviders">providers</span></span>
       <span class="pill"><b data-i18n="copilot.metaShellLabel">shell</b> <span data-i18n="copilot.metaShells">+ powershell</span></span>
       <div id="langSwitcher"></div>
+      <button class="home" id="shareBtn" style="cursor:pointer;" data-i18n="common.share">⎘ share</button>
       <a class="home" href="index.html" data-i18n="common.allTools">⊞ all tools</a>
     </div>
   </header>
@@ -498,6 +517,7 @@
           <pre id="output"></pre>
           <div class="out-actions">
             <button class="btn primary flex" id="copyBtn">⧉ copy</button>
+            <button class="btn ghost" id="shareOutBtn" data-i18n="common.share">⎘ share</button>
             <button class="btn ghost" id="addBtn">＋ add to collection</button>
           </div>
         </div>
@@ -521,6 +541,7 @@
   <footer>
     <div><b>Copilot Alias Forge</b> · generates <span style="color:var(--amber)">COPILOT_PROVIDER_*</span> launch aliases for the GitHub Copilot CLI (BYOK)</div>
     <div class="disc">Token limits &amp; model names are best-effort defaults for mid-2026 — verify against your provider and <b>copilot help providers</b>. Your keys never leave the browser; nothing is uploaded.</div>
+    <div style="margin-top:12px;">本工具由 <a href="https://www.facebook.com/will.fans/" target="_blank" rel="noopener noreferrer" style="color:var(--amber);text-decoration:none;border-bottom:1px dotted var(--amber);">Will 保哥的技術交流中心</a> 設計、開發與維護</div>
   </footer>
 </div>
 
@@ -535,7 +556,7 @@ window.I18NEngine.init({page:'copilot', titleKey:'copilot.title', onChange: func
    DATA — providers + per-model defaults (context window / max output /
    responses-api capability / reasoning effort levels). Best-effort mid-2026.
    ========================================================================= */
-const PROVIDERS = [
+const DEFAULT_PROVIDERS = [
   { id:"openai", name:"OpenAI", type:"openai", color:"#74e0a0", badge:"AI",
     baseUrl:"https://api.openai.com/v1", supportsResponses:true,
     keyRequired:true, keyEnv:"OPENAI_API_KEY",
@@ -688,10 +709,12 @@ const PROVIDERS = [
     ]},
 ];
 
+let PROVIDERS = JSON.parse(JSON.stringify(DEFAULT_PROVIDERS));
+
 /* =========================================================================
    STATE
    ========================================================================= */
-const state = {
+const DEFAULT_STATE = {
   providerId:"azure",
   modelId:"gpt-5.5",
   resource:"my-resource",
@@ -710,59 +733,74 @@ const state = {
   kind:"alias",        // alias | function
   psCleanup:true,
 };
-const collection = [];
+
+let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+let collection = [];
+
+function saveState(){
+  window.BYOKStore.savePage("copilot", {
+    providers: PROVIDERS,
+    state: state,
+    collection: collection
+  });
+}
 
 /* =========================================================================
    HELPERS
    ========================================================================= */
 const $ = id => document.getElementById(id);
-const provider = () => PROVIDERS.find(p => p.id === state.providerId);
-const model = () => provider().models.find(m => m.id === state.modelId) || provider().models[0];
+const provider = () => PROVIDERS.find(p => p.id === state.providerId) || PROVIDERS[0] || DEFAULT_PROVIDERS[0];
+const model = () => (provider().models && provider().models.find(m => m.id === state.modelId)) || (provider().models && provider().models[0]) || {id:"default", maxPrompt:128000, maxOutput:16384, responses:false, effort:[]};
 
 function baseUrl(){
   const p = provider();
+  if(!p) return "";
   if(p.needsResource){
     const r = (state.resource || "YOUR-RESOURCE").trim() || "YOUR-RESOURCE";
-    return p.baseUrlTemplate.replace("{resource}", r);
+    return (p.baseUrlTemplate || "").replace("{resource}", r);
   }
-  return p.baseUrl;
+  return p.baseUrl || "";
 }
 function modelString(){
-  return provider().modelIsDeployment ? ((state.deployment || model().id).trim() || model().id) : model().id;
+  const p = provider();
+  return (p && p.modelIsDeployment) ? ((state.deployment || model().id).trim() || model().id) : model().id;
 }
 function effortOptions(){ return model().effort || []; }
 function wireValue(){
   if(state.wireMode === "responses") return "responses";
   if(state.wireMode === "completions") return null;
   // auto
-  return (provider().supportsResponses && model().responses) ? "responses" : null;
+  const p = provider();
+  return (p && p.supportsResponses && model().responses) ? "responses" : null;
 }
 
 /* =========================================================================
    OUTPUT GENERATION
    ========================================================================= */
 function shellKeyValue(){
-  if(!provider().keyRequired) return null;
+  const p = provider();
+  if(!p || !p.keyRequired) return null;
   if(state.keyMode === "env"){
-    const n = (state.keyEnv || provider().keyEnv || "API_KEY").trim() || "API_KEY";
-    return "$" + n;                       // unquoted env reference, expands at runtime
+    const n = (state.keyEnv || p.keyEnv || "API_KEY").trim() || "API_KEY";
+    return "$" + n;
   }
   return '"' + (state.keyLiteral || "YOUR-API-KEY") + '"';
 }
 function psKeyValue(){
-  if(!provider().keyRequired) return null;
+  const p = provider();
+  if(!p || !p.keyRequired) return null;
   if(state.keyMode === "env"){
-    const n = (state.keyEnv || provider().keyEnv || "API_KEY").trim() || "API_KEY";
-    return "$env:" + n;                   // PS env reference (no quotes)
+    const n = (state.keyEnv || p.keyEnv || "API_KEY").trim() || "API_KEY";
+    return "$env:" + n;
   }
   return "'" + (state.keyLiteral || "YOUR-API-KEY") + "'";
 }
 
-// ordered list of [name, shellValue|null] env pairs
-function envPairs(kind){ // kind: 'shell' | 'ps'
+function envPairs(kind){
+  const p = provider();
   const pairs = [];
   if(state.offline) pairs.push(["COPILOT_OFFLINE", kind==="ps" ? "'true'" : "true"]);
-  pairs.push(["COPILOT_PROVIDER_TYPE", kind==="ps" ? `'${provider().type}'` : `"${provider().type}"`]);
+  pairs.push(["COPILOT_PROVIDER_TYPE", kind==="ps" ? `'${p.type}'` : `"${p.type}"`]);
   pairs.push(["COPILOT_PROVIDER_BASE_URL", kind==="ps" ? `'${baseUrl()}'` : `"${baseUrl()}"`]);
   const key = kind==="ps" ? psKeyValue() : shellKeyValue();
   if(key !== null) pairs.push(["COPILOT_PROVIDER_API_KEY", key]);
@@ -836,12 +874,11 @@ function generate(){
   if(state.shell === "bash"){
     return state.kind === "alias" ? genShellAlias() : genShellFunction();
   }
-  // powershell: alias-kind shows the limitation note + function; function-kind = plain function
   return genPwshFunction(state.kind === "alias");
 }
 
 /* =========================================================================
-   SYNTAX HIGHLIGHT (display only; copy uses raw text)
+   SYNTAX HIGHLIGHT
    ========================================================================= */
 function hl(code){
   const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
@@ -866,23 +903,120 @@ function hl(code){
 function renderProviders(){
   const wrap = $("providers");
   wrap.innerHTML = "";
-  PROVIDERS.forEach(p => {
+  if($("provCount")) $("provCount").textContent = PROVIDERS.length;
+
+  PROVIDERS.forEach((p, idx) => {
     const el = document.createElement("button");
     el.type = "button";
     el.className = "prov" + (p.id === state.providerId ? " sel" : "");
     el.innerHTML =
-      `<span class="mono-badge" style="background:${p.color}">${p.badge}</span>` +
+      `<button class="prov-del" title="${window.t?window.t('common.deleteProvider'):'Delete provider'}" type="button">✕</button>` +
+      `<span class="mono-badge" style="background:${p.color || '#74e0a0'}">${p.badge || p.name.slice(0,2).toUpperCase()}</span>` +
       `<span class="pname">${p.name}</span>` +
-      `<span class="ptype">type=${p.type}</span>`;
+      `<span class="ptype">type=${p.type || 'openai'}</span>`;
+    
+    el.querySelector(".prov-del").addEventListener("click", (e) => {
+      e.stopPropagation();
+      PROVIDERS.splice(idx, 1);
+      if(PROVIDERS.length === 0){
+        PROVIDERS = JSON.parse(JSON.stringify(DEFAULT_PROVIDERS));
+      }
+      if(state.providerId === p.id){
+        state.providerId = PROVIDERS[0].id;
+        state.modelId = PROVIDERS[0].models[0].id;
+        applyModelDefaults();
+      }
+      saveState();
+      renderProviders();
+      renderModelOptions();
+      renderEffort();
+      renderConditional();
+      refresh();
+    });
+
     el.addEventListener("click", () => selectProvider(p.id));
     wrap.appendChild(el);
+  });
+
+  // Big + Add Provider Card
+  const addBtn = document.createElement("button");
+  addBtn.type = "button";
+  addBtn.className = "prov-add";
+  addBtn.innerHTML = `<span class="add-icon">＋</span><span class="add-text">${window.t?window.t('common.addProvider'):'＋ add provider'}</span>`;
+  addBtn.addEventListener("click", openAddProviderModal);
+  wrap.appendChild(addBtn);
+}
+
+function openAddProviderModal(){
+  window.BYOKModal.show({
+    title: window.t ? window.t("common.addProvider") : "Add New Provider",
+    fields: [
+      { id:"name", label:"Provider Name", placeholder:"e.g. Together AI, DeepInfra", value:"" },
+      { id:"type", label:"Provider Type", type:"select", value:"openai", options:[
+        { value:"openai", label:"OpenAI Compatible (openai)" },
+        { value:"anthropic", label:"Anthropic (anthropic)" },
+        { value:"azure", label:"Azure OpenAI (azure)" }
+      ]},
+      { id:"baseUrl", label:"Base URL", placeholder:"https://api.example.com/v1", value:"" },
+      { id:"keyRequired", label:"Key Required", type:"checkbox", value:true, checkboxLabel:"Requires API Key" },
+      { id:"keyEnv", label:"API Key Env Var", placeholder:"MY_API_KEY", value:"" },
+      { id:"models", label:"Models (comma or newline separated)", placeholder:"model-1, model-2", value:"" },
+      { id:"supportsResponses", label:"Responses API", type:"checkbox", value:true, checkboxLabel:"Supports /v1/responses" },
+      { id:"maxPrompt", label:"Default Context Window (Max Prompt Tokens)", placeholder:"131072", value:"131072" },
+      { id:"maxOutput", label:"Default Max Output Tokens", placeholder:"32768", value:"32768" },
+      { id:"effort", label:"Reasoning Effort Levels", placeholder:"low,medium,high (or leave empty)", value:"" }
+    ],
+    onSave: (values) => {
+      const name = values.name.trim();
+      if(!name) return false;
+      const id = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || ("custom-" + Date.now());
+      const rawModels = values.models.split(/[\n,]+/).map(m => m.trim()).filter(Boolean);
+      const effortLevels = values.effort ? values.effort.split(/[\n,]+/).map(e => e.trim()).filter(Boolean) : [];
+      const models = rawModels.length ? rawModels.map(m => ({
+        id: m,
+        maxPrompt: parseInt(values.maxPrompt, 10) || 128000,
+        maxOutput: parseInt(values.maxOutput, 10) || 16384,
+        responses: !!values.supportsResponses,
+        effort: effortLevels
+      })) : [{
+        id: "default-model",
+        maxPrompt: parseInt(values.maxPrompt, 10) || 128000,
+        maxOutput: parseInt(values.maxOutput, 10) || 16384,
+        responses: !!values.supportsResponses,
+        effort: effortLevels
+      }];
+
+      const colors = ["#74e0a0", "#56b6c2", "#ffb454", "#a78bfa", "#ff6a6a", "#5cc8ff"];
+      const color = colors[PROVIDERS.length % colors.length];
+      const badge = name.slice(0, 2).toUpperCase();
+
+      const newProv = {
+        id,
+        name,
+        type: values.type || "openai",
+        color,
+        badge,
+        baseUrl: values.baseUrl || "https://api.example.com/v1",
+        supportsResponses: !!values.supportsResponses,
+        keyRequired: !!values.keyRequired,
+        keyEnv: values.keyEnv || (id.toUpperCase().replace(/-/g, "_") + "_API_KEY"),
+        models
+      };
+
+      PROVIDERS.push(newProv);
+      selectProvider(id);
+      saveState();
+      return true;
+    }
   });
 }
 
 function renderModelOptions(){
   const sel = $("model");
   sel.innerHTML = "";
-  provider().models.forEach(m => {
+  const p = provider();
+  if(!p || !p.models) return;
+  p.models.forEach(m => {
     const o = document.createElement("option");
     o.value = m.id; o.textContent = m.id;
     if(m.id === state.modelId) o.selected = true;
@@ -906,7 +1040,7 @@ function renderEffort(){
     b.type = "button";
     b.textContent = o === "none" ? "none" : o;
     b.className = (state.effort === o) ? "on" : "";
-    b.addEventListener("click", () => { state.effort = o; renderEffort(); refresh(); });
+    b.addEventListener("click", () => { state.effort = o; saveState(); renderEffort(); refresh(); });
     seg.appendChild(b);
   });
   $("effortHint").innerHTML = `Adds <b>--effort ${state.effort==="none"?"(omitted)":state.effort}</b>. Only models with configurable reasoning honor it.`;
@@ -914,12 +1048,13 @@ function renderEffort(){
 
 function renderConditional(){
   const p = provider();
+  if(!p) return;
   // azure fields
   $("azureFields").classList.toggle("hidden", !p.needsResource);
   $("baseUrlField").classList.toggle("hidden", !!p.needsResource);
   if(p.needsResource){
-    $("resource").value = state.resource;
-    $("deployment").value = state.deployment;
+    $("resource").value = state.resource || "";
+    $("deployment").value = state.deployment || "";
     $("azureUrlPreview").textContent = baseUrl();
   } else {
     $("baseUrl").value = baseUrl();
@@ -931,8 +1066,8 @@ function renderConditional(){
   $("keyNote").classList.toggle("hidden", needKey);
   if(needKey){
     $("keyReqTag").textContent = "required";
-    $("keyEnv").value = state.keyEnv;
-    $("keyLiteral").value = state.keyLiteral;
+    $("keyEnv").value = state.keyEnv || "";
+    $("keyLiteral").value = state.keyLiteral || "";
     $("keyEnvWrap").classList.toggle("hidden", state.keyMode !== "env");
     $("keyLiteral").classList.toggle("hidden", state.keyMode !== "literal");
     Array.from($("keyMode").children).forEach(b => b.classList.toggle("on", b.dataset.km === state.keyMode));
@@ -949,11 +1084,15 @@ function renderConditional(){
     ? `<b>${p.name}</b> supports the Responses API. Use <b>responses</b> for GPT-5.x / reasoning endpoints; <b>completions</b> for classic chat.`
     : `<b>${p.name}</b> is Chat-Completions only — wire stays unset (completions).`;
   // tuning
-  $("maxPrompt").value = state.maxPrompt;
-  $("maxOutput").value = state.maxOutput;
+  $("maxPrompt").value = state.maxPrompt || 0;
+  $("maxOutput").value = state.maxOutput || 0;
+  $("aliasName").value = state.aliasName || "cc";
+  $("yolo").checked = !!state.yolo;
+  $("offline").checked = !!state.offline;
+  $("psCleanup").checked = !!state.psCleanup;
   // ps cleanup row visibility
   $("psCleanupRow").classList.toggle("hidden", state.shell !== "powershell");
-  // kind seg (reflect)
+  // kind seg
   Array.from($("kindSeg").children).forEach(b => b.classList.toggle("on", b.dataset.k === state.kind));
   Array.from($("shellSeg").children).forEach(b => b.classList.toggle("on", b.dataset.s === state.shell));
 }
@@ -972,11 +1111,12 @@ function baseUrlHintFor(p){
 function renderModelMeta(){
   const m = model();
   const p = provider();
+  if(!m || !p) return;
   $("modelMeta").innerHTML =
     `ctx <b>${Number(m.maxPrompt).toLocaleString()}</b> · out <b>${Number(m.maxOutput).toLocaleString()}</b> · ` +
     `wire <b>${(p.supportsResponses && m.responses) ? "responses" : "completions"}</b> · ` +
-    `effort <b>${m.effort.length ? m.effort.join("/") : "n/a"}</b>`;
-  $("modelHint").textContent = p.modelIsDeployment ? "azure → uses deployment name" : (p.models.length + " models");
+    `effort <b>${m.effort && m.effort.length ? m.effort.join("/") : "n/a"}</b>`;
+  $("modelHint").textContent = p.modelIsDeployment ? "azure → uses deployment name" : ((p.models ? p.models.length : 0) + " models");
 }
 
 function renderSummary(){
@@ -984,6 +1124,7 @@ function renderSummary(){
   const m = model();
   const sum = $("summary");
   sum.innerHTML = "";
+  if(!p || !m) return;
   const chips = [
     ["provider", p.name],
     ["model", modelString()],
@@ -1019,7 +1160,6 @@ function refresh(){
   renderSummary();
   renderModelMeta();
   renderPlacement();
-  // keep azure url preview fresh
   if(provider().needsResource) $("azureUrlPreview").textContent = baseUrl();
 }
 
@@ -1029,14 +1169,14 @@ function refresh(){
 function selectProvider(id){
   state.providerId = id;
   const p = provider();
-  // default model = first
-  state.modelId = p.models[0].id;
+  if(!p) return;
+  state.modelId = (p.models && p.models[0]) ? p.models[0].id : "default";
   applyModelDefaults();
-  // key defaults
   state.keyMode = "env";
   state.keyEnv = p.keyEnv || "API_KEY";
   state.keyLiteral = "";
   state.wireMode = "auto";
+  saveState();
   renderProviders();
   renderModelOptions();
   renderEffort();
@@ -1049,8 +1189,7 @@ function applyModelDefaults(){
   state.maxPrompt = m.maxPrompt;
   state.maxOutput = m.maxOutput;
   if(provider().modelIsDeployment) state.deployment = m.id;
-  // pick a sensible effort default
-  const opts = m.effort;
+  const opts = m.effort || [];
   if(opts.length === 0) state.effort = "none";
   else if(opts.includes("high")) state.effort = "high";
   else if(opts.includes("medium")) state.effort = "medium";
@@ -1095,7 +1234,7 @@ function renderCollection(){
       `<span class="ci-name">${c.name}</span>` +
       `<span class="ci-meta">${c.shell} · ${c.kind} · ${c.provider}/${c.model}</span>` +
       `<button class="ci-x" title="remove">✕</button>`;
-    row.querySelector(".ci-x").addEventListener("click", () => { collection.splice(i,1); renderCollection(); });
+    row.querySelector(".ci-x").addEventListener("click", () => { collection.splice(i,1); saveState(); renderCollection(); });
     list.appendChild(row);
   });
 }
@@ -1107,38 +1246,38 @@ function bind(){
   $("model").addEventListener("change", e => {
     state.modelId = e.target.value;
     applyModelDefaults();
+    saveState();
     renderEffort(); renderConditional(); refresh();
   });
-  $("resource").addEventListener("input", e => { state.resource = e.target.value; refresh(); $("azureUrlPreview").textContent = baseUrl(); });
-  $("deployment").addEventListener("input", e => { state.deployment = e.target.value; refresh(); });
+  $("resource").addEventListener("input", e => { state.resource = e.target.value; saveState(); refresh(); $("azureUrlPreview").textContent = baseUrl(); });
+  $("deployment").addEventListener("input", e => { state.deployment = e.target.value; saveState(); refresh(); });
   $("baseUrl").addEventListener("input", e => {
-    // user override of base url for non-azure providers (session only)
-    provider().baseUrl = e.target.value; refresh();
+    provider().baseUrl = e.target.value; saveState(); refresh();
   });
   $("keyMode").addEventListener("click", e => {
     const b = e.target.closest("button"); if(!b) return;
-    state.keyMode = b.dataset.km; renderConditional(); refresh();
+    state.keyMode = b.dataset.km; saveState(); renderConditional(); refresh();
   });
-  $("keyEnv").addEventListener("input", e => { state.keyEnv = e.target.value; refresh(); });
-  $("keyLiteral").addEventListener("input", e => { state.keyLiteral = e.target.value; refresh(); });
-  $("maxPrompt").addEventListener("input", e => { state.maxPrompt = parseInt(e.target.value,10) || 0; refresh(); });
-  $("maxOutput").addEventListener("input", e => { state.maxOutput = parseInt(e.target.value,10) || 0; refresh(); });
+  $("keyEnv").addEventListener("input", e => { state.keyEnv = e.target.value; saveState(); refresh(); });
+  $("keyLiteral").addEventListener("input", e => { state.keyLiteral = e.target.value; saveState(); refresh(); });
+  $("maxPrompt").addEventListener("input", e => { state.maxPrompt = parseInt(e.target.value,10) || 0; saveState(); refresh(); });
+  $("maxOutput").addEventListener("input", e => { state.maxOutput = parseInt(e.target.value,10) || 0; saveState(); refresh(); });
   $("wireMode").addEventListener("click", e => {
     const b = e.target.closest("button"); if(!b) return;
-    state.wireMode = b.dataset.w; renderConditional(); refresh();
+    state.wireMode = b.dataset.w; saveState(); renderConditional(); refresh();
   });
-  $("aliasName").addEventListener("input", e => { state.aliasName = e.target.value.replace(/\s+/g,""); refresh(); });
+  $("aliasName").addEventListener("input", e => { state.aliasName = e.target.value.replace(/\s+/g,""); saveState(); refresh(); });
   $("kindSeg").addEventListener("click", e => {
     const b = e.target.closest("button"); if(!b) return;
-    state.kind = b.dataset.k; renderConditional(); refresh();
+    state.kind = b.dataset.k; saveState(); renderConditional(); refresh();
   });
   $("shellSeg").addEventListener("click", e => {
     const b = e.target.closest("button"); if(!b) return;
-    state.shell = b.dataset.s; renderConditional(); renderEffort(); refresh();
+    state.shell = b.dataset.s; saveState(); renderConditional(); renderEffort(); refresh();
   });
-  $("yolo").addEventListener("change", e => { state.yolo = e.target.checked; refresh(); });
-  $("offline").addEventListener("change", e => { state.offline = e.target.checked; refresh(); });
-  $("psCleanup").addEventListener("change", e => { state.psCleanup = e.target.checked; refresh(); });
+  $("yolo").addEventListener("change", e => { state.yolo = e.target.checked; saveState(); refresh(); });
+  $("offline").addEventListener("change", e => { state.offline = e.target.checked; saveState(); refresh(); });
+  $("psCleanup").addEventListener("change", e => { state.psCleanup = e.target.checked; saveState(); refresh(); });
 
   $("copyBtn").addEventListener("click", () => copyText($("output").dataset.raw || "", $("copyBtn"), "⧉ copied ✓"));
   $("addBtn").addEventListener("click", () => {
@@ -1150,6 +1289,7 @@ function bind(){
       model: modelString(),
       code: generate(),
     });
+    saveState();
     renderCollection(); showToast();
   });
   $("copyAllBtn").addEventListener("click", () => {
@@ -1157,13 +1297,41 @@ function bind(){
     const all = collection.map(c => c.code).join("\n\n");
     copyText(all, $("copyAllBtn"), "⧉ copied all ✓");
   });
-  $("clearBtn").addEventListener("click", () => { collection.length = 0; renderCollection(); });
+  $("clearBtn").addEventListener("click", () => { collection.length = 0; saveState(); renderCollection(); });
+
+  const shareHandler = () => {
+    window.BYOKShare.shareCurrentPage({
+      providers: PROVIDERS,
+      state: state,
+      collection: collection
+    });
+  };
+  if($("shareBtn")) $("shareBtn").addEventListener("click", shareHandler);
+  if($("shareOutBtn")) $("shareOutBtn").addEventListener("click", shareHandler);
 }
 
 /* =========================================================================
    INIT
    ========================================================================= */
-function init(){
+async function init(){
+  // Check shared URL hash first
+  const shared = await window.BYOKShare.getSharedData();
+  if(shared){
+    if(Array.isArray(shared.providers)) PROVIDERS = shared.providers;
+    if(shared.state) Object.assign(state, shared.state);
+    if(Array.isArray(shared.collection)) collection = shared.collection;
+    saveState();
+    window.BYOKToast.show(window.t ? window.t("common.sharedLoaded") : "Settings loaded from share link ✓");
+  } else {
+    // Load from local storage
+    const saved = window.BYOKStore.getPage("copilot", null);
+    if(saved){
+      if(Array.isArray(saved.providers)) PROVIDERS = saved.providers;
+      if(saved.state) Object.assign(state, saved.state);
+      if(Array.isArray(saved.collection)) collection = saved.collection;
+    }
+  }
+
   renderProviders();
   renderModelOptions();
   renderEffort();

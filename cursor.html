@@ -33,6 +33,7 @@
 <meta name="twitter:image" content="https://byok-forge.gh.miniasp.com/og-image.jpg" />
 <script src="translations.js?v=20260630"></script>
 <script src="i18n.js?v=20260630"></script>
+<script src="storage.js?v=20260630"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Martian+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -289,6 +290,46 @@
     border-color: var(--border-2);
     background: var(--panel-3);
   }
+  .prov .prov-del {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    cursor: pointer;
+    opacity: 0;
+    transition: all .15s ease;
+    z-index: 2;
+  }
+  .prov:hover .prov-del { opacity: 1; }
+  .prov .prov-del:hover { background: rgba(255,106,106,.15); color: var(--red); border-color: rgba(255,106,106,.3); }
+  .prov-add {
+    cursor: pointer;
+    border: 1px dashed var(--border-2);
+    border-radius: 11px;
+    background: var(--panel-2);
+    padding: 12px;
+    text-align: center;
+    transition: all .15s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 78px;
+    color: var(--muted);
+  }
+  .prov-add:hover { border-color: var(--amber-line); background: var(--amber-soft); color: var(--amber); transform: translateY(-2px); }
+  .prov-add .add-icon { font-size: 22px; line-height: 1; font-family: var(--mono); font-weight: 700; }
+  .prov-add .add-text { font-family: var(--mono); font-size: 11px; font-weight: 600; }
   .prov.sel {
     border-color: var(--amber-line);
     background: linear-gradient(180deg, var(--amber-soft), transparent);
@@ -480,6 +521,7 @@
     </div>
     <div class="meta">
       <div id="langSwitcher"></div>
+      <button class="home" id="shareBtn" style="cursor:pointer;" data-i18n="common.share">⎘ share</button>
       <a class="home" href="index.html" data-i18n="common.allTools">⊞ all tools</a>
     </div>
   </header>
@@ -576,6 +618,7 @@
             <pre id="settingsOut"></pre>
             <div class="out-actions">
               <button class="btn primary" id="copySettingsBtn" data-i18n="cursor.copySettings">⧉ copy settings</button>
+              <button class="btn ghost" id="shareOutBtn" data-i18n="common.share">⎘ share</button>
               <button class="btn" id="downloadSettingsBtn" data-i18n="cursor.downloadSettings">⤓ download settings.json</button>
             </div>
           </div>
@@ -598,15 +641,17 @@
   </main>
 
   <footer data-i18n-html="cursor.footer">Verify field names in your local Cursor settings before restart.</footer>
+  <div style="margin-top:12px;text-align:center;color:var(--muted-2);font-size:11.5px;font-family:var(--mono);">本工具由 <a href="https://www.facebook.com/will.fans/" target="_blank" rel="noopener noreferrer" style="color:var(--amber);text-decoration:none;border-bottom:1px dotted var(--amber);">Will 保哥的技術交流中心</a> 設計、開發與維護</div>
 
 </div>
 
 <script>
 (function () {
-  const PRESETS = [
+  const DEFAULT_PRESETS = [
     {
       value: "openai",
       nameKey: "cursor.presetOpenAI",
+      name: "OpenAI",
       providerId: "openai",
       baseURL: "https://api.openai.com/v1",
       keyEnv: "OPENAI_API_KEY",
@@ -617,6 +662,7 @@
     {
       value: "openrouter",
       nameKey: "cursor.presetOpenRouter",
+      name: "OpenRouter",
       providerId: "openrouter",
       baseURL: "https://openrouter.ai/api/v1",
       keyEnv: "OPENROUTER_API_KEY",
@@ -627,6 +673,7 @@
     {
       value: "deepseek",
       nameKey: "cursor.presetDeepSeek",
+      name: "DeepSeek",
       providerId: "deepseek",
       baseURL: "https://api.deepseek.com/v1",
       keyEnv: "DEEPSEEK_API_KEY",
@@ -637,24 +684,17 @@
     {
       value: "ollama-cloud",
       nameKey: "cursor.presetOllamaCloud",
+      name: "Ollama Cloud",
       providerId: "ollama-cloud",
       baseURL: "https://ollama.deepinfra.com/v1",
       keyEnv: "OLLAMA_API_KEY",
       model: "llama-3.1",
       includeKey: true,
       schema: "cursor-general"
-    },
-    {
-      value: "custom",
-      nameKey: "cursor.presetCustom",
-      providerId: "",
-      baseURL: "",
-      keyEnv: "",
-      model: "",
-      includeKey: true,
-      schema: "cursor-general"
     }
   ];
+
+  let PRESETS = JSON.parse(JSON.stringify(DEFAULT_PRESETS));
 
   const SCHEMAS = [
     { value: "cursor-general", nameKey: "cursor.schemaCursorGeneral" },
@@ -677,7 +717,7 @@
 
   const DEFAULT_PATH = "~/.config/cursor/settings.json";
 
-  const state = {
+  const DEFAULT_STATE = {
     preset: PRESETS[0].value,
     providerId: PRESETS[0].providerId,
     baseURL: PRESETS[0].baseURL,
@@ -688,33 +728,41 @@
     configPath: DEFAULT_PATH
   };
 
+  let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+
+  function saveState() {
+    window.BYOKStore.savePage("cursor", {
+      presets: PRESETS,
+      state: state
+    });
+  }
+
   const $ = function (id) {
     return document.getElementById(id);
   };
 
   const inputIds = ["providerId", "baseURL", "keyEnv", "model", "configPath", "schema", "includeKey"];
 
-  function getColorForProvider(value) {
-    if (!value) return "⚙";
+  function getColorForProvider(value, preset) {
+    if (preset && preset.badge) return preset.badge;
     const map = {
       openai: "O",
       openrouter: "R",
       deepseek: "D",
-      "ollama-cloud": "O",
-      custom: "C"
+      "ollama-cloud": "O"
     };
-    return map[value] || String(value).slice(0, 2).toUpperCase();
+    return map[value] || String((preset && preset.name) || value || "").slice(0, 2).toUpperCase();
   }
 
-  function getProviderColor(value) {
+  function getProviderColor(value, preset) {
+    if (preset && preset.color) return preset.color;
     const map = {
       openai: "var(--amber)",
       openrouter: "#56b6c2",
       deepseek: "#b48ead",
-      "ollama-cloud": "#74e0a0",
-      custom: "var(--panel-3)"
+      "ollama-cloud": "#74e0a0"
     };
-    return map[value] || "var(--panel-2)";
+    return map[value] || "#5cc8ff";
   }
 
   function renderSelectOptions() {
@@ -751,59 +799,135 @@
   function renderProviderCards() {
     const providers = $("providers");
     if (!providers) return;
+    providers.innerHTML = "";
 
     const frag = document.createDocumentFragment();
-    PRESETS.forEach(function (preset) {
+    PRESETS.forEach(function (preset, idx) {
       const button = document.createElement("button");
-      const displayName = t(preset.nameKey || preset.value);
+      const displayName = preset.nameKey ? t(preset.nameKey) : (preset.name || preset.value);
       button.type = "button";
       button.className = "prov" + (preset.value === state.preset ? " sel" : "");
       button.dataset.preset = preset.value;
       button.innerHTML = ''
-        + '<span class="mono-badge" style="background:' + getProviderColor(preset.value) + '">' + getColorForProvider(preset.value) + '</span>'
+        + '<button class="prov-del" title="' + (window.t ? window.t('common.deleteProvider') : 'Delete provider') + '" type="button">✕</button>'
+        + '<span class="mono-badge" style="background:' + getProviderColor(preset.value, preset) + '">' + getColorForProvider(preset.value, preset) + '</span>'
         + '<span class="pname">' + displayName + '</span>'
         + '<span class="ptype">' + (preset.baseURL || "") + '</span>';
+
+      button.querySelector(".prov-del").addEventListener("click", function (e) {
+        e.stopPropagation();
+        PRESETS.splice(idx, 1);
+        if (PRESETS.length === 0) {
+          PRESETS = JSON.parse(JSON.stringify(DEFAULT_PRESETS));
+        }
+        if (state.preset === preset.value) {
+          state.preset = PRESETS[0].value;
+          syncStateFromPreset();
+        }
+        saveState();
+        renderProviderCards();
+        render();
+      });
+
+      button.addEventListener("click", function () {
+        state.preset = preset.value;
+        syncStateFromPreset();
+      });
+
       frag.appendChild(button);
     });
 
-    providers.innerHTML = "";
+    // Big + Add Provider Card
+    const addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.className = "prov-add";
+    addBtn.innerHTML = '<span class="add-icon">＋</span><span class="add-text">' + (window.t ? window.t('common.addProvider') : '＋ add provider') + '</span>';
+    addBtn.addEventListener("click", openAddProviderModal);
+    frag.appendChild(addBtn);
+
     providers.appendChild(frag);
   }
 
+  function openAddProviderModal() {
+    window.BYOKModal.show({
+      title: window.t ? window.t("common.addProvider") : "Add New Provider",
+      fields: [
+        { id: "name", label: "Provider Name", placeholder: "e.g. Together AI, Groq", value: "" },
+        { id: "providerId", label: "Provider ID", placeholder: "e.g. together-ai", value: "" },
+        { id: "baseURL", label: "Base URL", placeholder: "https://api.example.com/v1", value: "" },
+        { id: "requireKey", label: "Key Required", type: "checkbox", value: true, checkboxLabel: "Requires API Key" },
+        { id: "keyEnv", label: "API Key Env Var", placeholder: "MY_API_KEY", value: "" },
+        { id: "model", label: "Default Model ID", placeholder: "model-name", value: "" },
+        { id: "schema", label: "Settings Schema", type: "select", value: "cursor-general", options: [
+          { value: "cursor-general", label: "Cursor general (cursor.*)" },
+          { value: "openai-legacy", label: "OpenAI legacy (openai.*)" },
+          { value: "cursor-aiprovider", label: "AI Provider (cursor.aiprovider.*)" }
+        ]}
+      ],
+      onSave: (values) => {
+        const name = values.name.trim();
+        if (!name) return false;
+        const val = values.providerId.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || ("custom-" + Date.now());
+
+        const colors = ["#5cc8ff", "#74e0a0", "#ffb454", "#a78bfa", "#ff6a6a", "#56b6c2"];
+        const color = colors[PRESETS.length % colors.length];
+
+        const newPreset = {
+          value: val,
+          name: name,
+          providerId: val,
+          baseURL: values.baseURL || "https://api.example.com/v1",
+          keyEnv: values.keyEnv || (val.toUpperCase().replace(/-/g, "_") + "_API_KEY"),
+          model: values.model || "my-model",
+          includeKey: !!values.requireKey,
+          schema: values.schema || "cursor-general",
+          color: color,
+          badge: name.slice(0, 2).toUpperCase()
+        };
+
+        PRESETS.push(newPreset);
+        state.preset = val;
+        syncStateFromPreset();
+        saveState();
+        renderProviderCards();
+        render();
+        return true;
+      }
+    });
+  }
+
   function getPreset(value) {
-    for (var i = 0; i < PRESETS.length; i++) {
-      if (PRESETS[i].value === value) return PRESETS[i];
+    for (let i = 0; i < PRESETS.length; i += 1) {
+      if (PRESETS[i].value === value) {
+        return PRESETS[i];
+      }
     }
-    return PRESETS[PRESETS.length - 1];
+    return PRESETS[0];
   }
 
   function syncStateFromPreset() {
-    const preset = getPreset(state.preset);
-    state.preset = preset.value;
-    if (state.preset !== "custom") {
-      state.providerId = preset.providerId;
-      state.baseURL = preset.baseURL;
-      state.keyEnv = preset.keyEnv;
-      state.model = preset.model;
-      state.includeKey = preset.includeKey;
-      state.schema = preset.schema;
-      state.configPath = state.configPath || DEFAULT_PATH;
-    }
-    syncInputValues();
-    render();
-    renderProviderCards();
-    renderModelList();
-  }
+    const selected = getPreset(state.preset);
+    if (!selected) return;
 
-  function syncInputValues() {
+    state.providerId = selected.providerId || "";
+    state.baseURL = selected.baseURL || "";
+    state.keyEnv = selected.keyEnv || "";
+    state.model = selected.model || "";
+    state.includeKey = Boolean(selected.includeKey);
+    state.schema = selected.schema || state.schema;
+
     $("providerId").value = state.providerId;
     $("baseURL").value = state.baseURL;
     $("keyEnv").value = state.keyEnv;
     $("model").value = state.model;
-    $("configPath").value = state.configPath;
+    $("includeKey").checked = state.includeKey;
+    $("configPath").value = state.configPath || DEFAULT_PATH;
     $("schema").value = state.schema;
-    $("includeKey").checked = !!state.includeKey;
-    $("configPathLabel").textContent = state.configPath || DEFAULT_PATH;
+
+    renderModelList();
+    renderProviderCards();
+    saveState();
+    render();
   }
 
   function collectState() {
@@ -812,102 +936,61 @@
     state.keyEnv = $("keyEnv").value.trim();
     state.model = $("model").value.trim();
     state.configPath = $("configPath").value.trim() || DEFAULT_PATH;
-    state.schema = $("schema").value;
     state.includeKey = $("includeKey").checked;
-    $("configPathLabel").textContent = state.configPath;
-  }
-
-  function q(value) {
-    return JSON.stringify(String(value));
+    state.schema = $("schema").value;
+    saveState();
   }
 
   function buildSettingsJson() {
-    const base = state.baseURL || "";
-    const keyRef = "${" + state.keyEnv + "}";
-    const model = state.model || "";
-    const lines = [];
-
-    if (state.schema === "cursor-general") {
-      lines.push("  \"cursor.general.openAIBaseURL\": " + q(base));
-      if (state.includeKey && state.keyEnv) {
-        lines.push("  \"cursor.general.openAIAPIKey\": " + q(keyRef));
-      }
-      if (model) {
-        lines.push("  \"cursor.general.model\": " + q(model));
-      }
-      if (state.providerId) {
-        lines.push("  \"cursor.general.provider\": " + q(state.providerId));
-      }
-    }
+    const obj = {};
+    const keyEnvName = state.keyEnv || "MY_API_KEY";
+    const apiKeyRef = `${keyEnvName}`;
 
     if (state.schema === "openai-legacy") {
-      lines.push("  \"openAiBaseUrl\": " + q(base));
-      if (state.includeKey && state.keyEnv) {
-        lines.push("  \"openAiApiKey\": " + q(keyRef));
-      }
-      if (model) {
-        lines.push("  \"openAiModel\": " + q(model));
-      }
-      if (state.providerId) {
-        lines.push("  \"openAiProvider\": " + q(state.providerId));
-      }
+      if (state.baseURL) obj["openai.baseURL"] = state.baseURL;
+      if (state.includeKey) obj["openai.apiKey"] = apiKeyRef;
+      if (state.model) obj["openai.model"] = state.model;
+      if (state.providerId) obj["openai.provider"] = state.providerId;
+      return JSON.stringify(obj, null, 2);
     }
 
     if (state.schema === "cursor-aiprovider") {
-      lines.push("  \"cursor.aiprovider.openai.baseUrl\": " + q(base));
-      if (state.includeKey && state.keyEnv) {
-        lines.push("  \"cursor.aiprovider.openai.apiKey\": " + q(keyRef));
-      }
-      if (state.providerId) {
-        lines.push("  \"cursor.aiprovider.openai.provider\": " + q(state.providerId));
-      }
-      if (model) {
-        lines.push("  \"cursor.aiprovider.openai.model\": " + q(model));
-      }
+      const aiProvider = {};
+      if (state.providerId) aiProvider.id = state.providerId;
+      if (state.baseURL) aiProvider.baseURL = state.baseURL;
+      if (state.includeKey) aiProvider.apiKeyEnv = keyEnvName;
+      if (state.model) aiProvider.defaultModel = state.model;
+      obj["cursor.aiprovider"] = aiProvider;
+      return JSON.stringify(obj, null, 2);
     }
 
-    if (!lines.length) {
-      return "{}\n";
-    }
-
-    return "{\n" + lines.join(",\n") + "\n}\n";
+    if (state.baseURL) obj["cursor.general.customBaseUrl"] = state.baseURL;
+    if (state.includeKey) obj["cursor.general.customApiKeyEnv"] = keyEnvName;
+    if (state.model) obj["cursor.general.customModel"] = state.model;
+    if (state.providerId) obj["cursor.general.customProviderId"] = state.providerId;
+    return JSON.stringify(obj, null, 2);
   }
 
   function buildRunText(settingsText) {
-    const path = state.configPath || DEFAULT_PATH;
-    const run = [];
-    run.push("# Write settings.json to Cursor configuration file");
-    run.push('cat <<\'JSON\' > "' + path + '"');
-    run.push(settingsText.replace(/\n$/, ""));
-    run.push("JSON");
-    run.push("");
-    run.push("# Restart Cursor to reload settings.");
-    if (state.includeKey && state.keyEnv) {
-      run.push("# Ensure env var is exported in your shell or launch profile before start:");
-      run.push('export ' + state.keyEnv + '="' + state.keyEnv + '_value"');
-    } else {
-      run.push("# No API key variable required for this preset.");
-    }
-    return run.join("\n") + "\n";
-  }
+    const lines = [];
+    const keyEnvName = state.keyEnv || "MY_API_KEY";
 
-  function copyTextFrom(id, fallbackMsgKey) {
-    const el = $(id);
-    if (!el) return;
-    const text = el.dataset && el.dataset.raw ? el.dataset.raw : el.textContent || "";
-    navigator.clipboard.writeText(text).then(function () {
-      const prev = $("copySettingsBtn") ? $("copySettingsBtn").textContent : "";
-      const label = t("common.copied") || fallbackMsgKey;
-      if (prev) {
-        const target = $("copySettingsBtn");
-        target.textContent = label;
-        setTimeout(function () {
-          target.textContent = t(fallbackMsgKey);
-        }, 900);
-      }
-    }).catch(function () {
-      window.alert("copy failed");
-    });
+    if (state.includeKey) {
+      lines.push(`# 1. Export your API key in shell:`);
+      lines.push(`export ${keyEnvName}="<your-api-key>"`);
+      lines.push("");
+    }
+
+    lines.push(`# 2. Write or merge into Cursor settings:`);
+    lines.push(`mkdir -p $(dirname "${state.configPath}")`);
+    lines.push(`cat << 'EOF' > "${state.configPath}"`);
+    lines.push(settingsText);
+    lines.push("EOF");
+    lines.push("");
+    lines.push(`# 3. Launch Cursor:`);
+    lines.push("cursor .");
+
+    return lines.join("\n");
   }
 
   function download(filename, text) {
@@ -939,16 +1022,6 @@
   function bind() {
     renderSelectOptions();
     renderProviderCards();
-    syncStateFromPreset();
-
-    if ($("providers")) {
-      $("providers").addEventListener("click", function (event) {
-        const el = event.target.closest(".prov");
-        if (!el) return;
-        state.preset = el.dataset.preset || state.preset;
-        syncStateFromPreset();
-      });
-    }
 
     $("schema").addEventListener("change", function () {
       state.schema = $("schema").value;
@@ -960,17 +1033,17 @@
       if (!el) return;
       el.addEventListener("input", function () {
         collectState();
-        if (id === "keyEnv" && state.preset !== "custom") {
+        if (id === "keyEnv") {
           var p = getPreset(state.preset);
-          p.keyEnv = state.keyEnv;
+          if (p) p.keyEnv = state.keyEnv;
         }
         render();
       });
       el.addEventListener("change", function () {
         collectState();
-        if (id === "keyEnv" && state.preset !== "custom") {
+        if (id === "keyEnv") {
           var p = getPreset(state.preset);
-          p.keyEnv = state.keyEnv;
+          if (p) p.keyEnv = state.keyEnv;
         }
         render();
       });
@@ -1006,6 +1079,15 @@
       download("cursor-settings.json", $("settingsOut").dataset.raw || "{}\n");
     });
 
+    const shareHandler = () => {
+      window.BYOKShare.shareCurrentPage({
+        presets: PRESETS,
+        state: state
+      });
+    };
+    if ($("shareBtn")) $("shareBtn").addEventListener("click", shareHandler);
+    if ($("shareOutBtn")) $("shareOutBtn").addEventListener("click", shareHandler);
+
     window.addEventListener("i18n:changed", function () {
       renderSelectOptions();
       renderProviderCards();
@@ -1013,20 +1095,55 @@
     });
   }
 
-  window.I18NEngine.init({
-    page: "cursor",
-    titleKey: "cursor.title",
-    onChange: function () {
-      renderSelectOptions();
-      renderProviderCards();
-      render();
+  async function init() {
+    const shared = await window.BYOKShare.getSharedData();
+    if (shared) {
+      if (Array.isArray(shared.presets)) PRESETS = shared.presets;
+      if (shared.state) Object.assign(state, shared.state);
+      saveState();
+      $("providerId").value = state.providerId || "";
+      $("baseURL").value = state.baseURL || "";
+      $("keyEnv").value = state.keyEnv || "";
+      $("model").value = state.model || "";
+      $("includeKey").checked = !!state.includeKey;
+      $("configPath").value = state.configPath || DEFAULT_PATH;
+      $("schema").value = state.schema || "cursor-general";
+      window.BYOKToast.show(window.t ? window.t("common.sharedLoaded") : "Settings loaded from share link ✓");
+    } else {
+      const saved = window.BYOKStore.getPage("cursor", null);
+      if (saved) {
+        if (Array.isArray(saved.presets)) PRESETS = saved.presets;
+        if (saved.state) Object.assign(state, saved.state);
+        $("providerId").value = state.providerId || "";
+        $("baseURL").value = state.baseURL || "";
+        $("keyEnv").value = state.keyEnv || "";
+        $("model").value = state.model || "";
+        $("includeKey").checked = !!state.includeKey;
+        $("configPath").value = state.configPath || DEFAULT_PATH;
+        $("schema").value = state.schema || "cursor-general";
+      } else {
+        syncStateFromPreset();
+      }
     }
-  });
+
+    bind();
+    render();
+
+    window.I18NEngine.init({
+      page: "cursor",
+      titleKey: "cursor.title",
+      onChange: function () {
+        renderSelectOptions();
+        renderProviderCards();
+        render();
+      }
+    });
+  }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", bind);
+    document.addEventListener("DOMContentLoaded", init);
   } else {
-    bind();
+    init();
   }
 })();
 </script>
