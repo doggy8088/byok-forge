@@ -715,7 +715,7 @@
     "stepfun/step-3.7-flash",
   ];
 
-  const DEFAULT_PATH = "~/.config/cursor/settings.json";
+  const DEFAULT_PATH = "~/.config/Cursor/User/settings.json";
 
   const DEFAULT_STATE = {
     preset: PRESETS[0].value,
@@ -971,9 +971,16 @@
     return JSON.stringify(obj, null, 2);
   }
 
+  function expandHomePath(p) {
+    const s = String(p || "").trim();
+    if (s.startsWith("~/")) return `$HOME/${s.slice(2)}`;
+    return s;
+  }
+
   function buildRunText(settingsText) {
     const lines = [];
     const keyEnvName = state.keyEnv || "MY_API_KEY";
+    const dest = expandHomePath(state.configPath);
 
     if (state.includeKey) {
       lines.push(`# 1. Export your API key in shell:`);
@@ -982,8 +989,10 @@
     }
 
     lines.push(`# 2. Write or merge into Cursor settings:`);
-    lines.push(`mkdir -p $(dirname "${state.configPath}")`);
-    lines.push(`cat << 'EOF' > "${state.configPath}"`);
+    lines.push(`# Linux: ~/.config/Cursor/User/settings.json`);
+    lines.push(`# Windows: %APPDATA%\\Cursor\\User\\settings.json`);
+    lines.push(`mkdir -p "$(dirname "${dest}")"`);
+    lines.push(`cat << 'EOF' > "${dest}"`);
     lines.push(settingsText);
     lines.push("EOF");
     lines.push("");
