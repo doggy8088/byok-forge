@@ -1019,10 +1019,15 @@
       .replace(/: (true|false|null)/g, ': <span class="c-val">$1</span>');
   }
 
+  function posixSingleQuote(s) {
+    return "'" + String(s).replace(/'/g, "'\\''") + "'";
+  }
+
   function shellHomePath(p) {
-    const s = String(p || "").trim();
-    if (s.startsWith("~/")) return `"$HOME/${s.slice(2).replace(/"/g, '\\"')}"`;
-    return `"${s.replace(/"/g, '\\"')}"`;
+    const raw = String(p || "").trim() || "config.json";
+    if (raw.startsWith("~/")) return '"$HOME"/' + posixSingleQuote(raw.slice(2));
+    if (raw.startsWith("$HOME/")) return '"$HOME"/' + posixSingleQuote(raw.slice(6));
+    return posixSingleQuote(raw);
   }
 
   function highlightShell(code) {

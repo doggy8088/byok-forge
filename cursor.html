@@ -716,6 +716,7 @@
   ];
 
   const DEFAULT_PATH = "~/.config/Cursor/User/settings.json";
+  const LEGACY_DEFAULT_PATH = "~/.config/cursor/settings.json";
 
   const DEFAULT_STATE = {
     preset: PRESETS[0].value,
@@ -971,16 +972,27 @@
     return JSON.stringify(obj, null, 2);
   }
 
-  function expandHomePath(p) {
-    const s = String(p || "").trim();
-    if (s.startsWith("~/")) return `$HOME/${s.slice(2)}`;
-    return s;
+  function posixSingleQuote(s) {
+    return "'" + String(s).replace(/'/g, "'\\''") + "'";
+  }
+
+  function shellHomePath(p) {
+    const raw = String(p || "").trim() || "settings.json";
+    if (raw.startsWith("~/")) return '"$HOME"/' + posixSingleQuote(raw.slice(2));
+    if (raw.startsWith("$HOME/")) return '"$HOME"/' + posixSingleQuote(raw.slice(6));
+    return posixSingleQuote(raw);
+  }
+
+  function migrateLegacyConfigPath() {
+    if (state.configPath === LEGACY_DEFAULT_PATH) {
+      state.configPath = DEFAULT_PATH;
+    }
   }
 
   function buildRunText(settingsText) {
     const lines = [];
     const keyEnvName = state.keyEnv || "MY_API_KEY";
-    const dest = expandHomePath(state.configPath);
+    const dest = shellHomePath(state.configPath);
 
     if (state.includeKey) {
       lines.push(`# 1. Export your API key in shell:`);
@@ -991,8 +1003,8 @@
     lines.push(`# 2. Write or merge into Cursor settings:`);
     lines.push(`# Linux: ~/.config/Cursor/User/settings.json`);
     lines.push(`# Windows: %APPDATA%\\Cursor\\User\\settings.json`);
-    lines.push(`mkdir -p "$(dirname "${dest}")"`);
-    lines.push(`cat << 'EOF' > "${dest}"`);
+    lines.push(`mkdir -p "$(dirname ${dest})"`);
+    lines.push(`cat << 'EOF' > ${dest}`);
     lines.push(settingsText);
     lines.push("EOF");
     lines.push("");
@@ -1109,6 +1121,7 @@
     if (shared) {
       if (Array.isArray(shared.presets)) PRESETS = shared.presets;
       if (shared.state) Object.assign(state, shared.state);
+      migrateLegacyConfigPath();
       saveState();
       $("providerId").value = state.providerId || "";
       $("baseURL").value = state.baseURL || "";
@@ -1123,6 +1136,7 @@
       if (saved) {
         if (Array.isArray(saved.presets)) PRESETS = saved.presets;
         if (saved.state) Object.assign(state, saved.state);
+        migrateLegacyConfigPath();
         $("providerId").value = state.providerId || "";
         $("baseURL").value = state.baseURL || "";
         $("keyEnv").value = state.keyEnv || "";
