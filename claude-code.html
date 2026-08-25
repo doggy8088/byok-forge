@@ -918,7 +918,7 @@
     const parts = [];
     const keyEnv = (state.keyEnv || "").trim();
     if (state.requireKey && keyEnv && keyEnv !== "ANTHROPIC_API_KEY") {
-      parts.push(`export ANTHROPIC_API_KEY="${${keyEnv}}"`);
+      parts.push(`export ANTHROPIC_API_KEY="\${${keyEnv}}"`);
     } else if (state.requireKey && keyEnv === "ANTHROPIC_API_KEY") {
       parts.push('export ANTHROPIC_API_KEY="<your-api-key>"');
     }
@@ -948,9 +948,9 @@
           return `<span class="c-com">${line}</span>`;
         }
         return line
-          .replace(/\b(export|claude)\b/g, '<span class="c-cmd">$1</span>')
-          .replace(/(-[a-zA-Z]|--[a-zA-Z-]+)/g, '<span class="c-flag">$1</span>')
-          .replace(/("[^"]*")/g, '<span class="c-str">$1</span>');
+          .replace(/("[^"]*")/g, '<span class="c-str">$1</span>')
+          .replace(/(^|\s)(-[a-zA-Z]|--[a-zA-Z0-9-]+)\b/g, '$1<span class="c-flag">$2</span>')
+          .replace(/(^|\s)(export|claude)(\s|$)/g, '$1<span class="c-cmd">$2</span>$3');
       })
       .join("\n");
   }

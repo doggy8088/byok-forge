@@ -1003,7 +1003,7 @@
     lines.push(`opencode -m ${pId}/${mId}`);
     lines.push("");
     lines.push(`# Or specify non-standard config location`);
-    lines.push(`OPENCODE_CONFIG="${state.configPath}" opencode -m ${pId}/${mId}`);
+    lines.push(`OPENCODE_CONFIG=${shellHomePath(state.configPath)} opencode -m ${pId}/${mId}`);
 
     return lines.join("\n");
   }
@@ -1019,6 +1019,17 @@
       .replace(/: (true|false|null)/g, ': <span class="c-val">$1</span>');
   }
 
+  function posixSingleQuote(s) {
+    return "'" + String(s).replace(/'/g, "'\\''") + "'";
+  }
+
+  function shellHomePath(p) {
+    const raw = String(p || "").trim() || "config.json";
+    if (raw.startsWith("~/")) return '"$HOME"/' + posixSingleQuote(raw.slice(2));
+    if (raw.startsWith("$HOME/")) return '"$HOME"/' + posixSingleQuote(raw.slice(6));
+    return posixSingleQuote(raw);
+  }
+
   function highlightShell(code) {
     return code
       .replace(/&/g, "&amp;")
@@ -1030,9 +1041,9 @@
           return `<span class="c-com">${line}</span>`;
         }
         return line
-          .replace(/\b(export|opencode)\b/g, '<span class="c-cmd">$1</span>')
-          .replace(/(-[a-zA-Z]|--[a-zA-Z-]+)/g, '<span class="c-flag">$1</span>')
-          .replace(/("[^"]*")/g, '<span class="c-str">$1</span>');
+          .replace(/("[^"]*")/g, '<span class="c-str">$1</span>')
+          .replace(/(^|\s)(-[a-zA-Z]|--[a-zA-Z0-9-]+)\b/g, '$1<span class="c-flag">$2</span>')
+          .replace(/(^|\s)(export|opencode)(\s|$)/g, '$1<span class="c-cmd">$2</span>$3');
       })
       .join("\n");
   }

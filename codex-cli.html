@@ -291,7 +291,7 @@
             <input type="text" id="apiVersion" value="2025-04-01-preview" autocomplete="off" spellcheck="false" />
           </div>
 
-          <div class="field" id="envField">
+          <div class="field" id="envKeyField">
             <label class="lbl" for="envKey" id="envKeyLbl">env_key <span class="tag">name of env var holding the key</span></label>
             <div class="adorn"><span class="pre">$</span><input type="text" id="envKey" autocomplete="off" spellcheck="false" placeholder="OPENAI_API_KEY" /></div>
             <div class="hintline">Codex reads the key from this env var at runtime — <b>export</b> it in your shell. The key itself is never written to disk.</div>
@@ -348,7 +348,7 @@
       <div class="summary" id="summary"></div>
 
       <!-- provider block / builtin note -->
-      <div>
+      <div id="providerOutSection">
         <p class="out-label" id="providerBlockLabel">① provider block · append to <span class="path">~/.codex/config.toml</span></p>
         <div id="providerBlockWrap">
           <div class="term">
@@ -366,7 +366,7 @@
       <div>
         <p class="out-label" id="profileFileLabel">② profile file <span class="path" id="profileLabelPath"></span></p>
         <div class="term">
-          <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl" id="profileTtl"></span></div>
+          <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl" id="termTitle"></span></div>
           <pre id="profileOut"></pre>
           <div class="out-actions">
             <button class="btn primary flex" id="copyProfileBtn">⧉ copy</button>
