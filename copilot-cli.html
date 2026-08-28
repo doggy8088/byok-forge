@@ -640,6 +640,7 @@ const DEFAULT_PROVIDERS = [
     baseUrl:"https://ollama.com/v1", supportsResponses:false,
     keyRequired:true, keyEnv:"OLLAMA_API_KEY",
     models:[
+      {id:"glm-5.3-flash:cloud",     maxPrompt:999424, maxOutput:131072, responses:false, effort:[]},
       {id:"glm-5.2:cloud",           maxPrompt:999424, maxOutput:131072, responses:false, effort:[]},
       {id:"glm-5.1:cloud",           maxPrompt:202752, maxOutput:131072, responses:false, effort:[]},
       {id:"kimi-k2.6:cloud",          maxPrompt:262144, maxOutput:131072, responses:false, effort:[]},

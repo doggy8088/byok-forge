@@ -439,7 +439,7 @@ const DEFAULT_PROVIDERS = [
   { id:"ollama-cloud", name:"Ollama Cloud", kind:"custom", providerId:"ollama-cloud", color:"#74e0a0", badge:"OC",
     baseUrl:"https://ollama.com/v1", keyRequired:true, env:"OLLAMA_API_KEY",
     modelCatalog:"ollama-cloud",
-    models:[ {id:"glm-5.2:cloud",eff:"high"},{id:"glm-5.1:cloud",eff:"high"},{id:"kimi-k2.6:cloud",eff:"omit"},{id:"qwen3-coder:480b-cloud",eff:"omit"},{id:"gpt-oss:120b-cloud",eff:"high"},{id:"minimax-m3:cloud",eff:"omit"} ]},
+    models:[ {id:"glm-5.3-flash:cloud",eff:"high"},{id:"glm-5.2:cloud",eff:"high"},{id:"glm-5.1:cloud",eff:"high"},{id:"kimi-k2.6:cloud",eff:"omit"},{id:"qwen3-coder:480b-cloud",eff:"omit"},{id:"gpt-oss:120b-cloud",eff:"high"},{id:"minimax-m3:cloud",eff:"omit"} ]},
   { id:"groq", name:"Groq", kind:"custom", providerId:"groq", color:"#ff6a6a", badge:"GQ", beta:true,
     baseUrl:"https://api.groq.com/openai/v1", keyRequired:true, env:"GROQ_API_KEY",
     modelCatalog:"groq",
@@ -463,7 +463,7 @@ const EFFORTS = ["omit","minimal","low","medium","high","xhigh","max"];
    ========================================================================= */
 const DEFAULT_STATE = {
   providerId:"ollama-cloud",
-  model:"glm-5.2:cloud",
+  model:"glm-5.3-flash:cloud",
   deployment:"gpt-5.5",
   providerIdField:"ollama-cloud",
   resource:"my-resource",
@@ -475,7 +475,7 @@ const DEFAULT_STATE = {
   approval:"on-request",
   sandbox:"workspace-write",
   yolo:true,
-  profileName:"ollama-glm-5-2",
+  profileName:"ollama-glm-5-3-flash",
   profileEdited:false,
 };
 

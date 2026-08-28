@@ -698,8 +698,9 @@
       keyEnv: "OLLAMA_API_KEY",
       requireKey: true,
       customHeaders: "Authorization: Bearer",
-      defaultModel: "glm-5.2:cloud",
+      defaultModel: "glm-5.3-flash:cloud",
       models: [
+        { id: "glm-5.3-flash:cloud", name: "GLM 5.3 Flash Cloud", context: 999424, output: 32000 },
         { id: "glm-5.2:cloud", name: "GLM 5.2 Cloud", context: 999424, output: 32000 },
         { id: "glm-5.1:cloud", name: "GLM 5.1 Cloud", context: 202752, output: 32000 },
         { id: "kimi-k2.6:cloud", name: "Kimi K2.6 Cloud", context: 262144, output: 32000 },

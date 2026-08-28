@@ -1,9 +1,9 @@
 {
   "models": [
     {
-      "slug": "deepseek-v3.1:671b-cloud",
-      "display_name": "deepseek-v3.1:671b-cloud",
-      "description": "deepseek-v3.1:671b-cloud via Ollama Cloud.",
+      "slug": "glm-5.3-flash:cloud",
+      "display_name": "glm-5.3-flash:cloud",
+      "description": "glm-5.3-flash:cloud via Ollama Cloud.",
       "supported_reasoning_levels": [
         {
           "effort": "low",
@@ -21,41 +21,8 @@
       "shell_type": "shell_command",
       "visibility": "list",
       "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are deepseek-v3.1:671b-cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "deepseek-v3.2:cloud",
-      "display_name": "deepseek-v3.2:cloud",
-      "description": "deepseek-v3.2:cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are deepseek-v3.2:cloud running in the Codex CLI through Ollama Cloud.",
+      "priority": 100,
+      "base_instructions": "You are glm-5.3-flash:cloud running in the Codex CLI through Ollama Cloud.",
       "supports_reasoning_summaries": true,
       "support_verbosity": true,
       "default_verbosity": "low",
@@ -133,204 +100,6 @@
       "experimental_supported_tools": []
     },
     {
-      "slug": "devstral-2:123b-cloud",
-      "display_name": "devstral-2:123b-cloud",
-      "description": "devstral-2:123b-cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are devstral-2:123b-cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "devstral-small-2:24b-cloud",
-      "display_name": "devstral-small-2:24b-cloud",
-      "description": "devstral-small-2:24b-cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are devstral-small-2:24b-cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "gemini-3-flash-preview:cloud",
-      "display_name": "gemini-3-flash-preview:cloud",
-      "description": "gemini-3-flash-preview:cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are gemini-3-flash-preview:cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "gemma3:12b-cloud",
-      "display_name": "gemma3:12b-cloud",
-      "description": "gemma3:12b-cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are gemma3:12b-cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "gemma3:27b-cloud",
-      "display_name": "gemma3:27b-cloud",
-      "description": "gemma3:27b-cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are gemma3:27b-cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "gemma3:4b-cloud",
-      "display_name": "gemma3:4b-cloud",
-      "description": "gemma3:4b-cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are gemma3:4b-cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
       "slug": "gemma4:31b-cloud",
       "display_name": "gemma4:31b-cloud",
       "description": "gemma4:31b-cloud via Ollama Cloud.",
@@ -386,72 +155,6 @@
       "supported_in_api": true,
       "priority": 20,
       "base_instructions": "You are gemma4:cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "glm-4.7:cloud",
-      "display_name": "glm-4.7:cloud",
-      "description": "glm-4.7:cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are glm-4.7:cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "glm-5:cloud",
-      "display_name": "glm-5:cloud",
-      "description": "glm-5:cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are glm-5:cloud running in the Codex CLI through Ollama Cloud.",
       "supports_reasoning_summaries": true,
       "support_verbosity": true,
       "default_verbosity": "low",
@@ -529,6 +232,39 @@
       "experimental_supported_tools": []
     },
     {
+      "slug": "glm-5.3:cloud",
+      "display_name": "glm-5.3:cloud",
+      "description": "glm-5.3:cloud via Ollama Cloud.",
+      "supported_reasoning_levels": [
+        {
+          "effort": "low",
+          "description": ""
+        },
+        {
+          "effort": "medium",
+          "description": ""
+        },
+        {
+          "effort": "high",
+          "description": ""
+        }
+      ],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are glm-5.3:cloud running in the Codex CLI through Ollama Cloud.",
+      "supports_reasoning_summaries": true,
+      "support_verbosity": true,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": true,
+      "experimental_supported_tools": []
+    },
+    {
       "slug": "gpt-oss:120b-cloud",
       "display_name": "gpt-oss:120b-cloud",
       "description": "gpt-oss:120b-cloud via Ollama Cloud.",
@@ -584,39 +320,6 @@
       "supported_in_api": true,
       "priority": 20,
       "base_instructions": "You are gpt-oss:20b-cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "kimi-k2.5:cloud",
-      "display_name": "kimi-k2.5:cloud",
-      "description": "kimi-k2.5:cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are kimi-k2.5:cloud running in the Codex CLI through Ollama Cloud.",
       "supports_reasoning_summaries": true,
       "support_verbosity": true,
       "default_verbosity": "low",
@@ -694,9 +397,9 @@
       "experimental_supported_tools": []
     },
     {
-      "slug": "minimax-m2.1:cloud",
-      "display_name": "minimax-m2.1:cloud",
-      "description": "minimax-m2.1:cloud via Ollama Cloud.",
+      "slug": "kimi-k3:cloud",
+      "display_name": "kimi-k3:cloud",
+      "description": "kimi-k3:cloud via Ollama Cloud.",
       "supported_reasoning_levels": [
         {
           "effort": "low",
@@ -715,40 +418,7 @@
       "visibility": "list",
       "supported_in_api": true,
       "priority": 20,
-      "base_instructions": "You are minimax-m2.1:cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "minimax-m2.5:cloud",
-      "display_name": "minimax-m2.5:cloud",
-      "description": "minimax-m2.5:cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are minimax-m2.5:cloud running in the Codex CLI through Ollama Cloud.",
+      "base_instructions": "You are kimi-k3:cloud running in the Codex CLI through Ollama Cloud.",
       "supports_reasoning_summaries": true,
       "support_verbosity": true,
       "default_verbosity": "low",
@@ -815,105 +485,6 @@
       "supported_in_api": true,
       "priority": 20,
       "base_instructions": "You are minimax-m3:cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "ministral-3:14b-cloud",
-      "display_name": "ministral-3:14b-cloud",
-      "description": "ministral-3:14b-cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are ministral-3:14b-cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "ministral-3:3b-cloud",
-      "display_name": "ministral-3:3b-cloud",
-      "description": "ministral-3:3b-cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are ministral-3:3b-cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "ministral-3:8b-cloud",
-      "display_name": "ministral-3:8b-cloud",
-      "description": "ministral-3:8b-cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are ministral-3:8b-cloud running in the Codex CLI through Ollama Cloud.",
       "supports_reasoning_summaries": true,
       "support_verbosity": true,
       "default_verbosity": "low",
@@ -1057,72 +628,6 @@
       "experimental_supported_tools": []
     },
     {
-      "slug": "qwen3-coder-next:cloud",
-      "display_name": "qwen3-coder-next:cloud",
-      "description": "qwen3-coder-next:cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are qwen3-coder-next:cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "qwen3-coder:480b-cloud",
-      "display_name": "qwen3-coder:480b-cloud",
-      "description": "qwen3-coder:480b-cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are qwen3-coder:480b-cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
       "slug": "qwen3.5:397b-cloud",
       "display_name": "qwen3.5:397b-cloud",
       "description": "qwen3.5:397b-cloud via Ollama Cloud.",
@@ -1178,39 +683,6 @@
       "supported_in_api": true,
       "priority": 20,
       "base_instructions": "You are qwen3.5:cloud running in the Codex CLI through Ollama Cloud.",
-      "supports_reasoning_summaries": true,
-      "support_verbosity": true,
-      "default_verbosity": "low",
-      "truncation_policy": {
-        "mode": "tokens",
-        "limit": 10000
-      },
-      "supports_parallel_tool_calls": true,
-      "experimental_supported_tools": []
-    },
-    {
-      "slug": "rnj-1:8b-cloud",
-      "display_name": "rnj-1:8b-cloud",
-      "description": "rnj-1:8b-cloud via Ollama Cloud.",
-      "supported_reasoning_levels": [
-        {
-          "effort": "low",
-          "description": ""
-        },
-        {
-          "effort": "medium",
-          "description": ""
-        },
-        {
-          "effort": "high",
-          "description": ""
-        }
-      ],
-      "shell_type": "shell_command",
-      "visibility": "list",
-      "supported_in_api": true,
-      "priority": 20,
-      "base_instructions": "You are rnj-1:8b-cloud running in the Codex CLI through Ollama Cloud.",
       "supports_reasoning_summaries": true,
       "support_verbosity": true,
       "default_verbosity": "low",
