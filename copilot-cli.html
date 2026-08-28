@@ -776,6 +776,18 @@ function wireValue(){
   return (p && p.supportsResponses && model().responses) ? "responses" : null;
 }
 
+/* shell/PowerShell escaping — 任何內嵌使用者值的輸出欄位都必須經過這些 helper */
+function posixSingleQuote(s) {
+  return "'" + String(s).replace(/'/g, "'\\''") + "'";
+}
+function psSingleQuote(s) {
+  return "'" + String(s).replace(/'/g, "''") + "'";
+}
+function safeIdentifier(s, fallback) {
+  const m = /^([A-Za-z_][A-Za-z0-9_-]*)$/.exec(String(s || "").trim());
+  return m ? m[1] : fallback;
+}
+
 /* =========================================================================
    OUTPUT GENERATION
    ========================================================================= */
@@ -783,34 +795,39 @@ function shellKeyValue(){
   const p = provider();
   if(!p || !p.keyRequired) return null;
   if(state.keyMode === "env"){
-    const n = (state.keyEnv || p.keyEnv || "API_KEY").trim() || "API_KEY";
+    const n = safeIdentifier(state.keyEnv || p.keyEnv || "API_KEY", "API_KEY");
     return "$" + n;
   }
-  return '"' + (state.keyLiteral || "YOUR-API-KEY") + '"';
+  return posixSingleQuote(state.keyLiteral || "YOUR-API-KEY");
 }
 function psKeyValue(){
   const p = provider();
   if(!p || !p.keyRequired) return null;
   if(state.keyMode === "env"){
-    const n = (state.keyEnv || p.keyEnv || "API_KEY").trim() || "API_KEY";
+    const n = safeIdentifier(state.keyEnv || p.keyEnv || "API_KEY", "API_KEY");
     return "$env:" + n;
   }
-  return "'" + (state.keyLiteral || "YOUR-API-KEY") + "'";
+  return psSingleQuote(state.keyLiteral || "YOUR-API-KEY");
 }
 
 function envPairs(kind){
   const p = provider();
   const pairs = [];
   if(state.offline) pairs.push(["COPILOT_OFFLINE", kind==="ps" ? "'true'" : "true"]);
-  pairs.push(["COPILOT_PROVIDER_TYPE", kind==="ps" ? `'${p.type}'` : `"${p.type}"`]);
-  pairs.push(["COPILOT_PROVIDER_BASE_URL", kind==="ps" ? `'${baseUrl()}'` : `"${baseUrl()}"`]);
+  pairs.push(["COPILOT_PROVIDER_TYPE", kind==="ps" ? psSingleQuote(p.type) : posixSingleQuote(p.type)]);
+  pairs.push(["COPILOT_PROVIDER_BASE_URL", kind==="ps" ? psSingleQuote(baseUrl()) : posixSingleQuote(baseUrl())]);
   const key = kind==="ps" ? psKeyValue() : shellKeyValue();
   if(key !== null) pairs.push(["COPILOT_PROVIDER_API_KEY", key]);
-  pairs.push(["COPILOT_MODEL", kind==="ps" ? `'${modelString()}'` : `"${modelString()}"`]);
+  pairs.push(["COPILOT_MODEL", kind==="ps" ? psSingleQuote(modelString()) : posixSingleQuote(modelString())]);
   const wire = wireValue();
-  if(wire) pairs.push(["COPILOT_PROVIDER_WIRE_API", kind==="ps" ? `'${wire}'` : `"${wire}"`]);
-  if(state.maxPrompt) pairs.push(["COPILOT_PROVIDER_MAX_PROMPT_TOKENS", kind==="ps" ? `'${state.maxPrompt}'` : `${state.maxPrompt}`]);
-  if(state.maxOutput) pairs.push(["COPILOT_PROVIDER_MAX_OUTPUT_TOKENS", kind==="ps" ? `'${state.maxOutput}'` : `${state.maxOutput}`]);
+  if(wire) pairs.push(["COPILOT_PROVIDER_WIRE_API", kind==="ps" ? psSingleQuote(wire) : posixSingleQuote(wire)]);
+  const numPair = (name, raw) => {
+    const n = Number(raw);
+    if(!Number.isFinite(n)) return;
+    pairs.push([name, kind==="ps" ? psSingleQuote(String(n)) : String(n)]);
+  };
+  if(state.maxPrompt) numPair("COPILOT_PROVIDER_MAX_PROMPT_TOKENS", state.maxPrompt);
+  if(state.maxOutput) numPair("COPILOT_PROVIDER_MAX_OUTPUT_TOKENS", state.maxOutput);
   return pairs;
 }
 
@@ -823,12 +840,12 @@ function flagsStr(){
 }
 
 function genShellAlias(){
-  const name = state.aliasName || "cc";
+  const name = safeIdentifier(state.aliasName || "cc", "cc");
   const body = envPairs("shell").map(([k,v]) => `${k}=${v}`).join(" ");
-  return `alias ${name}='${body} copilot${flagsStr()}'`;
+  return `alias ${name}=${posixSingleQuote(body + " copilot" + flagsStr())}`;
 }
 function genShellFunction(){
-  const name = state.aliasName || "cc";
+  const name = safeIdentifier(state.aliasName || "cc", "cc");
   const pairs = envPairs("shell").map(([k,v]) => `  ${k}=${v}`);
   const lines = [];
   lines.push(`${name}() {`);
@@ -838,7 +855,7 @@ function genShellFunction(){
   return lines.join("\n");
 }
 function genPwshFunction(withNote){
-  const name = state.aliasName || "cc";
+  const name = safeIdentifier(state.aliasName || "cc", "cc");
   const pairs = envPairs("ps");
   const w = Math.max.apply(null, pairs.map(p => p[0].length));
   const hash = pairs.map(([k,v]) => `        ${k.padEnd(w)} = ${v}`).join("\n");
