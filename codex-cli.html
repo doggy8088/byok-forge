@@ -206,6 +206,7 @@
 <script src="translations.js?v=20260630"></script>
 <script src="i18n.js?v=20260630"></script>
 <script src="storage.js?v=20260630"></script>
+<script src="models.js?v=20260829"></script>
 </head>
 <body data-page="codex">
 <div class="wrap">
@@ -439,7 +440,7 @@ const DEFAULT_PROVIDERS = [
   { id:"ollama-cloud", name:"Ollama Cloud", kind:"custom", providerId:"ollama-cloud", color:"#74e0a0", badge:"OC",
     baseUrl:"https://ollama.com/v1", keyRequired:true, env:"OLLAMA_API_KEY",
     modelCatalog:"ollama-cloud",
-    models:[ {id:"glm-5.3-flash:cloud",eff:"high"},{id:"glm-5.2:cloud",eff:"high"},{id:"glm-5.1:cloud",eff:"high"},{id:"kimi-k2.6:cloud",eff:"omit"},{id:"qwen3-coder:480b-cloud",eff:"omit"},{id:"gpt-oss:120b-cloud",eff:"high"},{id:"minimax-m3:cloud",eff:"omit"} ]},
+    models:[]},
   { id:"groq", name:"Groq", kind:"custom", providerId:"groq", color:"#ff6a6a", badge:"GQ", beta:true,
     baseUrl:"https://api.groq.com/openai/v1", keyRequired:true, env:"GROQ_API_KEY",
     modelCatalog:"groq",
@@ -454,6 +455,13 @@ const DEFAULT_PROVIDERS = [
     baseUrl:"https://api.x.ai/v1", keyRequired:true, env:"XAI_API_KEY",
     models:[ {id:"grok-4.3",eff:"medium"},{id:"grok-code-fast",eff:"omit"} ]},
 ];
+
+/* Derive ollama-cloud models from the shared registry (models.js) */
+(function () {
+  const reg = window.BYOK_MODELS && window.BYOK_MODELS.providers["ollama-cloud"];
+  const p = DEFAULT_PROVIDERS.find((x) => x.id === "ollama-cloud");
+  if (reg && p) p.models = reg.models.map((m) => ({ id: m.id, eff: m.codexEff }));
+})();
 
 let PROVIDERS = JSON.parse(JSON.stringify(DEFAULT_PROVIDERS));
 const EFFORTS = ["omit","minimal","low","medium","high","xhigh","max"];
@@ -484,7 +492,8 @@ let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 function saveState(){
   window.BYOKStore.savePage("codex", {
     providers: PROVIDERS,
-    state: state
+    state: state,
+    modelsVersion: (window.BYOK_MODELS && window.BYOK_MODELS.version) || 0
   });
 }
 
@@ -788,9 +797,42 @@ function renderSummary(){
   }
 }
 
+function buildOllamaCatalog(){
+  const reg = window.BYOK_MODELS && window.BYOK_MODELS.providers["ollama-cloud"];
+  if(!reg) return null;
+  return {
+    models: reg.models.map((m) => ({
+      slug: m.id,
+      display_name: m.id,
+      description: `${m.id} via Ollama Cloud.`,
+      supported_reasoning_levels: m.efforts.map((e) => ({ effort: e, description: "" })),
+      shell_type: "shell_command",
+      visibility: "list",
+      supported_in_api: true,
+      priority: m.priority,
+      base_instructions: `You are ${m.id} running in the Codex CLI through Ollama Cloud.`,
+      supports_reasoning_summaries: true,
+      support_verbosity: true,
+      default_verbosity: "low",
+      truncation_policy: { mode: "tokens", limit: 10000 },
+      supports_parallel_tool_calls: true,
+      experimental_supported_tools: []
+    }))
+  };
+}
+
 async function renderCatalogCode(){
   const p = provider();
   if(!p.modelCatalog) return;
+  if(window.BYOK_MODELS && window.BYOK_MODELS.providers[p.id]){
+    const cat = buildOllamaCatalog();
+    if(cat){
+      const txt = JSON.stringify(cat, null, 2);
+      $("catalogOut").innerHTML = hlJSON(txt);
+      $("catalogOut").dataset.raw = txt;
+      return;
+    }
+  }
   try {
     const res = await fetch(`model-catalog.${p.modelCatalog}.json`);
     const data = await res.json();
@@ -919,7 +961,8 @@ async function init(){
   } else {
     const saved = window.BYOKStore.getPage("codex", null);
     if(saved){
-      if(Array.isArray(saved.providers)) PROVIDERS = saved.providers;
+      const regVersion = (window.BYOK_MODELS && window.BYOK_MODELS.version) || 0;
+      if(Array.isArray(saved.providers) && saved.modelsVersion === regVersion) PROVIDERS = saved.providers;
       if(saved.state) Object.assign(state, saved.state);
     }
   }
