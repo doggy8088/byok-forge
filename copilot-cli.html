@@ -928,11 +928,12 @@ function renderProviders(){
     const el = document.createElement("button");
     el.type = "button";
     el.className = "prov" + (p.id === state.providerId ? " sel" : "");
+    const color = /^#[0-9a-fA-F]{3,8}$/.test(p.color || "") ? p.color : "#74e0a0";
     el.innerHTML =
       `<button class="prov-del" title="${window.t?window.t('common.deleteProvider'):'Delete provider'}" type="button">✕</button>` +
-      `<span class="mono-badge" style="background:${p.color || '#74e0a0'}">${p.badge || p.name.slice(0,2).toUpperCase()}</span>` +
-      `<span class="pname">${p.name}</span>` +
-      `<span class="ptype">type=${p.type || 'openai'}</span>`;
+      `<span class="mono-badge" style="background:${color}">${BYOKEsc.html(p.badge || p.name.slice(0,2).toUpperCase())}</span>` +
+      `<span class="pname">${BYOKEsc.html(p.name)}</span>` +
+      `<span class="ptype">type=${BYOKEsc.html(p.type || 'openai')}</span>`;
     
     el.querySelector(".prov-del").addEventListener("click", (e) => {
       e.stopPropagation();
@@ -1062,7 +1063,7 @@ function renderEffort(){
     b.addEventListener("click", () => { state.effort = o; saveState(); renderEffort(); refresh(); });
     seg.appendChild(b);
   });
-  $("effortHint").innerHTML = `Adds <b>--effort ${state.effort==="none"?"(omitted)":state.effort}</b>. Only models with configurable reasoning honor it.`;
+  $("effortHint").innerHTML = `Adds <b>--effort ${BYOKEsc.html(state.effort==="none"?"(omitted)":state.effort)}</b>. Only models with configurable reasoning honor it.`;
 }
 
 function renderConditional(){
@@ -1100,8 +1101,8 @@ function renderConditional(){
   $("wireAuto").textContent = "auto → " + (auto ? "responses" : "completions");
   Array.from($("wireMode").children).forEach(b => b.classList.toggle("on", b.dataset.w === state.wireMode));
   $("wireHint").innerHTML = p.supportsResponses
-    ? `<b>${p.name}</b> supports the Responses API. Use <b>responses</b> for GPT-5.x / reasoning endpoints; <b>completions</b> for classic chat.`
-    : `<b>${p.name}</b> is Chat-Completions only — wire stays unset (completions).`;
+    ? `<b>${BYOKEsc.html(p.name)}</b> supports the Responses API. Use <b>responses</b> for GPT-5.x / reasoning endpoints; <b>completions</b> for classic chat.`
+    : `<b>${BYOKEsc.html(p.name)}</b> is Chat-Completions only — wire stays unset (completions).`;
   // tuning
   $("maxPrompt").value = state.maxPrompt || 0;
   $("maxOutput").value = state.maxOutput || 0;
@@ -1134,7 +1135,7 @@ function renderModelMeta(){
   $("modelMeta").innerHTML =
     `ctx <b>${Number(m.maxPrompt).toLocaleString()}</b> · out <b>${Number(m.maxOutput).toLocaleString()}</b> · ` +
     `wire <b>${(p.supportsResponses && m.responses) ? "responses" : "completions"}</b> · ` +
-    `effort <b>${m.effort && m.effort.length ? m.effort.join("/") : "n/a"}</b>`;
+    `effort <b>${BYOKEsc.html(m.effort && m.effort.length ? m.effort.join("/") : "n/a")}</b>`;
   $("modelHint").textContent = p.modelIsDeployment ? "azure → uses deployment name" : ((p.models ? p.models.length : 0) + " models");
 }
 
@@ -1152,7 +1153,7 @@ function renderSummary(){
   if(state.effort && state.effort !== "none" && effortOptions().includes(state.effort)) chips.push(["effort", state.effort]);
   chips.forEach(([k,v]) => {
     const c = document.createElement("span");
-    c.className = "chip"; c.innerHTML = `${k} <b>${v}</b>`;
+    c.className = "chip"; c.innerHTML = `${k} <b>${BYOKEsc.html(v)}</b>`;
     sum.appendChild(c);
   });
   if(state.yolo){
@@ -1250,8 +1251,8 @@ function renderCollection(){
     const row = document.createElement("div");
     row.className = "coll-item";
     row.innerHTML =
-      `<span class="ci-name">${c.name}</span>` +
-      `<span class="ci-meta">${c.shell} · ${c.kind} · ${c.provider}/${c.model}</span>` +
+      `<span class="ci-name">${BYOKEsc.html(c.name)}</span>` +
+      `<span class="ci-meta">${BYOKEsc.html(c.shell)} · ${BYOKEsc.html(c.kind)} · ${BYOKEsc.html(c.provider)}/${BYOKEsc.html(c.model)}</span>` +
       `<button class="ci-x" title="remove">✕</button>`;
     row.querySelector(".ci-x").addEventListener("click", () => { collection.splice(i,1); saveState(); renderCollection(); });
     list.appendChild(row);

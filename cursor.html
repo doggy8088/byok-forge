@@ -755,7 +755,7 @@
   }
 
   function getProviderColor(value, preset) {
-    if (preset && preset.color) return preset.color;
+    if (preset && preset.color && /^#[0-9a-fA-F]{3,8}$/.test(preset.color)) return preset.color;
     const map = {
       openai: "var(--amber)",
       openrouter: "#56b6c2",
@@ -813,15 +813,15 @@
     const frag = document.createDocumentFragment();
     PRESETS.forEach(function (preset, idx) {
       const button = document.createElement("button");
-      const displayName = preset.nameKey ? t(preset.nameKey) : (preset.name || preset.value);
+      const displayName = preset.nameKey ? t(preset.nameKey) : BYOKEsc.html(preset.name || preset.value);
       button.type = "button";
       button.className = "prov" + (preset.value === state.preset ? " sel" : "");
       button.dataset.preset = preset.value;
       button.innerHTML = ''
         + '<button class="prov-del" title="' + (window.t ? window.t('common.deleteProvider') : 'Delete provider') + '" type="button">✕</button>'
-        + '<span class="mono-badge" style="background:' + getProviderColor(preset.value, preset) + '">' + getColorForProvider(preset.value, preset) + '</span>'
+        + '<span class="mono-badge" style="background:' + getProviderColor(preset.value, preset) + '">' + BYOKEsc.html(getColorForProvider(preset.value, preset)) + '</span>'
         + '<span class="pname">' + displayName + '</span>'
-        + '<span class="ptype">' + (preset.baseURL || "") + '</span>';
+        + '<span class="ptype">' + BYOKEsc.html(preset.baseURL || "") + '</span>';
 
       button.querySelector(".prov-del").addEventListener("click", function (e) {
         e.stopPropagation();

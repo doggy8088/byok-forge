@@ -771,7 +771,7 @@
   }
 
   function presetColor(key, preset) {
-    if (preset && preset.color) return preset.color;
+    if (preset && preset.color && /^#[0-9a-fA-F]{3,8}$/.test(preset.color)) return preset.color;
     const map = {
       openai: "var(--amber)",
       anthropic: "#56b6c2",
@@ -800,9 +800,9 @@
 
       button.innerHTML =
         `<button class="prov-del" title="${window.t ? window.t('common.deleteProvider') : 'Delete provider'}" type="button">✕</button>` +
-        `<span class="mono-badge" style="background:${presetColor(presetId, preset)};color:#0a0b0e">${presetBadge(presetId, preset)}</span>` +
-        `<span class="pname">${preset.name}</span>` +
-        `<span class="ptype">${preset.npm}</span>`;
+        `<span class="mono-badge" style="background:${presetColor(presetId, preset)};color:#0a0b0e">${BYOKEsc.html(presetBadge(presetId, preset))}</span>` +
+        `<span class="pname">${BYOKEsc.html(preset.name)}</span>` +
+        `<span class="ptype">${BYOKEsc.html(preset.npm)}</span>`;
 
       button.querySelector(".prov-del").addEventListener("click", function (e) {
         e.stopPropagation();
@@ -1067,7 +1067,7 @@
       chips.push([window.t ? window.t("opencode.chipKey") : "key", state.keyEnv || "custom"]);
     }
     container.innerHTML = chips
-      .map(([k, v]) => `<span class="chip">${k} <b>${v}</b></span>`)
+      .map(([k, v]) => `<span class="chip">${k} <b>${BYOKEsc.html(v)}</b></span>`)
       .join("");
   }
 

@@ -621,11 +621,12 @@ function renderProviders(){
     const el = document.createElement("button");
     el.type = "button";
     el.className = "prov" + (p.id===state.providerId ? " sel" : "");
+    const color = /^#[0-9a-fA-F]{3,8}$/.test(p.color || "") ? p.color : "#5cc8ff";
     el.innerHTML =
       `<button class="prov-del" title="${window.t?window.t('common.deleteProvider'):'Delete provider'}" type="button">✕</button>` +
-      `<span class="mono-badge" style="background:${p.color || '#5cc8ff'}">${p.badge || p.name.slice(0,2).toUpperCase()}</span>` +
-      `<span class="pname">${p.name}</span>` +
-      `<span class="ptype">${p.kind==="builtin"?"built-in":"id="+(p.providerId||p.id)}</span>` +
+      `<span class="mono-badge" style="background:${color}">${BYOKEsc.html(p.badge || p.name.slice(0,2).toUpperCase())}</span>` +
+      `<span class="pname">${BYOKEsc.html(p.name)}</span>` +
+      `<span class="ptype">${p.kind==="builtin"?"built-in":"id="+BYOKEsc.html(p.providerId||p.id)}</span>` +
       `<span class="kindtag">${p.kind==="builtin"?"no block":"+ block"}</span>`;
     
     el.querySelector(".prov-del").addEventListener("click", (e) => {
@@ -660,8 +661,8 @@ function renderProviders(){
   const p = provider();
   $("provHint").className = "hintline" + (p.beta ? " warn" : "");
   $("provHint").innerHTML = p.beta
-    ? t("codex.providerHintBeta", { provider: p.name })
-    : t("codex.providerHintDirect", { provider: p.name });
+    ? t("codex.providerHintBeta", { provider: BYOKEsc.html(p.name) })
+    : t("codex.providerHintDirect", { provider: BYOKEsc.html(p.name) });
 }
 
 function openAddProviderModal(){
@@ -734,7 +735,7 @@ function renderEffort(){
   });
   $("effortHint").innerHTML = state.effort==="omit"
     ? t("codex.effortHintOmit")
-    : t("codex.effortHintSet", { effort: state.effort });
+    : t("codex.effortHintSet", { effort: BYOKEsc.html(state.effort) });
 }
 
 function renderConditional(){
@@ -792,7 +793,7 @@ function renderSummary(){
   if(state.effort && state.effort!=="omit") chips.push([t("codex.chipEffort"), state.effort]);
   if(state.summary && state.summary!=="omit") chips.push([t("codex.chipSummary"), state.summary]);
   chips.forEach(([k,v]) => {
-    const c = document.createElement("span"); c.className="chip"; c.innerHTML=`${k} <b>${v}</b>`; sum.appendChild(c);
+    const c = document.createElement("span"); c.className="chip"; c.innerHTML=`${k} <b>${BYOKEsc.html(v)}</b>`; sum.appendChild(c);
   });
   if(state.yolo){
     const c = document.createElement("span"); c.className="chip warn"; c.innerHTML=`⚠ <b>--yolo</b>`; sum.appendChild(c);

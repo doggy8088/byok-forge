@@ -294,10 +294,16 @@
         padding: 16px 20px; border-bottom: 1px solid var(--border, #262b37);
         background: #0d0f14;
       `;
-      header.innerHTML = `
-        <h3 style="margin:0; font-family:var(--display, monospace); font-size:16px; font-weight:700; color:var(--text, #fff);">${options.title || "Add Provider"}</h3>
-        <button id="byok-modal-close" style="background:transparent; border:none; color:var(--muted, #888); font-size:18px; cursor:pointer; padding:4px 8px; border-radius:6px;">✕</button>
-      `;
+      const titleEl = document.createElement("h3");
+      titleEl.style.cssText = "margin:0; font-family:var(--display, monospace); font-size:16px; font-weight:700; color:var(--text, #fff);";
+      titleEl.textContent = options.title || "Add Provider";
+      header.appendChild(titleEl);
+
+      const closeBtn = document.createElement("button");
+      closeBtn.id = "byok-modal-close";
+      closeBtn.style.cssText = "background:transparent; border:none; color:var(--muted, #888); font-size:18px; cursor:pointer; padding:4px 8px; border-radius:6px;";
+      closeBtn.textContent = "✕";
+      header.appendChild(closeBtn);
 
       const body = document.createElement("div");
       body.style.cssText = "padding: 20px; display:flex; flex-direction:column; gap: 14px;";
@@ -347,8 +353,8 @@
 
         if (f.hint) {
           const hint = document.createElement("div");
-          hint.style.cssText = "font-size: 11px; color: var(--muted-2, #5d636f); font-family: var(--mono, monospace);";
-          hint.innerHTML = f.hint;
+          hint.style.cssText = "font-size: 11px; color: var(--muted-2, #5d636f); font-family: var(--mono, monospace); white-space: pre-line;";
+          hint.textContent = f.hint;
           fieldWrap.appendChild(hint);
         }
 
@@ -361,10 +367,19 @@
         padding: 14px 20px; border-top: 1px solid var(--border, #262b37);
         background: #0d0f14;
       `;
-      footer.innerHTML = `
-        <button id="byok-modal-cancel" class="btn" style="padding:8px 16px; font-family:var(--mono); font-size:12.5px; border-radius:8px; cursor:pointer; background:transparent; border:1px solid var(--border-2); color:var(--muted);">Cancel</button>
-        <button id="byok-modal-save" class="btn primary" style="padding:8px 18px; font-family:var(--mono); font-size:12.5px; border-radius:8px; cursor:pointer; background:var(--amber, #ffb454); border:none; color:#0a0b0e; font-weight:700;">Save Provider</button>
-      `;
+      const cancelBtn = document.createElement("button");
+      cancelBtn.id = "byok-modal-cancel";
+      cancelBtn.className = "btn";
+      cancelBtn.style.cssText = "padding:8px 16px; font-family:var(--mono); font-size:12.5px; border-radius:8px; cursor:pointer; background:transparent; border:1px solid var(--border-2); color:var(--muted);";
+      cancelBtn.textContent = "Cancel";
+      footer.appendChild(cancelBtn);
+
+      const saveBtn = document.createElement("button");
+      saveBtn.id = "byok-modal-save";
+      saveBtn.className = "btn primary";
+      saveBtn.style.cssText = "padding:8px 18px; font-family:var(--mono); font-size:12.5px; border-radius:8px; cursor:pointer; background:var(--amber, #ffb454); border:none; color:#0a0b0e; font-weight:700;";
+      saveBtn.textContent = "Save Provider";
+      footer.appendChild(saveBtn);
 
       dialog.appendChild(header);
       dialog.appendChild(body);
@@ -414,8 +429,12 @@
     },
   };
 
+  // Escape user-controlled values for safe innerHTML interpolation (covers attribute contexts too)
+  function escHtml(s){ return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+
   global.BYOKStore = BYOKStore;
   global.BYOKShare = BYOKShare;
   global.BYOKToast = BYOKToast;
   global.BYOKModal = BYOKModal;
+  global.BYOKEsc = { html: escHtml };
 })(window);

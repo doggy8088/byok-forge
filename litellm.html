@@ -479,19 +479,20 @@ function renderEntries(){
     const card = document.createElement("div");
     card.className = "entry";
     card.dataset.uid = e.uid;
-    const opts = LL_PROVIDERS.map(pp => `<option value="${pp.id}"${pp.id===e.provider?" selected":""}>${pp.name}</option>`).join("");
-    const modelLbl = p.modelLabel || t("litellm.modelLabel");
+    const opts = LL_PROVIDERS.map(pp => `<option value="${BYOKEsc.html(pp.id)}"${pp.id===e.provider?" selected":""}>${BYOKEsc.html(pp.name)}</option>`).join("");
+    const modelLbl = BYOKEsc.html(p.modelLabel || t("litellm.modelLabel"));
     const providerLabel = t("litellm.providerLabel");
     const aliasLabel = t("litellm.aliasLabel");
     const apiKeyLabel = t("litellm.apiKeyEnvLabel");
     const apiBaseLabel = t("litellm.apiBaseLabel");
     const apiVersionLabel = t("litellm.apiVersionLabel");
     const removeTitle = t("litellm.removeTitle");
+    const color = /^#[0-9a-fA-F]{3,8}$/.test(p.color || "") ? p.color : "#5cc8ff";
     card.innerHTML = `
       <div class="ehead">
-        <span class="ebadge" style="background:${p.color || "#5cc8ff"}">${p.badge || p.name.slice(0,2).toUpperCase()}</span>
+        <span class="ebadge" style="background:${color}">${BYOKEsc.html(p.badge || p.name.slice(0,2).toUpperCase())}</span>
         <span class="etitle">${t("litellm.modelLabel")} <b>#${i+1}</b></span>
-        <span class="ealias">${(e.alias||"").trim()||defaultAlias(e.model)}</span>
+        <span class="ealias">${BYOKEsc.html((e.alias||"").trim()||defaultAlias(e.model))}</span>
         ${state.entries.length>1?`<button class="rm" data-act="rm" title="${removeTitle}">✕</button>`:""}
       </div>
       <div class="erow">
@@ -501,46 +502,44 @@ function renderEntries(){
         </div>
         <div class="ecell">
           <span class="mini">${modelLbl}</span>
-          <select data-field="model">${(function(){ var ids=(p.models||[]).slice(); if(e.model && ids.indexOf(e.model)===-1) ids.unshift(e.model); return ids.map(function(mid){ return `<option value="${escAttr(mid)}"${mid===e.model?" selected":""}>${escAttr(mid)}</option>`; }).join(""); })()}</select>
+          <select data-field="model">${(function(){ var ids=(p.models||[]).slice(); if(e.model && ids.indexOf(e.model)===-1) ids.unshift(e.model); return ids.map(function(mid){ return `<option value="${BYOKEsc.html(mid)}"${mid===e.model?" selected":""}>${BYOKEsc.html(mid)}</option>`; }).join(""); })()}</select>
         </div>
       </div>
       <div class="erow">
         <div class="ecell">
           <span class="mini">${aliasLabel}</span>
-          <input type="text" data-field="alias" value="${escAttr(e.alias)}" autocomplete="off" spellcheck="false" />
+          <input type="text" data-field="alias" value="${BYOKEsc.html(e.alias)}" autocomplete="off" spellcheck="false" />
         </div>
         <div class="ecell ${p.keyless?"hidden":""}">
           <span class="mini">${apiKeyLabel}</span>
-          <div class="adorn"><span class="pre">$</span><input type="text" data-field="env" value="${escAttr(e.env)}" autocomplete="off" spellcheck="false" /></div>
+          <div class="adorn"><span class="pre">$</span><input type="text" data-field="env" value="${BYOKEsc.html(e.env)}" autocomplete="off" spellcheck="false" /></div>
         </div>
       </div>
       <div class="erow full ${p.needsBase || e.base?"":"hidden"}">
         <div class="ecell">
           <span class="mini">${apiBaseLabel}</span>
-          <input type="text" data-field="base" value="${escAttr(e.base)}" autocomplete="off" spellcheck="false" />
+          <input type="text" data-field="base" value="${BYOKEsc.html(e.base)}" autocomplete="off" spellcheck="false" />
         </div>
       </div>
       <div class="erow full ${p.needsVersion || e.version?"":"hidden"}">
         <div class="ecell">
           <span class="mini">${apiVersionLabel}</span>
-          <input type="text" data-field="version" value="${escAttr(e.version)}" autocomplete="off" spellcheck="false" />
+          <input type="text" data-field="version" value="${BYOKEsc.html(e.version)}" autocomplete="off" spellcheck="false" />
         </div>
       </div>
-      <div class="hintline">${t("litellm.routeHint", { route: entryModelString(e) })}</div>
+      <div class="hintline">${t("litellm.routeHint", { route: BYOKEsc.html(entryModelString(e)) })}</div>
     `;
     wrap.appendChild(card);
   });
   $("modelCount").textContent = t("litellm.modelCount", { count: state.entries.length });
 }
-function escAttr(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
-
 function renderSummary(){
   const sum = $("summary"); sum.innerHTML = "";
   const chips = [[t("litellm.summaryModels"), state.entries.length], [t("litellm.summaryPort"), (state.port||"4000").trim()]];
   const keys = uniqueEnvs().length;
   chips.push([t("litellm.summaryKeys"), keys]);
   if((state.masterKey||"").trim()) chips.push([t("litellm.summaryAuth"), t("litellm.labelMasterKey")]);
-  chips.forEach(([k,v])=>{ const c=document.createElement("span"); c.className="chip"; c.innerHTML=`${k} <b>${v}</b>`; sum.appendChild(c); });
+  chips.forEach(([k,v])=>{ const c=document.createElement("span"); c.className="chip"; c.innerHTML=`${k} <b>${BYOKEsc.html(v)}</b>`; sum.appendChild(c); });
 }
 
 function renderLabels(){

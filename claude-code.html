@@ -773,11 +773,13 @@
       btn.type = "button";
       btn.className = "prov" + (providerId === state.provider ? " sel" : "");
       btn.dataset.provider = providerId;
+      const rawColor = providerColor(providerId, provider);
+      const color = /^#[0-9a-fA-F]{3,8}$/.test(rawColor || "") ? rawColor : "#5cc8ff";
       btn.innerHTML =
         `<button class="prov-del" title="${window.t ? window.t('common.deleteProvider') : 'Delete provider'}" type="button">✕</button>` +
-        `<span class="mono-badge" style="background:${providerColor(providerId, provider)};color:#0a0b0e">${providerBadge(providerId, provider)}</span>` +
-        `<span class="pname">${provider.name || providerId}</span>` +
-        `<span class="ptype">${provider.baseURL || ""}</span>`;
+        `<span class="mono-badge" style="background:${color};color:#0a0b0e">${BYOKEsc.html(providerBadge(providerId, provider))}</span>` +
+        `<span class="pname">${BYOKEsc.html(provider.name || providerId)}</span>` +
+        `<span class="ptype">${BYOKEsc.html(provider.baseURL || "")}</span>`;
 
       btn.querySelector(".prov-del").addEventListener("click", function (e) {
         e.stopPropagation();
