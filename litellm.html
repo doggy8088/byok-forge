@@ -513,7 +513,7 @@ function renderEntries(){
         </div>
         <div class="ecell">
           <span class="mini">${modelLbl}</span>
-          <input type="text" data-field="model" list="models-${p.id}" value="${escAttr(e.model)}" autocomplete="off" spellcheck="false" />
+          <select data-field="model">${(function(){ var ids=(p.models||[]).slice(); if(e.model && ids.indexOf(e.model)===-1) ids.unshift(e.model); return ids.map(function(mid){ return `<option value="${escAttr(mid)}"${mid===e.model?" selected":""}>${escAttr(mid)}</option>`; }).join(""); })()}</select>
         </div>
       </div>
       <div class="erow">
@@ -597,7 +597,18 @@ function onEntryInput(ev){
 }
 function onEntryChange(ev){
   const t = ev.target;
-  if(t.dataset.field !== "provider") return;
+  const field = t.dataset.field;
+  if(field === "model"){
+    const e = entryByCard(t); if(!e) return;
+    e.model = t.value;
+    const card = t.closest(".entry");
+    const a = card.querySelector(".ealias"); if(a) a.textContent=(e.alias||"").trim()||defaultAlias(e.model);
+    const hint = card.querySelector(".hintline b"); if(hint) hint.textContent = entryModelString(e);
+    saveState();
+    refresh();
+    return;
+  }
+  if(field !== "provider") return;
   const e = entryByCard(t); if(!e) return;
   const p = provById(t.value);
   e.provider = t.value;

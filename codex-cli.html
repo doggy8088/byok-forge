@@ -245,8 +245,7 @@
         <div class="field">
           <div class="section-h"><span class="n">02</span><h2 data-i18n="codex.sectionModel">model</h2><span class="hint" id="modelHint"></span></div>
           <label class="lbl" for="model" id="modelLbl">model <span class="req">*</span></label>
-          <input type="text" id="model" list="modelList" autocomplete="off" spellcheck="false" />
-          <datalist id="modelList"></datalist>
+          <select id="model"></select>
           <div class="hintline" id="modelMeta"></div>
         </div>
 
@@ -705,10 +704,12 @@ function openAddProviderModal(){
 }
 
 function renderModelList(){
-  const dl = $("modelList"); dl.innerHTML = "";
+  const sel = $("model"); sel.innerHTML = "";
   const p = provider();
-  if(!p || !p.models) return;
-  p.models.forEach(m => { const o=document.createElement("option"); o.value=m.id; dl.appendChild(o); });
+  const models = (p && p.models) ? p.models.slice() : [];
+  if(state.model && !models.some(m => m.id === state.model)) models.unshift({id: state.model});
+  models.forEach(m => { const o=document.createElement("option"); o.value=m.id; o.textContent=m.id; if(m.id===state.model) o.selected=true; sel.appendChild(o); });
+  sel.value = state.model;
 }
 
 function renderEffort(){
@@ -871,7 +872,7 @@ function download(filename, text, mime){
    BIND
    ========================================================================= */
 function bind(){
-  $("model").addEventListener("input", e => { state.model=e.target.value; applyModelDefaults(); if(!state.profileEdited) state.profileName=suggestedProfile(); $("profileName").value=state.profileName; saveState(); renderEffort(); renderConditional(); refresh(); });
+  $("model").addEventListener("change", e => { state.model=e.target.value; applyModelDefaults(); if(!state.profileEdited) state.profileName=suggestedProfile(); $("profileName").value=state.profileName; saveState(); renderEffort(); renderConditional(); refresh(); });
   $("deployment").addEventListener("input", e => { state.deployment=e.target.value; saveState(); refresh(); });
   $("providerId").addEventListener("input", e => { state.providerIdField=e.target.value; saveState(); refresh(); });
   $("resource").addEventListener("input", e => { state.resource=e.target.value; saveState(); refresh(); $("azureUrlPreview").textContent=baseUrl(); });
