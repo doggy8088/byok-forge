@@ -7,6 +7,12 @@
 
   const STORAGE_KEY = "byok_forge_store_v1";
 
+  // Share payload limits (SEC-06): deserialized JSON <= 1 MiB, raw #cfg= param <= 64 KiB
+  const MAX_DESERIALIZED_CHARS = 1024 * 1024;
+  const MAX_SHARE_PARAM_CHARS = 64 * 1024;
+  // Keys that must never survive sanitization (prototype pollution)
+  const UNSAFE_KEYS = ["__proto__", "constructor", "prototype"];
+
   // Base64URL encoding/decoding
   function bytesToBase64Url(bytes) {
     let binary = "";
@@ -26,6 +32,18 @@
       bytes[i] = binary.charCodeAt(i);
     }
     return bytes;
+  }
+
+  // Recursive clone dropping prototype-pollution keys
+  function cleanDeep(value) {
+    if (Array.isArray(value)) return value.map(cleanDeep);
+    if (!value || typeof value !== "object") return value;
+    const out = {};
+    Object.keys(value).forEach((key) => {
+      if (UNSAFE_KEYS.indexOf(key) !== -1) return;
+      out[key] = cleanDeep(value[key]);
+    });
+    return out;
   }
 
   // Lossless compression using browser CompressionStream with fallback
@@ -48,8 +66,9 @@
       return "r." + bytesToBase64Url(bytes);
     },
 
-    async decompress(encodedStr) {
+    async decompress(encodedStr, opts) {
       if (!encodedStr || typeof encodedStr !== "string") return null;
+      if (encodedStr.length > MAX_SHARE_PARAM_CHARS) return null;
       try {
         if (encodedStr.startsWith("z.")) {
           const raw = encodedStr.slice(2);
@@ -57,13 +76,16 @@
           if (typeof DecompressionStream !== "undefined") {
             const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
             const text = await new Response(stream).text();
-            return JSON.parse(text);
+            if (text.length > MAX_DESERIALIZED_CHARS) return null;
+            return this.sanitize(JSON.parse(text), opts);
           }
         } else if (encodedStr.startsWith("r.")) {
           const raw = encodedStr.slice(2);
           const bytes = base64UrlToBytes(raw);
           const decoder = new TextDecoder();
-          return JSON.parse(decoder.decode(bytes));
+          const text = decoder.decode(bytes);
+          if (text.length > MAX_DESERIALIZED_CHARS) return null;
+          return this.sanitize(JSON.parse(text), opts);
         } else {
           // Try raw base64 or deflate-raw directly
           try {
@@ -71,12 +93,15 @@
             if (typeof DecompressionStream !== "undefined") {
               const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
               const text = await new Response(stream).text();
-              return JSON.parse(text);
+              if (text.length > MAX_DESERIALIZED_CHARS) return null;
+              return this.sanitize(JSON.parse(text), opts);
             }
           } catch (err) {
             const bytes = base64UrlToBytes(encodedStr);
             const decoder = new TextDecoder();
-            return JSON.parse(decoder.decode(bytes));
+            const text = decoder.decode(bytes);
+            if (text.length > MAX_DESERIALIZED_CHARS) return null;
+            return this.sanitize(JSON.parse(text), opts);
           }
         }
       } catch (err) {
@@ -86,13 +111,41 @@
       return null;
     },
 
-    async getSharedData() {
+    async getSharedData(opts) {
       const hash = window.location.hash || "";
       const match = hash.match(/[#&]cfg=([^&]+)/);
       if (match && match[1]) {
-        return await this.decompress(decodeURIComponent(match[1]));
+        if (match[1].length > MAX_SHARE_PARAM_CHARS) return null;
+        return this.sanitize(await this.decompress(decodeURIComponent(match[1]), opts), opts);
       }
       return null;
+    },
+
+    // Sanitize untrusted share/import payloads. strictState drops non-primitive
+    // state values (pages with flat state opt in); default keeps nested values
+    // (e.g. litellm state.entries) but still proto-cleans and size-caps them.
+    sanitize(data, opts) {
+      if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+      const cleaned = cleanDeep(data);
+      if (Array.isArray(cleaned.providers)) {
+        cleaned.providers = cleaned.providers.filter((p) =>
+          p && typeof p === "object" && !Array.isArray(p) &&
+          typeof p.id === "string" && typeof p.name === "string"
+        );
+        cleaned.providers.forEach((p) => {
+          if (!Array.isArray(p.models)) p.models = [];
+        });
+      }
+      if (opts && opts.strictState === true &&
+          cleaned.state && typeof cleaned.state === "object" && !Array.isArray(cleaned.state)) {
+        const st = {};
+        Object.keys(cleaned.state).forEach((k) => {
+          const v = cleaned.state[k];
+          if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") st[k] = v;
+        });
+        cleaned.state = st;
+      }
+      return cleaned;
     },
 
     async shareCurrentPage(pageData, toastMsg) {
@@ -181,6 +234,19 @@
       this.saveAll(all);
     },
 
+    // defaults: fresh list derived from the registry (array or object map)
+    // saved: user-persisted list
+    // ids present in defaults win (registry is authoritative); ids missing from
+    // defaults (user-created providers) are kept from saved.
+    mergeProviders(defaults, saved) {
+      const isArray = Array.isArray(defaults);
+      const defIds = new Set(isArray ? defaults.map(p => p.id) : Object.keys(defaults));
+      const extra = isArray
+        ? (saved || []).filter(p => p && !defIds.has(p.id))
+        : Object.fromEntries(Object.entries(saved || {}).filter(([k]) => !defIds.has(k)));
+      return isArray ? defaults.concat(extra) : Object.assign({}, defaults, extra);
+    },
+
     exportBackup() {
       const all = this.getAll();
       const exportObj = {
@@ -210,16 +276,19 @@
       reader.onload = (e) => {
         try {
           const parsed = JSON.parse(e.target.result);
-          if (!parsed || typeof parsed !== "object") {
+          if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
             throw new Error("Invalid format");
+          }
+          if (!(parsed.pages && typeof parsed.pages === "object" && !Array.isArray(parsed.pages))) {
+            throw new Error("Invalid format: missing pages object");
           }
           const all = this.getAll();
           if (!all.pages) all.pages = {};
-          if (parsed.pages && typeof parsed.pages === "object") {
-            Object.assign(all.pages, parsed.pages);
-          } else {
-            Object.assign(all.pages, parsed);
-          }
+          Object.keys(parsed.pages).forEach((pageId) => {
+            if (UNSAFE_KEYS.indexOf(pageId) !== -1) return;
+            const cleaned = BYOKShare.sanitize(parsed.pages[pageId]);
+            if (cleaned) all.pages[pageId] = cleaned;
+          });
           all.updatedAt = new Date().toISOString();
           this.saveAll(all);
           BYOKToast.show(window.t ? window.t("common.importSuccess") : "Settings imported successfully!");

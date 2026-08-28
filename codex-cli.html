@@ -962,17 +962,21 @@ async function init(){
   if(window.I18NEngine) window.I18NEngine.init({ page:"codex", titleKey:"codex.title" });
   document.addEventListener("i18n:changed", function () { refresh(); });
 
-  const shared = await window.BYOKShare.getSharedData();
+  const shared = await window.BYOKShare.getSharedData({ strictState: true });
   if(shared){
-    if(Array.isArray(shared.providers)) PROVIDERS = shared.providers;
+    if(Array.isArray(shared.providers)) PROVIDERS = window.BYOKStore.mergeProviders(PROVIDERS, shared.providers);
     if(shared.state) Object.assign(state, shared.state);
-    saveState();
+    window.BYOKStore.savePage("codex", {
+      providers: PROVIDERS,
+      state: state,
+      modelsVersion: 0
+    });
     window.BYOKToast.show(window.t ? window.t("common.sharedLoaded") : "Settings loaded from share link ✓");
   } else {
     const saved = window.BYOKStore.getPage("codex", null);
     if(saved){
-      const regVersion = (window.BYOK_MODELS && window.BYOK_MODELS.version) || 0;
-      if(Array.isArray(saved.providers) && saved.modelsVersion === regVersion) PROVIDERS = saved.providers;
+      // registry-derived defaults win for known ids; user-created providers are kept
+      if(Array.isArray(saved.providers)) PROVIDERS = window.BYOKStore.mergeProviders(PROVIDERS, saved.providers);
       if(saved.state) Object.assign(state, saved.state);
     }
   }

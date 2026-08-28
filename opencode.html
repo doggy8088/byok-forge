@@ -1241,18 +1241,23 @@
   }
 
   async function init() {
-    const shared = await window.BYOKShare.getSharedData();
+    const shared = await window.BYOKShare.getSharedData({ strictState: true });
     if (shared) {
-      if (shared.presets && typeof shared.presets === "object") PRESETS = shared.presets;
+      if (shared.presets && typeof shared.presets === "object" && !Array.isArray(shared.presets)) PRESETS = window.BYOKStore.mergeProviders(PRESETS, shared.presets);
       if (shared.state) Object.assign(state, shared.state);
-      saveState();
+      window.BYOKStore.savePage("opencode", {
+        modelsVersion: 0,
+        presets: PRESETS,
+        state: state
+      });
       applyStateToForm();
       populateModelSelect();
       window.BYOKToast.show(window.t ? window.t("common.sharedLoaded") : "Settings loaded from share link ✓");
     } else {
       const saved = window.BYOKStore.getPage("opencode", null);
       if (saved) {
-        if (saved.presets && typeof saved.presets === "object" && saved.modelsVersion === ((window.BYOK_MODELS && window.BYOK_MODELS.version) || 0)) PRESETS = saved.presets;
+        // registry-derived defaults win for known ids; user-created presets are kept
+        if (saved.presets && typeof saved.presets === "object" && !Array.isArray(saved.presets)) PRESETS = window.BYOKStore.mergeProviders(PRESETS, saved.presets);
         if (saved.state) Object.assign(state, saved.state);
         applyStateToForm();
         populateModelSelect();

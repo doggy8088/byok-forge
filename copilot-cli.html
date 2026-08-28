@@ -738,11 +738,17 @@ const DEFAULT_STATE = {
 let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 let collection = [];
 
+function stateForStorage(){
+  const s = Object.assign({}, state);
+  s.keyLiteral = "";
+  return s;
+}
+
 function saveState(){
   window.BYOKStore.savePage("copilot", {
     modelsVersion: (window.BYOK_MODELS && window.BYOK_MODELS.version) || 0,
     providers: PROVIDERS,
-    state: state,
+    state: stateForStorage(),
     collection: collection
   });
 }
@@ -919,6 +925,14 @@ function hl(code){
 /* =========================================================================
    RENDER
    ========================================================================= */
+function normalizeProviders(){
+  PROVIDERS.forEach((p) => {
+    if(!p || typeof p !== "object") return;
+    if(!Array.isArray(p.models)) p.models = [];
+    if(typeof p.name !== "string" || !p.name) p.name = "provider";
+  });
+}
+
 function renderProviders(){
   const wrap = $("providers");
   wrap.innerHTML = "";
@@ -943,7 +957,7 @@ function renderProviders(){
       }
       if(state.providerId === p.id){
         state.providerId = PROVIDERS[0].id;
-        state.modelId = PROVIDERS[0].models[0].id;
+        state.modelId = (PROVIDERS[0] && Array.isArray(PROVIDERS[0].models) && PROVIDERS[0].models[0]) ? PROVIDERS[0].models[0].id : "default";
         applyModelDefaults();
       }
       saveState();
@@ -1259,6 +1273,22 @@ function renderCollection(){
   });
 }
 
+/* Regenerate a collection item's snippet from its stored state snapshot so
+   copies always reflect the current generation logic; legacy items (no
+   snapshot) fall back to their stored code. */
+function regenerateCollectionCode(c){
+  if(!c || !c.stateSnapshot) return (c && typeof c.code === "string") ? c.code : "";
+  const prev = state;
+  state = Object.assign({}, DEFAULT_STATE, c.stateSnapshot);
+  try {
+    return state.shell === "bash"
+      ? (state.kind === "alias" ? genShellAlias() : genShellFunction())
+      : genPwshFunction(state.kind === "alias");
+  } finally {
+    state = prev;
+  }
+}
+
 /* =========================================================================
    WIRE UP EVENTS
    ========================================================================= */
@@ -1307,14 +1337,14 @@ function bind(){
       kind: state.kind,
       provider: provider().name,
       model: modelString(),
-      code: generate(),
+      stateSnapshot: stateForStorage(),
     });
     saveState();
     renderCollection(); showToast();
   });
   $("copyAllBtn").addEventListener("click", () => {
     if(collection.length === 0){ copyText($("output").dataset.raw || "", $("copyAllBtn"), "⧉ copied ✓"); return; }
-    const all = collection.map(c => c.code).join("\n\n");
+    const all = collection.map(regenerateCollectionCode).join("\n\n");
     copyText(all, $("copyAllBtn"), "⧉ copied all ✓");
   });
   $("clearBtn").addEventListener("click", () => { collection.length = 0; saveState(); renderCollection(); });
@@ -1322,7 +1352,7 @@ function bind(){
   const shareHandler = () => {
     window.BYOKShare.shareCurrentPage({
       providers: PROVIDERS,
-      state: state,
+      state: stateForStorage(),
       collection: collection
     });
   };
@@ -1335,23 +1365,30 @@ function bind(){
    ========================================================================= */
 async function init(){
   // Check shared URL hash first
-  const shared = await window.BYOKShare.getSharedData();
+  const shared = await window.BYOKShare.getSharedData({ strictState: true });
   if(shared){
-    if(Array.isArray(shared.providers)) PROVIDERS = shared.providers;
+    if(Array.isArray(shared.providers)) PROVIDERS = window.BYOKStore.mergeProviders(PROVIDERS, shared.providers);
     if(shared.state) Object.assign(state, shared.state);
     if(Array.isArray(shared.collection)) collection = shared.collection;
-    saveState();
+    normalizeProviders();
+    // modelsVersion: 0 — adopted share providers must not masquerade as
+    // registry-current; the next load re-merges against the current registry.
+    window.BYOKStore.savePage("copilot", {
+      modelsVersion: 0,
+      providers: PROVIDERS,
+      state: stateForStorage(),
+      collection: collection
+    });
     window.BYOKToast.show(window.t ? window.t("common.sharedLoaded") : "Settings loaded from share link ✓");
   } else {
     // Load from local storage
     const saved = window.BYOKStore.getPage("copilot", null);
     if(saved){
-      // adopt saved providers only if they were saved with the same model registry version
-      if(Array.isArray(saved.providers) && saved.modelsVersion === ((window.BYOK_MODELS && window.BYOK_MODELS.version) || 0)){
-        PROVIDERS = saved.providers;
-      }
+      // registry-derived defaults win for known ids; user-created providers are kept
+      if(Array.isArray(saved.providers)) PROVIDERS = window.BYOKStore.mergeProviders(PROVIDERS, saved.providers);
       if(saved.state) Object.assign(state, saved.state);
       if(Array.isArray(saved.collection)) collection = saved.collection;
+      normalizeProviders();
     }
   }
 

@@ -1088,18 +1088,23 @@
   }
 
   async function init() {
-    const shared = await window.BYOKShare.getSharedData();
+    const shared = await window.BYOKShare.getSharedData({ strictState: true });
     if (shared) {
-      if (shared.providers && typeof shared.providers === "object") PROVIDERS = shared.providers;
+      if (shared.providers && typeof shared.providers === "object" && !Array.isArray(shared.providers)) PROVIDERS = window.BYOKStore.mergeProviders(PROVIDERS, shared.providers);
       if (shared.state) Object.assign(state, shared.state);
-      saveState();
+      window.BYOKStore.savePage("claude-code", {
+        modelsVersion: 0,
+        providers: PROVIDERS,
+        state: state
+      });
       syncInputs();
       refreshModels();
       window.BYOKToast.show(window.t ? window.t("common.sharedLoaded") : "Settings loaded from share link ✓");
     } else {
       const saved = window.BYOKStore.getPage("claude-code", null);
       if (saved) {
-        if (saved.providers && typeof saved.providers === "object" && saved.modelsVersion === ((window.BYOK_MODELS && window.BYOK_MODELS.version) || 0)) PROVIDERS = saved.providers;
+        // registry-derived defaults win for known ids; user-created providers are kept
+        if (saved.providers && typeof saved.providers === "object" && !Array.isArray(saved.providers)) PROVIDERS = window.BYOKStore.mergeProviders(PROVIDERS, saved.providers);
         if (saved.state) Object.assign(state, saved.state);
         syncInputs();
         refreshModels();
