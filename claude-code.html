@@ -921,7 +921,8 @@
 
   function shellCommand() {
     const parts = [];
-    const keyEnv = (state.keyEnv || "").trim();
+    const rawKeyEnv = (state.keyEnv || "").trim();
+    const keyEnv = /^[A-Za-z_][A-Za-z0-9_]*$/.test(rawKeyEnv) ? rawKeyEnv : "ANTHROPIC_API_KEY";
     if (state.requireKey && keyEnv && keyEnv !== "ANTHROPIC_API_KEY") {
       parts.push(`export ANTHROPIC_API_KEY="\${${keyEnv}}"`);
     } else if (state.requireKey && keyEnv === "ANTHROPIC_API_KEY") {

@@ -152,7 +152,8 @@
     scope.querySelectorAll("[data-i18n]").forEach(function (element) {
       const key = element.getAttribute("data-i18n");
       if (!key) return;
-      element.textContent = t(key);
+      const translated = t(key);
+      if (translated !== key) element.textContent = translated;
     });
     scope.querySelectorAll("[data-i18n-html]").forEach(function (element) {
       const key = element.getAttribute("data-i18n-html");

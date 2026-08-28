@@ -444,7 +444,7 @@ const DEFAULT_PROVIDERS = [
   { id:"groq", name:"Groq", kind:"custom", providerId:"groq", color:"#ff6a6a", badge:"GQ", beta:true,
     baseUrl:"https://api.groq.com/openai/v1", keyRequired:true, env:"GROQ_API_KEY",
     modelCatalog:"groq",
-    models:[ {id:"openai/gpt-oss-120b",eff:"high"},{id:"openai/gpt-oss-20b",eff:"high"},{id:"llama-3.3-70b-versatile",eff:"omit"},{id:"moonshotai/kimi-k2-instruct",eff:"omit"},{id:"qwen-3-32b",eff:"omit"} ]},
+    models:[ {id:"openai/gpt-oss-120b",eff:"high"},{id:"openai/gpt-oss-20b",eff:"high"},{id:"llama-3.3-70b-versatile",eff:"omit"},{id:"moonshotai/kimi-k2-instruct",eff:"omit"},{id:"qwen/qwen3-32b",eff:"omit"} ]},
   { id:"vllm", name:"vLLM", kind:"custom", providerId:"vllm", color:"#5cc8ff", badge:"VL",
     baseUrl:"http://localhost:8000/v1", keyRequired:false, env:"VLLM_API_KEY",
     models:[ {id:"Qwen/Qwen3-Coder-30B-A3B-Instruct",eff:"omit"},{id:"openai/gpt-oss-120b",eff:"high"},{id:"deepseek-ai/DeepSeek-V3.1",eff:"omit"} ]},
@@ -486,6 +486,8 @@ const DEFAULT_STATE = {
   profileName:"ollama-glm-5-3-flash",
   profileEdited:false,
 };
+
+if (window.BYOK_MODELS && window.BYOK_MODELS.providers["ollama-cloud"]) DEFAULT_STATE.model = window.BYOK_MODELS.providers["ollama-cloud"].defaultModel;
 
 let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 
@@ -821,9 +823,12 @@ function buildOllamaCatalog(){
   };
 }
 
+let catalogSeq = 0;
 async function renderCatalogCode(){
   const p = provider();
   if(!p.modelCatalog) return;
+  const seq = ++catalogSeq;
+  $("catalogOut").dataset.raw = "";
   if(window.BYOK_MODELS && window.BYOK_MODELS.providers[p.id]){
     const cat = buildOllamaCatalog();
     if(cat){
@@ -835,11 +840,15 @@ async function renderCatalogCode(){
   }
   try {
     const res = await fetch(`model-catalog.${p.modelCatalog}.json`);
+    if(seq !== catalogSeq) return;
     const data = await res.json();
+    if(seq !== catalogSeq) return;
     const txt = JSON.stringify(data, null, 2);
     $("catalogOut").innerHTML = hlJSON(txt);
     $("catalogOut").dataset.raw = txt;
   } catch(e){
+    if(seq !== catalogSeq) return;
+    $("catalogOut").dataset.raw = "";
     $("catalogOut").textContent = `// Place model-catalog.${p.modelCatalog}.json in ~/.codex/`;
   }
 }

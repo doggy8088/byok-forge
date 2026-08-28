@@ -281,6 +281,26 @@
       "experimental_supported_tools": []
     },
     {
+      "slug": "moonshotai/kimi-k2-instruct",
+      "display_name": "moonshotai/kimi-k2-instruct",
+      "description": "moonshotai/kimi-k2-instruct via Groq.",
+      "supported_reasoning_levels": [],
+      "shell_type": "shell_command",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 20,
+      "base_instructions": "You are moonshotai/kimi-k2-instruct running in the Codex CLI through Groq.",
+      "supports_reasoning_summaries": false,
+      "support_verbosity": false,
+      "default_verbosity": "low",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "supports_parallel_tool_calls": false,
+      "experimental_supported_tools": []
+    },
+    {
       "slug": "qwen/qwen3-32b",
       "display_name": "qwen/qwen3-32b",
       "description": "qwen/qwen3-32b via Groq.",
