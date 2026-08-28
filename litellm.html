@@ -284,8 +284,6 @@
     </div>
   </div>
 
-  <datalist id="dl-store"></datalist>
-
   <footer>
     <div><b>LiteLLM Config Forge</b> · build a <span style="color:var(--amber)">litellm-config.yaml</span> for the LiteLLM proxy</div>
     <div class="disc">The <a href="https://docs.litellm.ai/docs/response_api" style="color:var(--amber)">LiteLLM proxy</a> exposes an OpenAI <b>/v1/responses</b> endpoint and bridges to Chat-Completions providers automatically — so Responses-only clients like the Codex CLI can talk to Mistral, DeepSeek, Anthropic, Gemini and more. API keys are referenced as <code style="color:var(--amber)">os.environ/NAME</code> and read by the proxy at runtime; they're never written into the YAML. Model names are best-effort for mid-2026 — verify with each provider.</div>
@@ -474,16 +472,6 @@ function hlShell(code){
   }).join("\n");
 }
 
-function renderDatalists(){
-  const store = $("dl-store");
-  store.innerHTML = "";
-  LL_PROVIDERS.forEach(p => {
-    const dl = document.createElement("datalist");
-    dl.id = "models-" + p.id;
-    if(p.models) p.models.forEach(m => { const o=document.createElement("option"); o.value=m; dl.appendChild(o); });
-    store.appendChild(dl);
-  });
-}
 function renderEntries(){
   const wrap = $("entries"); wrap.innerHTML = "";
   state.entries.forEach((e, i) => {
@@ -513,7 +501,7 @@ function renderEntries(){
         </div>
         <div class="ecell">
           <span class="mini">${modelLbl}</span>
-          <input type="text" data-field="model" list="models-${p.id}" value="${escAttr(e.model)}" autocomplete="off" spellcheck="false" />
+          <select data-field="model">${(function(){ var ids=(p.models||[]).slice(); if(e.model && ids.indexOf(e.model)===-1) ids.unshift(e.model); return ids.map(function(mid){ return `<option value="${escAttr(mid)}"${mid===e.model?" selected":""}>${escAttr(mid)}</option>`; }).join(""); })()}</select>
         </div>
       </div>
       <div class="erow">
@@ -586,10 +574,10 @@ function onEntryInput(ev){
   const t = ev.target;
   const field = t.dataset.field; if(!field) return;
   const e = entryByCard(t); if(!e) return;
-  if(field === "provider") return;
+  if(field === "provider" || field === "model") return;
   e[field] = t.value;
   if(field === "alias"){ const card=t.closest(".entry"); const a=card.querySelector(".ealias"); if(a) a.textContent=(e.alias||"").trim()||defaultAlias(e.model); }
-  if(field === "model" || field === "env" || field === "base" || field === "version"){
+  if(field === "env" || field === "base" || field === "version"){
     const card=t.closest(".entry"); const hint=card.querySelector(".hintline b"); if(hint) hint.textContent = entryModelString(e);
   }
   saveState();
@@ -597,7 +585,18 @@ function onEntryInput(ev){
 }
 function onEntryChange(ev){
   const t = ev.target;
-  if(t.dataset.field !== "provider") return;
+  const field = t.dataset.field;
+  if(field === "model"){
+    const e = entryByCard(t); if(!e) return;
+    e.model = t.value;
+    const card = t.closest(".entry");
+    const a = card.querySelector(".ealias"); if(a) a.textContent=(e.alias||"").trim()||defaultAlias(e.model);
+    const hint = card.querySelector(".hintline b"); if(hint) hint.textContent = entryModelString(e);
+    saveState();
+    refresh();
+    return;
+  }
+  if(field !== "provider") return;
   const e = entryByCard(t); if(!e) return;
   const p = provById(t.value);
   e.provider = t.value;
@@ -690,7 +689,7 @@ async function init(){
   if(state.dropParams !== undefined) $("dropParams").checked = !!state.dropParams;
   if(state.detailedDebug !== undefined) $("detailedDebug").checked = !!state.detailedDebug;
 
-  renderDatalists(); renderEntries(); bind(); refresh();
+  renderEntries(); bind(); refresh();
 }
 document.addEventListener("DOMContentLoaded", init);
 </script>

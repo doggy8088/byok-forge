@@ -563,8 +563,7 @@
             </div>
             <div class="field">
               <label class="lbl" for="model" data-i18n="cursor.labelModel">model</label>
-              <input id="model" type="text" list="modelList" autocomplete="off" spellcheck="false" />
-              <datalist id="modelList"></datalist>
+              <select id="model"></select>
               <div class="descline" data-i18n-html="cursor.modelHint">If your Cursor model list differs, adjust in Cursor settings UI.</div>
             </div>
           </div>
@@ -783,18 +782,27 @@
   }
 
   function renderModelList() {
-    const modelList = $("modelList");
-    if (!modelList) return;
-    modelList.innerHTML = "";
-    if (state.preset !== "openrouter") return;
-
-    const modelFrag = document.createDocumentFragment();
-    OPENROUTER_TOP_MODELS.forEach(function (model) {
+    const sel = $("model");
+    if (!sel) return;
+    const preset = getPreset(state.preset);
+    let ids = [];
+    if (preset && Array.isArray(preset.models) && preset.models.length) {
+      ids = preset.models.slice();
+    } else if (state.preset === "openrouter") {
+      ids = OPENROUTER_TOP_MODELS.slice();
+    } else if (preset && preset.model) {
+      ids = [preset.model];
+    }
+    if (state.model && ids.indexOf(state.model) === -1) ids.unshift(state.model);
+    sel.innerHTML = "";
+    ids.forEach(function (mid) {
       const option = document.createElement("option");
-      option.value = model;
-      modelFrag.appendChild(option);
+      option.value = mid;
+      option.textContent = mid;
+      if (mid === state.model) option.selected = true;
+      sel.appendChild(option);
     });
-    modelList.appendChild(modelFrag);
+    sel.value = state.model;
   }
 
   function renderProviderCards() {
@@ -1052,22 +1060,20 @@
     inputIds.forEach(function (id) {
       const el = $(id);
       if (!el) return;
-      el.addEventListener("input", function () {
+      const onUpdate = function () {
         collectState();
         if (id === "keyEnv") {
           var p = getPreset(state.preset);
           if (p) p.keyEnv = state.keyEnv;
         }
         render();
-      });
-      el.addEventListener("change", function () {
-        collectState();
-        if (id === "keyEnv") {
-          var p = getPreset(state.preset);
-          if (p) p.keyEnv = state.keyEnv;
-        }
-        render();
-      });
+      };
+      if (el.tagName === "SELECT") {
+        el.addEventListener("change", onUpdate);
+      } else {
+        el.addEventListener("input", onUpdate);
+        el.addEventListener("change", onUpdate);
+      }
     });
 
     $("copySettingsBtn").addEventListener("click", function () {
@@ -1150,6 +1156,7 @@
     }
 
     bind();
+    renderModelList();
     render();
 
     window.I18NEngine.init({

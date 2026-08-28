@@ -581,8 +581,7 @@
         <div class="field">
           <div class="section-h"><span class="n">02</span><h2 data-i18n="claudeCode.sectionModel">model</h2><span class="hint" data-i18n="claudeCode.sectionModelHint">model id / alias</span></div>
           <label class="lbl" for="model" data-i18n="claudeCode.labelModel">model id</label>
-          <input type="text" id="model" list="modelList" autocomplete="off" spellcheck="false" />
-          <datalist id="modelList"></datalist>
+          <select id="model"></select>
           <div class="descline" data-i18n="claudeCode.modelHint">Top-level value passed to Claude Code model.</div>
         </div>
 
@@ -875,18 +874,21 @@
   }
 
   function refreshModels() {
-    const dl = $("modelList");
-    if (!dl) return;
-    dl.innerHTML = "";
+    const sel = $("model");
+    if (!sel) return;
+    sel.innerHTML = "";
 
     const active = PROVIDERS[state.provider];
-    const models = active && active.models ? active.models : [];
+    const models = active && active.models ? active.models.slice() : [];
+    if (state.model && !models.some((m) => m.id === state.model)) models.unshift({ id: state.model, name: state.model });
     models.forEach((m) => {
       const opt = document.createElement("option");
       opt.value = m.id;
       opt.textContent = m.name || m.id;
-      dl.appendChild(opt);
+      if (m.id === state.model) opt.selected = true;
+      sel.appendChild(opt);
     });
+    sel.value = state.model;
   }
 
   function syncInputs() {
@@ -1026,7 +1028,7 @@
   }
 
   function bind() {
-    $("model").addEventListener("input", function () {
+    $("model").addEventListener("change", function () {
       state.model = this.value.trim();
       saveState();
       refresh();

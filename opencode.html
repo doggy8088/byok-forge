@@ -538,8 +538,7 @@
           <div class="section-h"><span class="n">02</span><h2 data-i18n="opencode.sectionModel">model</h2><span class="hint" data-i18n="opencode.sectionModelHint">model id + optional limits</span></div>
 
           <label class="lbl" for="model" data-i18n="opencode.labelModel">model id</label>
-          <input type="text" id="model" list="modelList" autocomplete="off" spellcheck="false" />
-          <datalist id="modelList"></datalist>
+          <select id="model"></select>
           <div class="descline" data-i18n="opencode.modelHint">For OpenCode root setting, it becomes <b>providerId/model</b>.</div>
 
           <div class="row2" style="margin-top:14px;">
@@ -896,7 +895,7 @@
     state.outputLimit = (m.limit && m.limit.output) || "";
 
     applyStateToForm();
-    populateModelDatalist();
+    populateModelSelect();
     saveState();
     renderPresetCards();
     refresh();
@@ -916,18 +915,21 @@
     }
   }
 
-  function populateModelDatalist() {
-    const dl = $("modelList");
-    if (!dl) return;
-    dl.innerHTML = "";
+  function populateModelSelect() {
+    const sel = $("model");
+    if (!sel) return;
+    sel.innerHTML = "";
     const preset = PRESETS[state.preset];
-    if (!preset || !preset.models) return;
-    preset.models.forEach((m) => {
+    const models = (preset && preset.models) ? preset.models.slice() : [];
+    if (state.model && !models.some((m) => m.id === state.model)) models.unshift({ id: state.model, name: state.model });
+    models.forEach((m) => {
       const opt = document.createElement("option");
       opt.value = m.id;
-      opt.textContent = m.name;
-      dl.appendChild(opt);
+      opt.textContent = m.name || m.id;
+      if (m.id === state.model) opt.selected = true;
+      sel.appendChild(opt);
     });
+    sel.value = state.model;
   }
 
   function applyStateToForm() {
@@ -1181,7 +1183,7 @@
       refresh();
     });
 
-    $("model").addEventListener("input", function () {
+    $("model").addEventListener("change", function () {
       state.model = this.value.trim();
       applyPresetModel();
       saveState();
@@ -1242,7 +1244,7 @@
       if (shared.state) Object.assign(state, shared.state);
       saveState();
       applyStateToForm();
-      populateModelDatalist();
+      populateModelSelect();
       window.BYOKToast.show(window.t ? window.t("common.sharedLoaded") : "Settings loaded from share link ✓");
     } else {
       const saved = window.BYOKStore.getPage("opencode", null);
@@ -1250,7 +1252,7 @@
         if (saved.presets && typeof saved.presets === "object") PRESETS = saved.presets;
         if (saved.state) Object.assign(state, saved.state);
         applyStateToForm();
-        populateModelDatalist();
+        populateModelSelect();
       } else {
         syncFromPreset("openai");
       }
