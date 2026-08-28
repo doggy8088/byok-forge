@@ -1060,22 +1060,20 @@
     inputIds.forEach(function (id) {
       const el = $(id);
       if (!el) return;
-      el.addEventListener("input", function () {
+      const onUpdate = function () {
         collectState();
         if (id === "keyEnv") {
           var p = getPreset(state.preset);
           if (p) p.keyEnv = state.keyEnv;
         }
         render();
-      });
-      el.addEventListener("change", function () {
-        collectState();
-        if (id === "keyEnv") {
-          var p = getPreset(state.preset);
-          if (p) p.keyEnv = state.keyEnv;
-        }
-        render();
-      });
+      };
+      if (el.tagName === "SELECT") {
+        el.addEventListener("change", onUpdate);
+      } else {
+        el.addEventListener("input", onUpdate);
+        el.addEventListener("change", onUpdate);
+      }
     });
 
     $("copySettingsBtn").addEventListener("click", function () {

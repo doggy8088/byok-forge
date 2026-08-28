@@ -895,7 +895,7 @@
     state.outputLimit = (m.limit && m.limit.output) || "";
 
     applyStateToForm();
-    populateModelDatalist();
+    populateModelSelect();
     saveState();
     renderPresetCards();
     refresh();
@@ -915,7 +915,7 @@
     }
   }
 
-  function populateModelDatalist() {
+  function populateModelSelect() {
     const sel = $("model");
     if (!sel) return;
     sel.innerHTML = "";
@@ -1244,7 +1244,7 @@
       if (shared.state) Object.assign(state, shared.state);
       saveState();
       applyStateToForm();
-      populateModelDatalist();
+      populateModelSelect();
       window.BYOKToast.show(window.t ? window.t("common.sharedLoaded") : "Settings loaded from share link ✓");
     } else {
       const saved = window.BYOKStore.getPage("opencode", null);
@@ -1252,7 +1252,7 @@
         if (saved.presets && typeof saved.presets === "object") PRESETS = saved.presets;
         if (saved.state) Object.assign(state, saved.state);
         applyStateToForm();
-        populateModelDatalist();
+        populateModelSelect();
       } else {
         syncFromPreset("openai");
       }
