@@ -34,6 +34,7 @@
 <script src="translations.js?v=20260630"></script>
 <script src="i18n.js?v=20260630"></script>
 <script src="storage.js?v=20260630"></script>
+<script src="models.js?v=20260829"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Martian+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -701,7 +702,7 @@
     { value: "cursor-aiprovider", nameKey: "cursor.schemaCursorAiprovider" }
   ];
 
-  const OPENROUTER_TOP_MODELS = [
+  const OPENROUTER_TOP_MODELS_FALLBACK = [
     "deepseek/deepseek-v4-flash",
     "xiaomi/mimo-v2.5",
     "minimax/minimax-m3",
@@ -713,6 +714,15 @@
     "anthropic/claude-sonnet-4.6",
     "stepfun/step-3.7-flash",
   ];
+
+  /* OpenRouter model ids come from the shared registry (models.js);
+     the hardcoded list above is only a fallback for stale file:// cached pages. */
+  const OPENROUTER_TOP_MODELS = (function () {
+    const reg = window.BYOK_MODELS && window.BYOK_MODELS.providers["openrouter"];
+    return (reg && Array.isArray(reg.models) && reg.models.length)
+      ? reg.models.map(function (m) { return m.id; })
+      : OPENROUTER_TOP_MODELS_FALLBACK.slice();
+  })();
 
   const DEFAULT_PATH = "~/.config/Cursor/User/settings.json";
   const LEGACY_DEFAULT_PATH = "~/.config/cursor/settings.json";
@@ -733,7 +743,21 @@
   function saveState() {
     window.BYOKStore.savePage("cursor", {
       presets: PRESETS,
-      state: state
+      state: state,
+      modelsVersion: (window.BYOK_MODELS && window.BYOK_MODELS.version) || 0
+    });
+  }
+
+  /* mergeProviders keys on `id`; cursor presets key on `value`, so alias one
+     onto the other for the merge and drop the alias from the result so the
+     persisted shape stays unchanged. User-created presets are kept. */
+  function mergePresetsByValue(defaults, saved) {
+    const alias = (list) => (list || []).map((p) => Object.assign({}, p, { id: p.id || p.value }));
+    const merged = window.BYOKStore.mergeProviders(alias(defaults), alias(saved)) || [];
+    return merged.map((p) => {
+      const out = Object.assign({}, p);
+      delete out.id;
+      return out;
     });
   }
 
@@ -1169,10 +1193,16 @@
   async function init() {
     const shared = await window.BYOKShare.getSharedData();
     if (shared) {
-      if (Array.isArray(shared.presets)) PRESETS = shared.presets;
+      if (Array.isArray(shared.presets)) PRESETS = mergePresetsByValue(PRESETS, shared.presets);
       if (shared.state) Object.assign(state, shared.state);
       migrateLegacyConfigPath();
-      saveState();
+      // modelsVersion: 0 — adopted share presets must not masquerade as
+      // registry-current; the next load re-merges against the current registry.
+      window.BYOKStore.savePage("cursor", {
+        presets: PRESETS,
+        state: state,
+        modelsVersion: 0
+      });
       $("providerId").value = state.providerId || "";
       $("baseURL").value = state.baseURL || "";
       $("keyEnv").value = state.keyEnv || "";
@@ -1184,7 +1214,8 @@
     } else {
       const saved = window.BYOKStore.getPage("cursor", null);
       if (saved) {
-        if (Array.isArray(saved.presets)) PRESETS = saved.presets;
+        // registry-derived defaults win for known ids; user-created presets are kept
+        if (Array.isArray(saved.presets)) PRESETS = mergePresetsByValue(PRESETS, saved.presets);
         if (saved.state) Object.assign(state, saved.state);
         migrateLegacyConfigPath();
         $("providerId").value = state.providerId || "";

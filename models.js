@@ -1,10 +1,11 @@
 /* =========================================================================
    BYOK Forge — shared model registry (single source of truth)
 
-   All tool pages (codex-cli / copilot-cli / claude-code / opencode) derive
-   their Ollama Cloud model lists from here. Bump VERSION whenever model
-   data changes so persisted page snapshots are refreshed on next load.
-   Cache-bust with ?v= equal to VERSION when loading this file.
+   All tool pages (codex-cli / copilot-cli / claude-code / opencode / cursor /
+   litellm) derive their Ollama Cloud and OpenRouter model lists from here.
+   Bump VERSION whenever model data changes so persisted page snapshots are
+   refreshed on next load. Cache-bust with ?v= equal to VERSION when loading
+   this file.
    ========================================================================= */
 (function () {
   const VERSION = 20260829;
@@ -41,6 +42,23 @@
         keyEnv: "OLLAMA_API_KEY",
         defaultModel: "glm-5.3-flash:cloud",
         models: ollamaCloudModels,
+      },
+      "openrouter": {
+        baseUrl: "https://openrouter.ai/api/v1",
+        keyEnv: "OPENROUTER_API_KEY",
+        defaultModel: "deepseek/deepseek-v4-flash",
+        models: [
+          { id: "deepseek/deepseek-v4-flash",    name: "DeepSeek V4 Flash",          context: 1048576, output: 65536,  efforts: ["low", "medium", "high"], codexEff: "high", priority: 20 },
+          { id: "xiaomi/mimo-v2.5",              name: "Xiaomi MiMo v2.5",           context: 1048576, output: 65536,  efforts: ["low", "medium", "high"], codexEff: "high", priority: 20 },
+          { id: "minimax/minimax-m3",            name: "MiniMax M3",                 context: 1048576, output: 512000, efforts: ["low", "medium", "high"], codexEff: "high", priority: 20 },
+          { id: "tencent/hy3-preview",           name: "Tencent Hy3 preview",        context: 262144,  output: 65536,  efforts: ["low", "medium", "high"], codexEff: "high", priority: 20 },
+          { id: "z-ai/glm-5.2",                  name: "Z.ai GLM 5.2",               context: 1000000, output: 65536,  efforts: ["low", "medium", "high"], codexEff: "high", priority: 20 },
+          { id: "anthropic/claude-opus-4.7",     name: "Anthropic Claude Opus 4.7",  context: 1000000, output: 128000, efforts: ["low", "medium", "high"], codexEff: "high", priority: 20 },
+          { id: "deepseek/deepseek-v4-pro",      name: "DeepSeek V4 Pro",            context: 1048576, output: 384000, efforts: ["low", "medium", "high"], codexEff: "high", priority: 20 },
+          { id: "anthropic/claude-opus-4.8",     name: "Anthropic Claude Opus 4.8",  context: 1000000, output: 128000, efforts: ["low", "medium", "high"], codexEff: "high", priority: 20 },
+          { id: "anthropic/claude-sonnet-4.6",   name: "Anthropic Claude Sonnet 4.6",context: 1000000, output: 128000, efforts: ["low", "medium", "high"], codexEff: "high", priority: 20 },
+          { id: "stepfun/step-3.7-flash",        name: "StepFun Step 3.7 Flash",     context: 256000,  output: 256000, efforts: ["low", "medium", "high"], codexEff: "high", priority: 20 },
+        ],
       },
     },
   };

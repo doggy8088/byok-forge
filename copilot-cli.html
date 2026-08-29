@@ -644,18 +644,7 @@ const DEFAULT_PROVIDERS = [
   { id:"openrouter", name:"OpenRouter", type:"openai", color:"#b48ead", badge:"OR",
     baseUrl:"https://openrouter.ai/api/v1", supportsResponses:false,
     keyRequired:true, keyEnv:"OPENROUTER_API_KEY",
-    models:[
-      {id:"deepseek/deepseek-v4-flash", maxPrompt:1048576, maxOutput:65536,  responses:false, effort:[]},
-      {id:"xiaomi/mimo-v2.5",          maxPrompt:1048576, maxOutput:65536,  responses:false, effort:[]},
-      {id:"minimax/minimax-m3",        maxPrompt:1048576, maxOutput:512000, responses:false, effort:[]},
-      {id:"tencent/hy3-preview",       maxPrompt:262144,  maxOutput:65536,  responses:false, effort:[]},
-      {id:"z-ai/glm-5.2",              maxPrompt:1000000, maxOutput:65536,  responses:false, effort:[]},
-      {id:"anthropic/claude-opus-4.7", maxPrompt:1000000, maxOutput:128000, responses:false, effort:[]},
-      {id:"deepseek/deepseek-v4-pro",   maxPrompt:1048576, maxOutput:384000, responses:false, effort:[]},
-      {id:"anthropic/claude-opus-4.8",  maxPrompt:1000000, maxOutput:128000, responses:false, effort:[]},
-      {id:"anthropic/claude-sonnet-4.6",maxPrompt:1000000, maxOutput:128000, responses:false, effort:[]},
-      {id:"stepfun/step-3.7-flash",    maxPrompt:256000,  maxOutput:256000, responses:false, effort:[]},
-    ]},
+    models:[]},
   { id:"groq", name:"Groq", type:"openai", color:"#ff6a6a", badge:"GQ",
     baseUrl:"https://api.groq.com/openai/v1", supportsResponses:true,
     keyRequired:true, keyEnv:"GROQ_API_KEY",
@@ -708,6 +697,13 @@ const DEFAULT_PROVIDERS = [
   const reg = window.BYOK_MODELS && window.BYOK_MODELS.providers["ollama-cloud"];
   const p = DEFAULT_PROVIDERS.find((x) => x.id === "ollama-cloud");
   if (reg && p) p.models = reg.models.map((m) => ({ id: m.id, maxPrompt: m.context, maxOutput: m.output, responses: false, effort: m.efforts.slice() }));
+})();
+
+/* openrouter models come only from the shared registry (models.js); effort stays [] */
+(function () {
+  const reg = window.BYOK_MODELS && window.BYOK_MODELS.providers["openrouter"];
+  const p = DEFAULT_PROVIDERS.find((x) => x.id === "openrouter");
+  if (reg && p) p.models = reg.models.map((m) => ({ id: m.id, maxPrompt: m.context, maxOutput: m.output, responses: false, effort: [] }));
 })();
 
 let PROVIDERS = JSON.parse(JSON.stringify(DEFAULT_PROVIDERS));

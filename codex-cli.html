@@ -450,7 +450,7 @@ const DEFAULT_PROVIDERS = [
     models:[ {id:"Qwen/Qwen3-Coder-30B-A3B-Instruct",eff:"omit"},{id:"openai/gpt-oss-120b",eff:"high"},{id:"deepseek-ai/DeepSeek-V3.1",eff:"omit"} ]},
   { id:"openrouter", name:"OpenRouter", kind:"custom", providerId:"openrouter", color:"#b48ead", badge:"OR", beta:true,
     baseUrl:"https://openrouter.ai/api/v1", keyRequired:true, env:"OPENROUTER_API_KEY",
-    models:[ {id:"deepseek/deepseek-v4-flash",eff:"high"},{id:"xiaomi/mimo-v2.5",eff:"high"},{id:"minimax/minimax-m3",eff:"high"},{id:"tencent/hy3-preview",eff:"high"},{id:"z-ai/glm-5.2",eff:"high"},{id:"anthropic/claude-opus-4.7",eff:"high"},{id:"deepseek/deepseek-v4-pro",eff:"high"},{id:"anthropic/claude-opus-4.8",eff:"high"},{id:"anthropic/claude-sonnet-4.6",eff:"high"},{id:"stepfun/step-3.7-flash",eff:"high"} ]},
+    models:[]},
   { id:"xai", name:"xAI Grok", kind:"custom", providerId:"xai", color:"#e9e7e0", badge:"X",
     baseUrl:"https://api.x.ai/v1", keyRequired:true, env:"XAI_API_KEY",
     models:[ {id:"grok-4.3",eff:"medium"},{id:"grok-code-fast",eff:"omit"} ]},
@@ -460,6 +460,13 @@ const DEFAULT_PROVIDERS = [
 (function () {
   const reg = window.BYOK_MODELS && window.BYOK_MODELS.providers["ollama-cloud"];
   const p = DEFAULT_PROVIDERS.find((x) => x.id === "ollama-cloud");
+  if (reg && p) p.models = reg.models.map((m) => ({ id: m.id, eff: m.codexEff }));
+})();
+
+/* Derive openrouter models from the shared registry (models.js) */
+(function () {
+  const reg = window.BYOK_MODELS && window.BYOK_MODELS.providers["openrouter"];
+  const p = DEFAULT_PROVIDERS.find((x) => x.id === "openrouter");
   if (reg && p) p.models = reg.models.map((m) => ({ id: m.id, eff: m.codexEff }));
 })();
 

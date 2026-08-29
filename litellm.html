@@ -181,6 +181,7 @@
 <script src="translations.js?v=20260630"></script>
 <script src="i18n.js?v=20260630"></script>
 <script src="storage.js?v=20260630"></script>
+<script src="models.js?v=20260829"></script>
 </head>
 <body data-page="litellm">
 <div class="wrap">
@@ -336,6 +337,17 @@ const DEFAULT_LL_PROVIDERS = [
     models:["Qwen/Qwen3-Coder-30B-A3B-Instruct","openai/gpt-oss-120b"] },
 ];
 
+/* OpenRouter model ids come from the shared registry (models.js);
+   the hardcoded 3-item list in DEFAULT_LL_PROVIDERS above is only a fallback
+   for stale file:// cached pages. */
+(function () {
+  const reg = window.BYOK_MODELS && window.BYOK_MODELS.providers["openrouter"];
+  const p = DEFAULT_LL_PROVIDERS.find(x => x.id === "openrouter");
+  if (reg && p && Array.isArray(reg.models) && reg.models.length) {
+    p.models = reg.models.map(m => m.id);
+  }
+})();
+
 let LL_PROVIDERS = JSON.parse(JSON.stringify(DEFAULT_LL_PROVIDERS));
 const provById = id => LL_PROVIDERS.find(p => p.id === id) || LL_PROVIDERS[0] || DEFAULT_LL_PROVIDERS[0];
 
@@ -369,6 +381,7 @@ let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 
 function saveState(){
   window.BYOKStore.savePage("litellm", {
+    modelsVersion: (window.BYOK_MODELS && window.BYOK_MODELS.version) || 0,
     providers: LL_PROVIDERS,
     state: state
   });
@@ -671,14 +684,21 @@ async function init(){
 
   const shared = await window.BYOKShare.getSharedData();
   if(shared){
-    if(Array.isArray(shared.providers)) LL_PROVIDERS = shared.providers;
+    if(Array.isArray(shared.providers)) LL_PROVIDERS = window.BYOKStore.mergeProviders(LL_PROVIDERS, shared.providers);
     if(shared.state) Object.assign(state, shared.state);
-    saveState();
+    // modelsVersion: 0 — adopted share providers must not masquerade as
+    // registry-current; the next load re-merges against the current registry.
+    window.BYOKStore.savePage("litellm", {
+      modelsVersion: 0,
+      providers: LL_PROVIDERS,
+      state: state
+    });
     window.BYOKToast.show(window.t ? window.t("common.sharedLoaded") : "Settings loaded from share link ✓");
   } else {
     const saved = window.BYOKStore.getPage("litellm", null);
     if(saved){
-      if(Array.isArray(saved.providers)) LL_PROVIDERS = saved.providers;
+      // registry-derived defaults win for known ids; user-created providers are kept
+      if(Array.isArray(saved.providers)) LL_PROVIDERS = window.BYOKStore.mergeProviders(LL_PROVIDERS, saved.providers);
       if(saved.state) Object.assign(state, saved.state);
     }
   }

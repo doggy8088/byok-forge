@@ -183,33 +183,59 @@ function loadInSandbox(file) {
     problems.join('\n') || `${ids.length} 個 id 全部存在於 catalog（共 ${slugs.size} 個 slug）：${ids.join(', ')}`);
 })();
 
-/* E. registry 健全性：ollama-cloud 21 筆、首位 priority=100、其餘 20、id 依字母排序 */
+/* E. registry 健全性
+   - ollama-cloud：21 筆、首位 priority=100、其餘 20、id 依字母排序
+   - openrouter：10 筆、首位 deepseek/deepseek-v4-flash、全部 codexEff=high、id 無重複 */
 (function checkRegistry() {
-  const label = 'E. registry 健全性（BYOK_MODELS.providers["ollama-cloud"]）';
-  let models;
+  const label = 'E. registry 健全性（BYOK_MODELS.providers["ollama-cloud"] ＋ ["openrouter"]）';
+  let providers;
   try {
-    models = loadInSandbox('models.js').BYOK_MODELS.providers['ollama-cloud'].models;
+    providers = loadInSandbox('models.js').BYOK_MODELS.providers;
   } catch (e) {
     report(label, false, `models.js 無法載入：${e.message}`);
     return;
   }
-  if (!Array.isArray(models)) { report(label, false, 'models 不是陣列'); return; }
   const problems = [];
-  if (models.length !== 21) problems.push(`models 共 ${models.length} 筆，預期 21`);
-  const first = models[0] || {};
-  if (first.id !== 'glm-5.3-flash:cloud') problems.push(`第一筆 id=${first.id}，預期 glm-5.3-flash:cloud`);
-  if (first.priority !== 100) problems.push(`第一筆 priority=${first.priority}，預期 100`);
-  models.slice(1).forEach((m, i) => {
-    if (m.priority !== 20) problems.push(`第 ${i + 2} 筆（${m.id}）priority=${m.priority}，預期 20`);
-  });
-  const restIds = models.slice(1).map(m => m.id);
-  const sortedIds = [...restIds].sort();
-  restIds.forEach((id, i) => {
-    if (id !== sortedIds[i]) problems.push(`id 未依字母排序：第 ${i + 2} 筆是 ${id}，應為 ${sortedIds[i]}`);
-  });
-  report(label, problems.length === 0,
-    problems.join('\n') ||
-    `共 ${models.length} 筆；首位 ${first.id}（priority=100）；其餘 priority=20 且 id 依字母排序`);
+  const summaries = [];
+
+  const oc = providers['ollama-cloud'];
+  if (!oc || !Array.isArray(oc.models)) {
+    problems.push('providers["ollama-cloud"].models 不是陣列');
+  } else {
+    const models = oc.models;
+    if (models.length !== 21) problems.push(`ollama-cloud：models 共 ${models.length} 筆，預期 21`);
+    const first = models[0] || {};
+    if (first.id !== 'glm-5.3-flash:cloud') problems.push(`ollama-cloud：第一筆 id=${first.id}，預期 glm-5.3-flash:cloud`);
+    if (first.priority !== 100) problems.push(`ollama-cloud：第一筆 priority=${first.priority}，預期 100`);
+    models.slice(1).forEach((m, i) => {
+      if (m.priority !== 20) problems.push(`ollama-cloud：第 ${i + 2} 筆（${m.id}）priority=${m.priority}，預期 20`);
+    });
+    const restIds = models.slice(1).map(m => m.id);
+    const sortedIds = [...restIds].sort();
+    restIds.forEach((id, i) => {
+      if (id !== sortedIds[i]) problems.push(`ollama-cloud：id 未依字母排序：第 ${i + 2} 筆是 ${id}，應為 ${sortedIds[i]}`);
+    });
+    summaries.push(`ollama-cloud 共 ${models.length} 筆；首位 ${first.id}（priority=100）；其餘 priority=20 且 id 依字母排序`);
+  }
+
+  const or = providers['openrouter'];
+  if (!or || !Array.isArray(or.models)) {
+    problems.push('providers["openrouter"].models 不是陣列');
+  } else {
+    const models = or.models;
+    const first = models[0] || {};
+    if (models.length !== 10) problems.push(`openrouter：models 共 ${models.length} 筆，預期 10`);
+    if (first.id !== 'deepseek/deepseek-v4-flash') problems.push(`openrouter：第一筆 id=${first.id}，預期 deepseek/deepseek-v4-flash`);
+    models.forEach(m => {
+      if (m.codexEff !== 'high') problems.push(`openrouter：${m.id} codexEff=${m.codexEff}，預期 high`);
+    });
+    const ids = models.map(m => m.id);
+    const dup = ids.filter((id, i) => ids.indexOf(id) !== i);
+    if (dup.length) problems.push(`openrouter：id 重複：${[...new Set(dup)].join(', ')}`);
+    summaries.push(`openrouter 共 ${models.length} 筆；首位 ${first.id}；全部 codexEff=high、id 無重複`);
+  }
+
+  report(label, problems.length === 0, problems.join('\n') || summaries.join('；'));
 })();
 
 console.log(failed ? '\ncheck：有檢查失敗，詳情如上。' : '\ncheck：全部通過。');
