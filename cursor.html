@@ -541,6 +541,9 @@
             <label class="lbl" data-i18n="cursor.labelPreset">quick preset</label>
             <div class="providers" id="providers"></div>
             <div class="descline" data-i18n-html="cursor.presetHint">Use presets to fill URL and key reference together.</div>
+            <div style="margin-top:12px;">
+              <button type="button" class="btn" id="resetSettingsBtn" data-i18n="common.resetSettings">Reset settings</button>
+            </div>
           </div>
 
           <div class="row2">
@@ -1198,6 +1201,15 @@
 
     $("downloadSettingsBtn").addEventListener("click", function () {
       download("cursor-settings.json", $("settingsOut").dataset.raw || "{}\n");
+    });
+
+    $("resetSettingsBtn").addEventListener("click", function () {
+      const ok = window.confirm(window.t ? window.t('common.resetConfirm') : 'Reset this page\'s settings to defaults?');
+      if (!ok) return;
+      PRESETS = JSON.parse(JSON.stringify(DEFAULT_PRESETS));
+      state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+      syncStateFromPreset();
+      window.BYOKToast.show(window.t ? window.t('common.resetDone') : 'Settings reset ✓');
     });
 
     const shareHandler = () => {

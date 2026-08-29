@@ -212,6 +212,9 @@
           <div class="section-h"><span class="n">01</span><h2 data-i18n="litellm.sectionModels">models</h2><span class="hint" id="modelCount"></span></div>
           <div id="entries"></div>
           <button class="addbtn" id="addBtn" data-i18n="litellm.addAnotherModel">＋ add another model</button>
+          <div style="margin-top:10px;display:flex;justify-content:flex-end;">
+            <button type="button" class="btn" id="resetSettingsBtn" data-i18n="common.resetSettings">Reset settings</button>
+          </div>
         </div>
 
         <div class="divider"></div>
@@ -656,6 +659,20 @@ function bind(){
     state.entries.push(makeEntry(last ? last.provider : "mistral"));
     saveState();
     renderEntries(); refresh();
+  });
+
+  $("resetSettingsBtn").addEventListener("click", () => {
+    const ok = window.confirm(window.t ? window.t('common.resetConfirm') : 'Reset this page\'s settings to defaults?');
+    if (!ok) return;
+    LL_PROVIDERS = JSON.parse(JSON.stringify(DEFAULT_LL_PROVIDERS));
+    state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    saveState();
+    $("port").value = state.port || "4000";
+    $("masterKey").value = state.masterKey || "";
+    $("dropParams").checked = !!state.dropParams;
+    $("detailedDebug").checked = !!state.detailedDebug;
+    renderEntries(); refresh();
+    window.BYOKToast.show(window.t ? window.t('common.resetDone') : 'Settings reset ✓');
   });
 
   $("port").addEventListener("input", e => { state.port = e.target.value.replace(/[^0-9]/g,""); e.target.value=state.port; saveState(); refresh(); });
