@@ -59,6 +59,9 @@ window.I18N_LANGUAGES = {
 window.I18N_TRANSLATIONS = {
   "en": {
     "common": {
+      "resetSettings": "Reset settings",
+      "resetConfirm": "Reset this page's settings to defaults?",
+      "resetDone": "Settings reset to defaults ✓",
       "languageLabel": "Language",
       "languageSwitcherAria": "Language selector",
       "allTools": "⊞ all tools",
@@ -438,6 +441,9 @@ window.I18N_TRANSLATIONS = {
   },
   "zh-Hant": {
     "common": {
+      "resetSettings": "重置設定",
+      "resetConfirm": "確定要將本頁設定重置回預設值嗎？",
+      "resetDone": "已重置為預設值 ✓",
       "languageLabel": "語言",
       "languageSwitcherAria": "語言選擇器",
       "allTools": "⊞ 所有工具",
@@ -817,6 +823,9 @@ window.I18N_TRANSLATIONS = {
   },
   "zh-Hans": {
     "common": {
+      "resetSettings": "重置设置",
+      "resetConfirm": "确定要将本页设置重置回默认值吗？",
+      "resetDone": "已重置为默认值 ✓",
       "languageLabel": "语言",
       "languageSwitcherAria": "语言选择器",
       "allTools": "⊞ 所有工具",
@@ -1196,6 +1205,9 @@ window.I18N_TRANSLATIONS = {
   },
   "ja": {
     "common": {
+      "resetSettings": "設定をリセット",
+      "resetConfirm": "このページの設定をデフォルトに戻しますか？",
+      "resetDone": "デフォルトに戻しました ✓",
       "languageLabel": "言語",
       "languageSwitcherAria": "言語セレクター",
       "allTools": "⊞ すべてのツール",
@@ -1575,6 +1587,9 @@ window.I18N_TRANSLATIONS = {
   },
   "ko": {
     "common": {
+      "resetSettings": "설정 초기화",
+      "resetConfirm": "이 페이지의 설정을 기본값으로 초기화할까요?",
+      "resetDone": "기본값으로 초기화되었습니다 ✓",
       "languageLabel": "언어",
       "languageSwitcherAria": "언어 선택기",
       "allTools": "⊞ 모든 도구",
@@ -1954,6 +1969,9 @@ window.I18N_TRANSLATIONS = {
   },
   "vi": {
     "common": {
+      "resetSettings": "Đặt lại cài đặt",
+      "resetConfirm": "Đặt lại cài đặt của trang này về mặc định?",
+      "resetDone": "Đã đặt lại về mặc định ✓",
       "languageLabel": "Ngôn ngữ",
       "languageSwitcherAria": "Bộ chọn ngôn ngữ",
       "allTools": "⊞ tất cả công cụ",
@@ -2333,6 +2351,9 @@ window.I18N_TRANSLATIONS = {
   },
   "th": {
     "common": {
+      "resetSettings": "รีเซ็ตการตั้งค่า",
+      "resetConfirm": "รีเซ็ตการตั้งค่าของหน้านี้เป็นค่าเริ่มต้นใช่หรือไม่?",
+      "resetDone": "รีเซ็ตเป็นค่าเริ่มต้นแล้ว ✓",
       "languageLabel": "ภาษา",
       "languageSwitcherAria": "ตัวเลือกภาษา",
       "allTools": "⊞ เครื่องมือทั้งหมด",
@@ -2712,6 +2733,9 @@ window.I18N_TRANSLATIONS = {
   },
   "id": {
     "common": {
+      "resetSettings": "Reset pengaturan",
+      "resetConfirm": "Setel ulang pengaturan halaman ini ke default?",
+      "resetDone": "Pengaturan direset ke default ✓",
       "languageLabel": "Bahasa",
       "languageSwitcherAria": "Pemilih bahasa",
       "allTools": "⊞ semua alat",
@@ -3091,6 +3115,9 @@ window.I18N_TRANSLATIONS = {
   },
   "de": {
     "common": {
+      "resetSettings": "Einstellungen zurücksetzen",
+      "resetConfirm": "Einstellungen dieser Seite auf die Standardwerte zurücksetzen?",
+      "resetDone": "Auf Standardwerte zurückgesetzt ✓",
       "languageLabel": "Sprache",
       "languageSwitcherAria": "Sprachauswahl",
       "allTools": "⊞ alle Werkzeuge",
@@ -3470,6 +3497,9 @@ window.I18N_TRANSLATIONS = {
   },
   "fr": {
     "common": {
+      "resetSettings": "Réinitialiser les paramètres",
+      "resetConfirm": "Réinitialiser les paramètres de cette page aux valeurs par défaut ?",
+      "resetDone": "Paramètres réinitialisés ✓",
       "languageLabel": "Langue",
       "languageSwitcherAria": "Sélection de la langue",
       "allTools": "⊞ tous les outils",
@@ -3849,6 +3879,9 @@ window.I18N_TRANSLATIONS = {
   },
   "es": {
     "common": {
+      "resetSettings": "Restablecer ajustes",
+      "resetConfirm": "¿Restablecer la configuración de esta página a los valores predeterminados?",
+      "resetDone": "Configuración restablecida ✓",
       "languageLabel": "Idioma",
       "languageSwitcherAria": "Selección de idioma",
       "allTools": "⊞ todas las herramientas",

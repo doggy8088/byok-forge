@@ -234,6 +234,18 @@
       this.saveAll(all);
     },
 
+    // Drop one page's persisted snapshot (used by the per-page reset button).
+    clearPage(pageId) {
+      const all = this.getAll();
+      if (all.pages && all.pages[pageId]) {
+        delete all.pages[pageId];
+        all.updatedAt = new Date().toISOString();
+        this.saveAll(all);
+        return true;
+      }
+      return false;
+    },
+
     // defaults: fresh list derived from the registry (array or object map)
     // saved: user-persisted list
     // ids present in defaults win (registry is authoritative); ids missing from
