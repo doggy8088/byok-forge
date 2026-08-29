@@ -485,7 +485,7 @@ window.I18N_TRANSLATIONS = {
       "brandTitle": "<b>byok</b> <i>forge</i>",
       "brandSubtitle": "// 用於 AI 程式設計 CLI 的啟動設定產生器",
       "heroKicker": "自托管 · 客戶端執行 · 無遙測",
-      "heroHeading": "把你的 <span class=\"a\">Copilot</span> 與 <span class=\"b\">Codex</span> CLI 指向任何模型。",
+      "heroHeading": "把你的 <span class=\"a\">Harness</span> 指向任何模型。",
       "heroBody": "選擇提供商與模型、調整選項，然後複製可直接貼上的啟動設定。所有內容都在瀏覽器中執行 — 你的 API 金鑰只作為 <code>$ENV_VARS</code> 引用，不會離開頁面。",
       "stripTitle": "它是怎麼運作的。",
       "stripBody": "每個工具都是單一 HTML 檔案 — 無需建置、無需伺服器、無需安裝。你可以在本機開啟，或放到任何靜態網站上。API 金鑰以環境變數名稱引用（例如 <code>$OLLAMA_API_KEY</code>）；產生出的設定檔只包含引用，不含機密。",
