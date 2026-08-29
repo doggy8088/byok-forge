@@ -501,6 +501,13 @@
           </div>
         </div>
 
+        <div class="divider"></div>
+
+        <!-- reset settings -->
+        <div class="field">
+          <button class="btn ghost" id="resetBtn" type="button" style="width:100%;justify-content:center;" data-i18n="common.resetSettings">↺ reset settings</button>
+        </div>
+
       </div>
     </div>
 
@@ -1344,6 +1351,20 @@ function bind(){
     copyText(all, $("copyAllBtn"), "⧉ copied all ✓");
   });
   $("clearBtn").addEventListener("click", () => { collection.length = 0; saveState(); renderCollection(); });
+  $("resetBtn").addEventListener("click", () => {
+    if (!window.confirm(window.t ? window.t("common.resetConfirm") : "Reset this page's settings to defaults?")) return;
+    PROVIDERS = JSON.parse(JSON.stringify(DEFAULT_PROVIDERS));
+    state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    collection.length = 0;
+    saveState();
+    renderProviders();
+    renderModelOptions();
+    renderEffort();
+    renderConditional();
+    renderCollection();
+    refresh();
+    window.BYOKToast.show(window.t ? window.t("common.resetDone") : "Settings reset to defaults ✓");
+  });
 
   const shareHandler = () => {
     window.BYOKShare.shareCurrentPage({

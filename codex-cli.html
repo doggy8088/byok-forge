@@ -339,6 +339,13 @@
           </label>
         </div>
 
+        <div class="divider"></div>
+
+        <!-- reset settings -->
+        <div class="field">
+          <button class="btn ghost" id="resetBtn" type="button" style="width:100%;justify-content:center;" data-i18n="common.resetSettings">↺ reset settings</button>
+        </div>
+
       </div>
     </div>
 
@@ -944,6 +951,17 @@ function bind(){
   $("sandboxSeg").addEventListener("click", e => { const b=e.target.closest("button"); if(!b)return; state.sandbox=b.dataset.sb; saveState(); renderConditional(); refresh(); });
   $("summarySeg").addEventListener("click", e => { const b=e.target.closest("button"); if(!b)return; state.summary=b.dataset.sm; saveState(); renderConditional(); refresh(); });
   $("yolo").addEventListener("change", e => { state.yolo=e.target.checked; saveState(); refresh(); });
+  $("resetBtn").addEventListener("click", () => {
+    if (!window.confirm(window.t ? window.t("common.resetConfirm") : "Reset this page's settings to defaults?")) return;
+    PROVIDERS = JSON.parse(JSON.stringify(DEFAULT_PROVIDERS));
+    state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    saveState();
+    renderProviders(); renderModelList(); renderEffort(); renderConditional();
+    $("model").value = state.model;
+    $("profileName").value = state.profileName;
+    refresh();
+    showToast();
+  });
 
   $("copyProviderBtn").addEventListener("click", () => copyText($("providerOut").dataset.raw||"", $("copyProviderBtn"), "⧉ copied ✓"));
   $("copyProfileBtn").addEventListener("click", () => copyText($("profileOut").dataset.raw||"", $("copyProfileBtn"), "⧉ copied ✓"));
