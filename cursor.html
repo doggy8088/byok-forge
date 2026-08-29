@@ -655,7 +655,7 @@
       providerId: "openai",
       baseURL: "https://api.openai.com/v1",
       keyEnv: "OPENAI_API_KEY",
-      model: "gpt-4.1",
+      model: "gpt-5.5",
       includeKey: true,
       schema: "cursor-general"
     },
@@ -677,6 +677,7 @@
       providerId: "deepseek",
       baseURL: "https://api.deepseek.com/v1",
       keyEnv: "DEEPSEEK_API_KEY",
+      models: ["deepseek-chat", "deepseek-reasoner"],
       model: "deepseek-chat",
       includeKey: true,
       schema: "cursor-aiprovider"
@@ -803,6 +804,29 @@
     schemaSelect.innerHTML = "";
     schemaSelect.appendChild(schemaFrag);
     schemaSelect.value = state.schema;
+  }
+
+  /* Shared-link adoption may carry a model id that no longer exists in the
+     preset/registry list; renderModelList would keep it as a ghost option.
+     Reset it to the registry/preset default before the list renders. */
+  function resolveModelForCurrentList() {
+    const preset = getPreset(state.preset);
+    let ids = [];
+    if (preset && Array.isArray(preset.models) && preset.models.length) {
+      ids = preset.models.slice();
+    } else if (preset && preset.providerId && window.BYOK_MODELS && window.BYOK_MODELS.providers[preset.providerId] && Array.isArray(window.BYOK_MODELS.providers[preset.providerId].models) && window.BYOK_MODELS.providers[preset.providerId].models.length) {
+      ids = window.BYOK_MODELS.providers[preset.providerId].models.map(function (m) { return m.id; });
+    } else if (state.preset === "openrouter") {
+      ids = OPENROUTER_TOP_MODELS.slice();
+    } else if (preset && preset.model) {
+      ids = [preset.model];
+    }
+    if (state.model && ids.indexOf(state.model) !== -1) return;
+    const reg = preset && window.BYOK_MODELS ? window.BYOK_MODELS.providers[preset.providerId] : null;
+    if (reg && reg.defaultModel) state.model = reg.defaultModel;
+    else if (preset && preset.model) state.model = preset.model;
+    else if (ids.length) state.model = ids[0];
+    else state.model = "";
   }
 
   function renderModelList() {
@@ -1198,6 +1222,7 @@
       if (Array.isArray(shared.presets)) PRESETS = mergePresetsByValue(PRESETS, shared.presets);
       if (shared.state) Object.assign(state, shared.state);
       migrateLegacyConfigPath();
+      resolveModelForCurrentList();
       // modelsVersion: 0 — adopted share presets must not masquerade as
       // registry-current; the next load re-merges against the current registry.
       window.BYOKStore.savePage("cursor", {
