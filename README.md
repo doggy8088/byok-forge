@@ -14,8 +14,9 @@ referenced by environment-variable name and never leave the page.
 | [`codex-cli.html`](codex-cli.html) | **Codex Config Forge** | `~/.codex/<profile>.config.toml` profiles for the OpenAI Codex CLI |
 | [`litellm.html`](litellm.html) | **LiteLLM Config Forge** | `litellm-config.yaml` proxy that exposes `/v1/responses` for chat-only providers |
 | [`opencode.html`](opencode.html) | **OpenCode Config Forge** | `~/.config/opencode/opencode.json` BYOK config for OpenCode |
-| [`claude-code.html`](claude-code.html) | **Claude Code Config Forge** | `~/.claude/settings.json` BYOK config for Claude Code |
 | [`cursor.html`](cursor.html) | **Cursor Config Forge** | Cursor `settings.json` BYOK settings reference |
+| [`pi.html`](pi.html) | **Pi Config Forge** | `~/.pi/agent/models.json` BYOK config for the Pi coding agent |
+| [`omp.html`](omp.html) | **OMP Config Forge** | `~/.omp/agent/models.yml` BYOK config for OMP |
 
 ## Usage
 
@@ -27,8 +28,9 @@ open index.html      # macOS
 ```
 
 Each tool is a self-contained HTML file; you can also open `copilot-cli.html`,
-`codex-cli.html`, `litellm.html`, `opencode.html`, `claude-code.html`, or
-`cursor.html` directly, or host the folder on any static web server.
+`codex-cli.html`, `litellm.html`, `opencode.html`, `claude-code.html`,
+`cursor.html`, `pi.html`, or `omp.html` directly, or host the folder on any
+static web server.
 
 ## Internationalization
 
@@ -150,7 +152,48 @@ Generates **Cursor BYOK-oriented settings snippets** and a companion shell comma
 - **Model as hint** — include model id in generated snippets for manual confirmation in Cursor.
 - **Key safety** — generated references keep key usage by variable name (no secret values).
 
-**Where to put it:** paste the generated `settings.json` block to your local Cursor settings file path and restart Cursor.
+## pi.html — Pi Config Forge
+
+Generates **Pi coding agent BYOK config** (`~/.pi/agent/models.json`) for
+[pi.dev](https://pi.dev/). Output includes:
+
+1. A `providers` object with `baseUrl`, `api`, and an optional `apiKey`
+   (`$ENV_VAR` / `${ENV_VAR}` interpolation, literal, or the `ollama` placeholder).
+2. One model entry with `id`, `name`, `reasoning`, `contextWindow`, and `maxTokens`.
+3. A launch snippet: `pi --provider <id> --model <model>`.
+
+- **Four API wires** — `openai-completions`, `openai-responses`,
+  `anthropic-messages`, `google-generative-ai`.
+- **Provider presets** — OpenAI (Chat + Responses), Anthropic (proxy), Google AI
+  Studio, OpenRouter, Ollama (local & cloud), LM Studio, vLLM, and custom.
+- **Hot reload** — Pi re-reads `models.json` every time you open `/model`, so no
+  restart is needed after writing the file.
+
+**Where to put it:** save as `~/.pi/agent/models.json`, `export` the referenced
+API-key env var, then run `pi --model <providerId>/<modelId>` or select the model
+with `/model`.
+
+## omp.html — OMP Config Forge
+
+Generates **OMP BYOK config** (`~/.omp/agent/models.yml`) for [omp.sh](https://omp.sh/).
+Output includes:
+
+1. A `providers` block with `baseUrl`, `api`, `apiKey` (env-var-name-or-literal,
+   `!command`, or `auth: none` for keyless), optional `authHeader`, and
+   optional `disableStrictTools`.
+2. One model entry with `id`, `name`, `reasoning`, `contextWindow`, and `maxTokens`.
+3. A launch snippet: `omp --model <providerId>/<modelId>` plus `omp models` to verify.
+
+- **Four API wires** — same as Pi plus OMP-specific defaults (Ollama local preset
+  uses `openai-responses` per OMP's implicit discovery behavior).
+- **Auth modes** — env-var-name-or-literal `apiKey`, or keyless `auth: none` for
+  local engines; optional `authHeader: true` for bearer-token proxies.
+- **new-api / one-api presets** — `discovery.type: proxy` option noted for
+  Anthropic+OpenAI-compatible proxies.
+
+**Where to put it:** save as `~/.omp/agent/models.yml` (or `models.yaml`), set the
+referenced key env var (shell or `.env`), then run `omp --model <providerId>/<modelId>`
+and verify with `omp models`.
 
 ---
 
