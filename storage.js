@@ -246,6 +246,17 @@
       return false;
     },
 
+    // Wipe the entire store (all pages) — used by the global reset on index.html.
+    clearAll() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        return true;
+      } catch (e) {
+        console.error("Failed to clear localStorage", e);
+        return false;
+      }
+    },
+
     // defaults: fresh list derived from the registry (array or object map)
     // saved: user-persisted list
     // ids present in defaults win (registry is authoritative); ids missing from

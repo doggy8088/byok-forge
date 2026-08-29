@@ -158,6 +158,7 @@
       <div id="langSwitcher"></div>
       <button class="gh" id="btnExport" type="button" data-i18n="common.export" style="cursor:pointer;">⤓ export</button>
       <button class="gh" id="btnImport" type="button" data-i18n="common.import" style="cursor:pointer;">⤒ import</button>
+      <button class="gh" id="btnResetAll" type="button" data-i18n="common.resetAllSettings" style="cursor:pointer;">↺ reset all settings</button>
       <input type="file" id="importFileInput" accept=".json,application/json" style="display:none;" />
     </div>
   </header>
@@ -297,6 +298,21 @@ document.getElementById('importFileInput').addEventListener('change', function (
     window.BYOKStore.importBackup(e.target.files[0]);
     e.target.value = '';
   }
+});
+
+function showIndexToast(message) {
+  var el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = message;
+  el.classList.add('show');
+  setTimeout(function () { el.classList.remove('show'); }, 2200);
+}
+
+document.getElementById('btnResetAll').addEventListener('click', function () {
+  var t = window.t || function (k, fb) { return fb; };
+  if (!window.confirm(t('common.resetAllConfirm') || 'This wipes saved settings for ALL tools. Continue?')) return;
+  window.BYOKStore.clearAll();
+  showIndexToast(window.t ? window.t('common.resetAllDone') : 'All settings wiped ✓');
 });
 </script>
 </body>
