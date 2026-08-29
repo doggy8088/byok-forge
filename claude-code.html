@@ -1090,6 +1090,13 @@
     if (shared) {
       if (shared.providers && typeof shared.providers === "object" && !Array.isArray(shared.providers)) PROVIDERS = window.BYOKStore.mergeProviders(PROVIDERS, shared.providers);
       if (shared.state) Object.assign(state, shared.state);
+      // share-adopt only: fall back to the merged provider's default when the adopted
+      // model id is unknown here, instead of unshifting a ghost option in refreshModels
+      const adoptedProvider = PROVIDERS[state.provider];
+      const adoptedModels = adoptedProvider && adoptedProvider.models ? adoptedProvider.models : [];
+      if (!adoptedModels.some((m) => m.id === state.model)) {
+        state.model = (adoptedProvider && adoptedProvider.defaultModel) || (adoptedModels[0] ? adoptedModels[0].id : fallbackModel);
+      }
       window.BYOKStore.savePage("claude-code", {
         modelsVersion: 0,
         providers: PROVIDERS,
