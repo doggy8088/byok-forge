@@ -335,6 +335,9 @@ const DEFAULT_LL_PROVIDERS = [
   { id:"ollama",    name:"Ollama (local)",prefix:"ollama_chat",  env:"", color:"#e9e7e0", badge:"OL",
     keyless:true, needsBase:true, baseDefault:"http://localhost:11434",
     models:["qwen3-coder:30b","qwen3:14b","gpt-oss:120b","deepseek-r1:8b","devstral","llama3.3:70b"] },
+  { id:"ollama-cloud",name:"Ollama Cloud", prefix:"openai",         env:"OLLAMA_API_KEY",     color:"#74e0a0", badge:"OC",
+    needsBase:true, baseDefault:"https://ollama.com/v1",
+    models:["glm-5.3-flash:cloud","gpt-oss:120b-cloud","qwen3.5:cloud"] },
   { id:"vllm",      name:"vLLM (hosted)", prefix:"hosted_vllm",  env:"VLLM_API_KEY", color:"#5cc8ff", badge:"VL",
     needsBase:true, baseDefault:"http://localhost:8000/v1",
     models:["Qwen/Qwen3-Coder-30B-A3B-Instruct","openai/gpt-oss-120b","deepseek-ai/DeepSeek-V3.1"] },
@@ -346,6 +349,16 @@ const DEFAULT_LL_PROVIDERS = [
 (function () {
   const reg = window.BYOK_MODELS && window.BYOK_MODELS.providers["openrouter"];
   const p = DEFAULT_LL_PROVIDERS.find(x => x.id === "openrouter");
+  if (reg && p && Array.isArray(reg.models) && reg.models.length) {
+    p.models = reg.models.map(m => m.id);
+  }
+})();
+
+/* Ollama Cloud model ids come from the shared registry (models.js);
+   the hardcoded 3-item list above is only a fallback for stale file:// pages. */
+(function () {
+  const reg = window.BYOK_MODELS && window.BYOK_MODELS.providers["ollama-cloud"];
+  const p = DEFAULT_LL_PROVIDERS.find(x => x.id === "ollama-cloud");
   if (reg && p && Array.isArray(reg.models) && reg.models.length) {
     p.models = reg.models.map(m => m.id);
   }
