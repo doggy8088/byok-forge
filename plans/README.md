@@ -44,7 +44,7 @@
 | 13 | collection 永久保存生成時的 code，registry bump 後「全部複製」吐過時 alias | correctness | LOW-MED | S | LOW | copilot-cli.html:1299-1312 | → 003.E |
 | 14 | README「self-contained HTML」已失真、無 models.js 維護慣例說明、claude-code 章節過簡、meta description 漏 3 個工具 | docs | MED | S | LOW | README.md:8/29-32/135-142 | 未入選（見下） |
 | 16 | **新發現（執行 004 時由 check.js 揪出）**：i18n 鍵集漂移 — en 有 361 鍵，9 個語言（zh-Hans/ja/ko/vi/th/id/de/fr/es）各缺 52 鍵（`cursor.*` 48 鍵＋`index.cardCursor*` 4 鍵）；僅 zh-Hant 與 en 完整 | docs | MED | S | LOW | scripts/check.js B 項（`5356d76`），已獨立驗證 | ✅ FIXED（`d6a4c93`：52 鍵全數補齊，11 語言鍵集一致；檢查 B 已轉為 blocking） |
-| 15 | 模型清單以 5 種方言重複：OpenRouter（codex 10 項 vs cursor 10 項 vs litellm 3 項，已漂移）、OpenAI、Ollama-local、Groq、xAI、vLLM、DeepSeek | tech-debt | MED | L | MED | codex-cli.html:427/453、cursor.html:703-714、litellm.html:321-336（v） | 未入選（見 Direction） |
+| 15 | 模型清單以 5 種方言重複：~~OpenRouter~~（✅ 已統一：`BYOK_MODELS.providers.openrouter`，codex/copilot/claude-code/opencode/cursor/litellm 六頁推導，cursor/litellm 首次接入 models.js 與 mergeProviders 守衛，`25d3327`）｜OpenAI、Ollama-local、Groq、xAI、vLLM、DeepSeek 仍重複 | tech-debt | MED | L→M | MED | codex-cli.html:427/453、cursor.html:703-714、litellm.html:321-336（v） | OpenRouter 已完成；其餘待第三輪 |
 
 ### 審計後否決（不要重審）
 
