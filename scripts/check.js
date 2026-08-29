@@ -205,7 +205,7 @@ function loadInSandbox(file) {
     const models = oc.models;
     if (models.length !== 21) problems.push(`ollama-cloud：models 共 ${models.length} 筆，預期 21`);
     const first = models[0] || {};
-    if (first.id !== 'glm-5.3-flash:cloud') problems.push(`ollama-cloud：第一筆 id=${first.id}，預期 glm-5.3-flash:cloud`);
+    if (first.id !== 'glm-5.3-flash') problems.push(`ollama-cloud：第一筆 id=${first.id}，預期 glm-5.3-flash`);
     if (first.priority !== 100) problems.push(`ollama-cloud：第一筆 priority=${first.priority}，預期 100`);
     models.slice(1).forEach((m, i) => {
       if (m.priority !== 20) problems.push(`ollama-cloud：第 ${i + 2} 筆（${m.id}）priority=${m.priority}，預期 20`);
@@ -215,6 +215,8 @@ function loadInSandbox(file) {
     restIds.forEach((id, i) => {
       if (id !== sortedIds[i]) problems.push(`ollama-cloud：id 未依字母排序：第 ${i + 2} 筆是 ${id}，應為 ${sortedIds[i]}`);
     });
+    const cloudId = models.filter(m => /:cloud$|-cloud$/.test(m.id));
+    if (cloudId.length) problems.push(`ollama-cloud：id 不應含 cloud 後綴：${cloudId.map(m => m.id).join(', ')}`);
     summaries.push(`ollama-cloud 共 ${models.length} 筆；首位 ${first.id}（priority=100）；其餘 priority=20 且 id 依字母排序`);
   }
 

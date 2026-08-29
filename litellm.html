@@ -181,7 +181,7 @@
 <script src="translations.js?v=20260630"></script>
 <script src="i18n.js?v=20260630"></script>
 <script src="storage.js?v=20260630"></script>
-<script src="models.js?v=20260829"></script>
+<script src="models.js?v=20260830"></script>
 </head>
 <body data-page="litellm">
 <div class="wrap">
@@ -337,7 +337,7 @@ const DEFAULT_LL_PROVIDERS = [
     models:["qwen3-coder:30b","qwen3:14b","gpt-oss:120b","deepseek-r1:8b","devstral","llama3.3:70b"] },
   { id:"ollama-cloud",name:"Ollama Cloud", prefix:"openai",         env:"OLLAMA_API_KEY",     color:"#74e0a0", badge:"OC",
     needsBase:true, baseDefault:"https://ollama.com/v1",
-    models:["glm-5.3-flash:cloud","gpt-oss:120b-cloud","qwen3.5:cloud"] },
+    models:["glm-5.3-flash","gpt-oss:120b","qwen3.5"] },
   { id:"vllm",      name:"vLLM (hosted)", prefix:"hosted_vllm",  env:"VLLM_API_KEY", color:"#5cc8ff", badge:"VL",
     needsBase:true, baseDefault:"http://localhost:8000/v1",
     models:["Qwen/Qwen3-Coder-30B-A3B-Instruct","openai/gpt-oss-120b","deepseek-ai/DeepSeek-V3.1"] },
