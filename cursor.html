@@ -812,6 +812,8 @@
     let ids = [];
     if (preset && Array.isArray(preset.models) && preset.models.length) {
       ids = preset.models.slice();
+    } else if (preset && preset.providerId && window.BYOK_MODELS && window.BYOK_MODELS.providers[preset.providerId] && Array.isArray(window.BYOK_MODELS.providers[preset.providerId].models) && window.BYOK_MODELS.providers[preset.providerId].models.length) {
+      ids = window.BYOK_MODELS.providers[preset.providerId].models.map(function (m) { return m.id; });
     } else if (state.preset === "openrouter") {
       ids = OPENROUTER_TOP_MODELS.slice();
     } else if (preset && preset.model) {
