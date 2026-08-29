@@ -1,5 +1,5 @@
 /* scripts/check.js — BYOK Forge 零依賴靜態檢查（僅用 node 內建模組）。
-   檢查項目：JS 語法、i18n 鍵集（report-only）、?v= 一致性、groq parity、registry 健全性。
+   檢查項目：JS 語法、i18n 鍵集、?v= 一致性、groq parity、registry 健全性。
    本機執行：node scripts/check.js；GitHub Actions 在 deploy 前執行同一支。 */
 'use strict';
 
@@ -64,10 +64,9 @@ function loadInSandbox(file) {
     problems.length === 0, problems.join('\n'));
 })();
 
-/* B. i18n 鍵集（report-only 降級）— 各語言鍵集在 repo 現況本就未對齊
-   （cursor 相關鍵缺多數語言），依計畫降級路徑列出與 en 的差異，但不擋 CI。 */
+/* B. i18n 鍵集 — 各語言鍵集必須與 en 完全對齊（缺鍵／多鍵皆視為失敗，blocking）。 */
 (function checkI18nKeys() {
-  const label = 'B. i18n 鍵集（I18N_TRANSLATIONS 各語言 vs en，report-only）';
+  const label = 'B. i18n 鍵集（I18N_TRANSLATIONS 各語言 vs en）';
   let translations;
   try {
     translations = loadInSandbox('translations.js').I18N_TRANSLATIONS;
@@ -95,13 +94,12 @@ function loadInSandbox(file) {
     report(`${label} — ${Object.keys(translations).length} 語言鍵集一致`, true);
     return;
   }
-  console.log(`[WARN] ${label} — 鍵集未對齊，僅列出差異、不擋 CI（計畫明載的降級路徑）`);
   const lines = [`基準 en：${enKeys.size} 鍵`];
   for (const d of diffs) {
     lines.push(`${d.lang}：缺 ${d.missing.length} 鍵 [${d.missing.slice(0, 5).join(', ')}${d.missing.length > 5 ? ', …' : ''}]` +
       (d.extra.length ? `；多 ${d.extra.length} 鍵 [${d.extra.slice(0, 5).join(', ')}]` : ''));
   }
-  console.log(lines.map(l => `  ${l}`).join('\n'));
+  report(`${label} — 鍵集未對齊`, false, lines.join('\n'));
 })();
 
 /* C. ?v= 一致性：translations/storage/i18n 在所有引用頁面版本相同；
