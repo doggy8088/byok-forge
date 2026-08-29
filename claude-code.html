@@ -619,6 +619,10 @@
           <input type="text" id="configPath" autocomplete="off" spellcheck="false" />
           <div class="descline" data-i18n="claudeCode.configPathHint">Default is <b>~/.claude/settings.json</b>.</div>
         </div>
+
+        <div class="field" style="text-align:right;">
+          <button class="btn" id="resetSettingsBtn" type="button" data-i18n="common.resetSettings">↺ reset settings</button>
+        </div>
       </div>
     </div>
 
@@ -1060,6 +1064,19 @@
       state.configPath = this.value.trim();
       saveState();
       refresh();
+    });
+
+    $("resetSettingsBtn").addEventListener("click", function () {
+      const ok = window.confirm(window.t ? window.t('common.resetConfirm') : 'Reset this page\'s settings to defaults?');
+      if (!ok) return;
+      PROVIDERS = JSON.parse(JSON.stringify(DEFAULT_PROVIDERS));
+      state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+      saveState();
+      syncInputs();
+      refreshModels();
+      renderProviderCards();
+      refresh();
+      window.BYOKToast.show(window.t ? window.t('common.resetDone') : 'Settings reset to defaults ✓');
     });
 
     $("copyConfigBtn").addEventListener("click", () => {

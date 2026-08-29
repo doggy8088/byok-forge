@@ -569,6 +569,10 @@
           <input type="text" id="configPath" autocomplete="off" spellcheck="false" />
           <div class="descline" data-i18n="opencode.configPathHint">Default is <b>~/.config/opencode/opencode.json</b>. You can also set <b>OPENCODE_CONFIG</b> explicitly.</div>
         </div>
+
+        <div class="field" style="text-align:right;">
+          <button class="btn" id="resetSettingsBtn" type="button" data-i18n="common.resetSettings">↺ reset settings</button>
+        </div>
       </div>
     </div>
 
@@ -1216,6 +1220,15 @@
       state.configPath = this.value.trim();
       saveState();
       refresh();
+    });
+
+    $("resetSettingsBtn").addEventListener("click", function () {
+      const ok = window.confirm(window.t ? window.t('common.resetConfirm') : 'Reset this page\'s settings to defaults?');
+      if (!ok) return;
+      PRESETS = JSON.parse(JSON.stringify(DEFAULT_PRESETS));
+      state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+      syncFromPreset(state.preset);
+      window.BYOKToast.show(window.t ? window.t('common.resetDone') : 'Settings reset to defaults ✓');
     });
 
     $("copyConfigBtn").addEventListener("click", () => {
