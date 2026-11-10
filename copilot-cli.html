@@ -840,9 +840,12 @@ function envPairs(kind){
   return pairs;
 }
 
-function flagsStr(){
+function flagsStr(kind){
   let f = "";
   if(state.yolo) f += " --yolo";
+  // COPILOT_MODEL alone does not select the BYOK model; --model is required.
+  const m = modelString();
+  if(m) f += " --model " + (kind==="ps" ? psSingleQuote(m) : posixSingleQuote(m));
   const eff = state.effort;
   if(eff && eff !== "none" && effortOptions().includes(eff)) f += " --effort " + eff;
   return f;
@@ -851,7 +854,7 @@ function flagsStr(){
 function genShellAlias(){
   const name = safeIdentifier(state.aliasName || "cc", "cc");
   const body = envPairs("shell").map(([k,v]) => `${k}=${v}`).join(" ");
-  return `alias ${name}=${posixSingleQuote(body + " copilot" + flagsStr())}`;
+  return `alias ${name}=${posixSingleQuote(body + " copilot" + flagsStr("shell"))}`;
 }
 function genShellFunction(){
   const name = safeIdentifier(state.aliasName || "cc", "cc");
@@ -859,7 +862,7 @@ function genShellFunction(){
   const lines = [];
   lines.push(`${name}() {`);
   pairs.forEach(p => lines.push(p + " \\"));
-  lines.push(`  copilot${flagsStr()} "$@"`);
+  lines.push(`  copilot${flagsStr("shell")} "$@"`);
   lines.push(`}`);
   return lines.join("\n");
 }
@@ -883,7 +886,7 @@ function genPwshFunction(withNote){
     out.push(`    foreach ($k in $vars.Keys) { $prev[$k] = (Get-Item "Env:\\$k" -ErrorAction SilentlyContinue).Value }`);
     out.push(`    foreach ($k in $vars.Keys) { Set-Item "Env:\\$k" $vars[$k] }`);
     out.push(`    try {`);
-    out.push(`        copilot${flagsStr()} @args`);
+    out.push(`        copilot${flagsStr("ps")} @args`);
     out.push(`    } finally {`);
     out.push(`        foreach ($k in $vars.Keys) {`);
     out.push(`            if ($null -ne $prev[$k]) { Set-Item "Env:\\$k" $prev[$k] }`);
@@ -892,7 +895,7 @@ function genPwshFunction(withNote){
     out.push(`    }`);
   } else {
     out.push(`    foreach ($k in $vars.Keys) { Set-Item "Env:\\$k" $vars[$k] }`);
-    out.push(`    copilot${flagsStr()} @args`);
+    out.push(`    copilot${flagsStr("ps")} @args`);
   }
   out.push(`}`);
   return out.join("\n");
