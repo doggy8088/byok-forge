@@ -17,6 +17,7 @@ referenced by environment-variable name and never leave the page.
 | [`cursor.html`](cursor.html) | **Cursor Config Forge** | Cursor `settings.json` BYOK settings reference |
 | [`pi.html`](pi.html) | **Pi Config Forge** | `~/.pi/agent/models.json` BYOK config for the Pi coding agent |
 | [`omp.html`](omp.html) | **OMP Config Forge** | `~/.omp/agent/models.yml` BYOK config for OMP |
+| [`minimax-code.html`](minimax-code.html) | **MiniMax Code Config Forge** | `~/.minimax/config.yaml` BYOK config & `mcode provider add` CLI snippet for MiniMax Code (`mcode`) |
 
 ## Usage
 
@@ -29,7 +30,7 @@ open index.html      # macOS
 
 Each tool is a self-contained HTML file; you can also open `copilot-cli.html`,
 `codex-cli.html`, `litellm.html`, `opencode.html`, `claude-code.html`,
-`cursor.html`, `pi.html`, or `omp.html` directly, or host the folder on any
+`cursor.html`, `pi.html`, `omp.html`, or `minimax-code.html` directly, or host the folder on any
 static web server.
 
 ## Internationalization
@@ -194,6 +195,30 @@ Output includes:
 **Where to put it:** save as `~/.omp/agent/models.yml` (or `models.yaml`), set the
 referenced key env var (shell or `.env`), then run `omp --model <providerId>/<modelId>`
 and verify with `omp models`.
+
+## minimax-code.html — MiniMax Code Config Forge
+
+Generates **MiniMax Code CLI (`@minimax-ai/code` · `mcode`) BYOK config** (`~/.minimax/config.yaml`)
+and a companion `mcode provider add` CLI snippet. Output includes:
+
+1. A `custom_provider.<id>` YAML block with `name`, `kind: custom`, `enabled: true`, `api`,
+   `options` (`baseURL`, `authMode: api-key`, `apiKey: ${ENV_VAR}`), and `models.<model-id>`
+   (`name`, `configuration_source: manual`, `enabled: true`, `reasoning`, `limit.context`,
+   `limit.output`, `capabilities.support_image`), plus optional top-level
+   `defaultModel: custom_provider:<id>/<model-id>`.
+2. A CLI snippet with `mcode provider add` (`--name`, `--base-url`, `--api-format`, `--model`,
+   `--api-key-env`, `--context-limit`, `--output-limit`, `--support-image`, `--use`), plus
+   `mcode provider test` and `mcode -m custom_provider:<id>/<model-id>`.
+
+- **Four API formats** — `anthropic-messages`, `openai-completions`, `openai-responses`,
+  `google-generative-ai`.
+- **Provider presets** — OpenRouter, MiniMax API (`https://api.minimax.io/anthropic`), Anthropic,
+  OpenAI, Google Gemini, DeepSeek, Ollama (local & cloud), LM Studio, vLLM, and custom.
+- **Secret-free config** — `options.apiKey` uses `${ENV_VAR}` syntax, which `mcode` resolves from
+  `process.env` at runtime without storing plaintext secrets on disk.
+
+**Where to put it:** save as `~/.minimax/config.yaml` (or `$MINIMAX_DATA_DIR/config.yaml`) or run
+the generated `mcode provider add` command, then launch with `mcode -m custom_provider:<id>/<model>`.
 
 ---
 
