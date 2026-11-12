@@ -6020,3 +6020,73 @@ window.I18N_TRANSLATIONS = {
     }
   }
 };
+
+/* ChatGPT Desktop standalone generator and homepage card. */
+(function () {
+  const additions = {
+    "en": {
+      title: "ChatGPT Desktop Config Forge — generate BYOK config.toml",
+      brandTitle: "chatgpt <b>desktop</b> forge",
+      cardBody: "Generate a dedicated <b>ChatGPT Desktop</b> setup with <b>config.toml</b>, the selected model profile, and a downloadable <b>model_catalog.json</b>."
+    },
+    "zh-Hant": {
+      title: "ChatGPT Desktop 設定產生器 — 產生 BYOK config.toml",
+      brandTitle: "chatgpt <b>desktop</b> 設定產生器",
+      cardBody: "直接產生 <b>ChatGPT Desktop</b> 的 <b>config.toml</b>、所選模型設定檔與可下載的 <b>model_catalog.json</b>。"
+    },
+    "zh-Hans": {
+      title: "ChatGPT Desktop 配置生成器 — 生成 BYOK config.toml",
+      brandTitle: "chatgpt <b>desktop</b> 配置生成器",
+      cardBody: "直接生成 <b>ChatGPT Desktop</b> 的 <b>config.toml</b>、所选模型配置文件与可下载的 <b>model_catalog.json</b>。"
+    },
+    "ja": {
+      title: "ChatGPT Desktop 設定ジェネレーター — BYOK config.toml を生成",
+      brandTitle: "chatgpt <b>desktop</b> 設定ジェネレーター",
+      cardBody: "<b>ChatGPT Desktop</b> 用の <b>config.toml</b>、選択したモデルプロファイル、ダウンロード可能な <b>model_catalog.json</b> を生成します。"
+    },
+    "ko": {
+      title: "ChatGPT Desktop 설정 생성기 — BYOK config.toml 생성",
+      brandTitle: "chatgpt <b>desktop</b> 설정 생성기",
+      cardBody: "<b>ChatGPT Desktop</b>용 <b>config.toml</b>, 선택한 모델 프로필 및 다운로드 가능한 <b>model_catalog.json</b>을 생성합니다."
+    },
+    "vi": {
+      title: "Trình tạo cấu hình ChatGPT Desktop — tạo BYOK config.toml",
+      brandTitle: "trình tạo cấu hình <b>chatgpt desktop</b>",
+      cardBody: "Tạo cấu hình <b>ChatGPT Desktop</b> riêng với <b>config.toml</b>, profile mô hình đã chọn và <b>model_catalog.json</b> có thể tải xuống."
+    },
+    "th": {
+      title: "ตัวสร้างการตั้งค่า ChatGPT Desktop — สร้าง BYOK config.toml",
+      brandTitle: "ตัวสร้างการตั้งค่า <b>chatgpt desktop</b>",
+      cardBody: "สร้างการตั้งค่า <b>ChatGPT Desktop</b> โดยเฉพาะ พร้อม <b>config.toml</b> โปรไฟล์โมเดลที่เลือก และ <b>model_catalog.json</b> ที่ดาวน์โหลดได้"
+    },
+    "id": {
+      title: "Generator Konfigurasi ChatGPT Desktop — buat BYOK config.toml",
+      brandTitle: "generator konfigurasi <b>chatgpt desktop</b>",
+      cardBody: "Buat konfigurasi khusus <b>ChatGPT Desktop</b> dengan <b>config.toml</b>, profil model terpilih, dan <b>model_catalog.json</b> yang dapat diunduh."
+    },
+    "de": {
+      title: "ChatGPT Desktop Konfigurationsgenerator — BYOK config.toml erzeugen",
+      brandTitle: "chatgpt <b>desktop</b> konfigurationsgenerator",
+      cardBody: "Erzeuge eine eigene <b>ChatGPT Desktop</b>-Konfiguration mit <b>config.toml</b>, dem ausgewählten Modellprofil und einer herunterladbaren <b>model_catalog.json</b>."
+    },
+    "fr": {
+      title: "Générateur de configuration ChatGPT Desktop — créer BYOK config.toml",
+      brandTitle: "générateur de configuration <b>chatgpt desktop</b>",
+      cardBody: "Générez une configuration dédiée à <b>ChatGPT Desktop</b> avec <b>config.toml</b>, le profil du modèle sélectionné et un <b>model_catalog.json</b> téléchargeable."
+    },
+    "es": {
+      title: "Generador de configuración de ChatGPT Desktop — crear BYOK config.toml",
+      brandTitle: "generador de configuración de <b>chatgpt desktop</b>",
+      cardBody: "Genera una configuración dedicada para <b>ChatGPT Desktop</b> con <b>config.toml</b>, el perfil del modelo seleccionado y un <b>model_catalog.json</b> descargable."
+    }
+  };
+  Object.keys(additions).forEach(function (lang) {
+    const dict = window.I18N_TRANSLATIONS[lang];
+    if (!dict) return;
+    dict.chatgptDesktop = {
+      title: additions[lang].title,
+      brandTitle: additions[lang].brandTitle
+    };
+    if (dict.index) dict.index.cardChatgptDesktopBody = additions[lang].cardBody;
+  });
+})();

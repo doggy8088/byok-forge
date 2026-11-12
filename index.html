@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
 <meta name="theme-color" content="#0a0b0e" />
-<meta name="description" content="A toolkit that generates bring-your-own-key launch configs for AI coding CLIs: Copilot CLI aliases, Codex CLI profiles, LiteLLM proxy configs, OpenCode, Claude Code, Cursor, Pi, OMP, and MiniMax Code." />
+<meta name="description" content="A toolkit that generates bring-your-own-key launch configs for AI coding CLIs and ChatGPT Desktop: Copilot CLI aliases, Codex CLI profiles, LiteLLM proxy configs, OpenCode, Claude Code, Cursor, Pi, OMP, and MiniMax Code." />
 <link rel="canonical" href="https://byok-forge.gh.miniasp.com/" />
 <meta name="robots" content="index, follow" />
 <meta name="keywords" content="BYOK, GitHub Copilot CLI, OpenAI Codex CLI, LiteLLM, bring your own key, AI coding, shell alias, config generator" />
@@ -44,7 +44,7 @@
     --amber:#ffb454; --amber-soft:rgba(255,180,84,.14); --amber-line:rgba(255,180,84,.40);
     --sky:#5cc8ff; --sky-soft:rgba(92,200,255,.14); --sky-line:rgba(92,200,255,.42);
     --violet:#a78bfa; --violet-soft:rgba(167,139,250,.14); --violet-line:rgba(167,139,250,.42);
-    --green:#74e0a0; --cyan:#56b6c2; --red:#ff6a6a;
+    --green:#74e0a0; --green-soft:rgba(16,163,127,.14); --green-line:rgba(116,224,160,.42); --cyan:#56b6c2; --red:#ff6a6a;
     --radius:16px;
     --cjk:'';
     --mono:'JetBrains Mono',var(--cjk),ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -93,10 +93,12 @@
   .tool.amber::before{background:radial-gradient(420px 240px at 100% 0%, var(--amber-soft), transparent 70%);}
   .tool.sky::before{background:radial-gradient(420px 240px at 100% 0%, var(--sky-soft), transparent 70%);}
   .tool.violet::before{background:radial-gradient(420px 240px at 100% 0%, var(--violet-soft), transparent 70%);}
+  .tool.green::before{background:radial-gradient(420px 240px at 100% 0%, var(--green-soft), transparent 70%);}
   .tool:hover{transform:translateY(-5px);}
   .tool.amber:hover{border-color:var(--amber-line);box-shadow:0 28px 60px -34px rgba(255,180,84,.55);}
   .tool.sky:hover{border-color:var(--sky-line);box-shadow:0 28px 60px -34px rgba(92,200,255,.55);}
   .tool.violet:hover{border-color:var(--violet-line);box-shadow:0 28px 60px -34px rgba(167,139,250,.55);}
+  .tool.green:hover{border-color:var(--green-line);box-shadow:0 28px 60px -34px rgba(116,224,160,.55);}
   .tool:hover::before{opacity:1;}
   .tool .head{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--border);background:#0d0f14;font-family:var(--mono);}
   .tool .head .dot{width:11px;height:11px;border-radius:50%;}
@@ -105,11 +107,13 @@
   .tool.amber .head .fname b{color:var(--amber);}
   .tool.sky .head .fname b{color:var(--sky);}
   .tool.violet .head .fname b{color:var(--violet);}
+  .tool.green .head .fname b{color:var(--green);}
   .tool .body{padding:24px 22px 22px;display:flex;flex-direction:column;flex:1;}
   .tool .mono-badge{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:17px;color:#0a0b0e;margin-bottom:18px;}
   .tool.amber .mono-badge{background:var(--amber);}
   .tool.sky .mono-badge{background:var(--sky);}
   .tool.violet .mono-badge{background:var(--violet);}
+  .tool.green .mono-badge{background:var(--green);}
   .tool h3{margin:0 0 8px;font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.03em;text-transform:lowercase;}
   .tool .desc{color:var(--muted);font-size:13.5px;margin:0 0 18px;line-height:1.55;flex:1;}
   .tool .desc b{color:var(--text);font-weight:500;}
@@ -119,6 +123,7 @@
   .tool.amber .go{background:var(--amber);color:#0a0b0e;}
   .tool.sky .go{background:var(--sky);color:#0a0b0e;}
   .tool.violet .go{background:var(--violet);color:#0a0b0e;}
+  .tool.green .go{background:var(--green);color:#0a0b0e;}
   .tool:hover .go{gap:16px;}
   .tool .go .arrow{font-size:15px;}
 
@@ -198,6 +203,22 @@
           <span class="feat" data-i18n="index.cardCodexFeat2">profile.config.toml</span>
           <span class="feat" data-i18n="index.cardCodexFeat3">10 providers</span>
           <span class="feat" data-i18n="index.cardCodexFeat4">downloadable</span>
+        </div>
+        <span class="go"><span data-i18n="common.openGenerator">open generator</span> <span class="arrow">→</span></span>
+      </div>
+    </a>
+
+    <a class="tool green fade d5" href="chatgpt-desktop.html">
+      <div class="head"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname"><b>chatgpt-desktop</b>.html</span></div>
+      <div class="body">
+        <div class="mono-badge">CD</div>
+        <h3>chatgpt desktop forge</h3>
+        <p class="desc" data-i18n-html="index.cardChatgptDesktopBody">Generate a dedicated <b>ChatGPT Desktop</b> setup with <b>config.toml</b>, the selected model profile, and a downloadable <b>model_catalog.json</b>.</p>
+        <div class="feats">
+          <span class="feat">config.toml + profile</span>
+          <span class="feat">model catalog</span>
+          <span class="feat">responses api</span>
+          <span class="feat">no secrets in file</span>
         </div>
         <span class="go"><span data-i18n="common.openGenerator">open generator</span> <span class="arrow">→</span></span>
       </div>
