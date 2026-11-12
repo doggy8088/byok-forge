@@ -80,7 +80,7 @@
   .seg button.on{background:var(--green-soft);color:var(--green);box-shadow:inset 0 0 0 1px var(--green-line)}
   .actions{display:flex;gap:8px;flex-wrap:wrap}
   .btn{border:1px solid var(--border-2);background:var(--panel-2);color:var(--text);border-radius:9px;padding:9px 13px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:.15s ease}
-  .btn:hover{border-color:var(--green-line);color:var(--green)} .btn.primary{background:var(--green);border-color:var(--green);color:#07100c;font-weight:700}
+  .btn:hover{border-color:var(--green-line);color:var(--green)} .btn.primary{background:var(--green);border-color:var(--green);color:#07100c;font-weight:700}.btn:disabled{opacity:.42;cursor:not-allowed;border-color:var(--border);color:var(--muted)}
   .btn.ghost{width:100%;background:transparent;color:var(--muted)}
   .out-col{display:flex;flex-direction:column;gap:16px;min-width:0}
   .summary{display:flex;flex-wrap:wrap;gap:7px;padding:2px 0 4px}
@@ -169,7 +169,7 @@
 
       <article>
         <div class="output-head"><span class="output-title">03 · <span class="path">model_catalog.json</span></span></div>
-        <div class="term"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span>model catalog · 4 models</span></div><pre id="catalogOut" style="max-height:24vh"></pre><div class="output-actions"><button class="btn primary" id="copyCatalogBtn">⧉ copy catalog</button><button class="btn" id="downloadCatalogBtn">⤓ download</button></div></div>
+        <div class="term"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span>model catalog · 4 models</span></div><pre id="catalogOut" style="max-height:24vh"></pre><div class="output-actions"><button class="btn primary" id="copyCatalogBtn" disabled>⧉ copy catalog</button><button class="btn" id="downloadCatalogBtn" disabled>⤓ download</button></div></div>
       </article>
 
       <div class="setup"><h3>Use with ChatGPT Desktop</h3><p>Save the three outputs in the same profile directory. Export the generated environment variable in the environment that launches ChatGPT Desktop, then restart the app so it reloads <code>config.toml</code> and <code>model_catalog.json</code>.</p></div>
@@ -183,12 +183,11 @@
 <script>
 "use strict";
 const MODELS = [
-  { id:"duotify-dev", effort:"xhigh" },
-  { id:"duotify-dev-lite", effort:"high" },
-  { id:"duotify-dev-terra", effort:"high" },
-  { id:"duotify-dev-ultra", effort:"high" }
+  { id:"duotify-dev", effort:"xhigh", efforts:["low","medium","high","xhigh","max"] },
+  { id:"duotify-dev-lite", effort:"high", efforts:["low","high","xhigh"] },
+  { id:"duotify-dev-terra", effort:"high", efforts:["low","medium","high","xhigh","max","ultra"] },
+  { id:"duotify-dev-ultra", effort:"high", efforts:["low","medium","high","xhigh","max","ultra"] }
 ];
-const EFFORTS = ["low","medium","high","xhigh","max","ultra"];
 const DEFAULT_STATE = {
   providerId:"duotify",
   baseUrl:"http://10.20.132.18:4000/v1",
@@ -200,12 +199,29 @@ const DEFAULT_STATE = {
 };
 let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 let catalogText = "";
+let catalogData = null;
+let catalogAvailable = false;
 let toastTimer;
 
 const $ = (id) => document.getElementById(id);
 const selectedModel = () => MODELS.find((m) => m.id === state.model) || MODELS[0];
-const currentLang = () => (window.I18NEngine ? window.I18NEngine.detectLang() : "en");
 function t(key, fallback){ return window.t ? window.t(key) : fallback; }
+function catalogModel(modelId){ return catalogData && Array.isArray(catalogData.models) ? catalogData.models.find((m) => m.slug === modelId) : null; }
+function modelEfforts(modelId){
+  const model=MODELS.find((m) => m.id === modelId) || selectedModel();
+  const entry=catalogModel(modelId);
+  const levels=entry && Array.isArray(entry.supported_reasoning_levels) ? entry.supported_reasoning_levels.map((x) => x.effort).filter(Boolean) : [];
+  return levels.length ? levels : model.efforts;
+}
+function defaultEffort(modelId){
+  const model=MODELS.find((m) => m.id === modelId) || selectedModel();
+  const allowed=modelEfforts(modelId);
+  return allowed.includes(model.effort) ? model.effort : (allowed[0] || model.effort);
+}
+function normalizedEffort(){
+  const allowed=modelEfforts(state.model);
+  return allowed.includes(state.effort) ? state.effort : defaultEffort(state.model);
+}
 function tomlString(value){
   return String(value == null ? "" : value).replace(/\\/g,"\\\\").replace(/"/g,"\\\"");
 }
@@ -219,7 +235,7 @@ function providerBlock(){
   ].join("\n");
 }
 function generatedConfig(){
-  return [
+  const lines = [
     `model_catalog_json = "./model_catalog.json"`,
     ``,
     `approval_policy = "${tomlString(state.approval)}"`,
@@ -227,16 +243,16 @@ function generatedConfig(){
     `model = "${tomlString(state.model)}"`,
     `preferred_auth_method = "apikey"`,
     `wire_api = "responses"`,
-    `model_reasoning_effort = "${tomlString(state.effort)}"`,
-    `model_reasoning_summary = "${tomlString(state.summary)}"`,
-    ``,
-    providerBlock()
-  ].join("\n");
+    `model_reasoning_effort = "${tomlString(state.effort)}"`
+  ];
+  if(state.summary !== "omit") lines.push(`model_reasoning_summary = "${tomlString(state.summary)}"`);
+  lines.push(``, providerBlock());
+  return lines.join("\n");
 }
 function saveState(){ window.BYOKStore.savePage("chatgpt-desktop", { state: state }); }
 function renderSegments(){
   const effort = $("effortSeg"); effort.innerHTML = "";
-  EFFORTS.forEach((value) => { const b=document.createElement("button"); b.type="button"; b.dataset.value=value; b.textContent=value; b.className=state.effort===value?"on":""; effort.appendChild(b); });
+  modelEfforts(state.model).forEach((value) => { const b=document.createElement("button"); b.type="button"; b.dataset.value=value; b.textContent=value; b.className=state.effort===value?"on":""; effort.appendChild(b); });
   ["summarySeg","approvalSeg"].forEach((id) => [...$(id).children].forEach((b) => b.classList.toggle("on", b.dataset.value === state[id === "summarySeg" ? "summary" : "approval"])));
 }
 function renderModels(){
@@ -248,6 +264,7 @@ function renderSummary(){
   $("summary").innerHTML=items.map(([k,v])=>`<span class="chip">${k} <b>${BYOKEsc.html(v)}</b></span>`).join("");
 }
 function refresh(){
+  state.effort=normalizedEffort();
   $("providerId").value=state.providerId; $("baseUrl").value=state.baseUrl; $("envKey").value=state.envKey;
   renderModels(); renderSegments(); renderSummary();
   const config=generatedConfig(); $("configOut").textContent=config; $("configOut").dataset.raw=config;
@@ -263,33 +280,48 @@ async function copyText(text){
 }
 function download(filename,text,mime){ const blob=new Blob([text],{type:mime||"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},100); }
 async function loadCatalog(){
-  try { const res=await fetch("model-catalog.chatgpt-desktop.json"); if(!res.ok) throw new Error(`${res.status}`); const data=await res.json(); catalogText=JSON.stringify(data,null,2); }
-  catch(e){ catalogText=`// model_catalog.json could not be loaded (${e.message}).\n// Serve this page over HTTP or place model-catalog.chatgpt-desktop.json beside the page.`; }
-  $("catalogOut").textContent=catalogText; $("catalogOut").dataset.raw=catalogText;
+  const copyBtn=$("copyCatalogBtn"), downloadBtn=$("downloadCatalogBtn");
+  copyBtn.disabled=true; downloadBtn.disabled=true;
+  $("catalogOut").textContent="Loading model_catalog.json…";
+  try {
+    const res=await fetch("model-catalog.chatgpt-desktop.json"); if(!res.ok) throw new Error(`${res.status}`);
+    const data=await res.json();
+    if(!data || !Array.isArray(data.models)) throw new Error("invalid catalog shape");
+    catalogData=data; catalogAvailable=true; catalogText=JSON.stringify(data,null,2);
+    $("catalogOut").textContent=catalogText; $("catalogOut").dataset.raw=catalogText;
+    copyBtn.disabled=false; downloadBtn.disabled=false;
+    state.effort=normalizedEffort(); refresh();
+  } catch(e) {
+    catalogData=null; catalogAvailable=false; catalogText="";
+    $("catalogOut").textContent=`model_catalog.json could not be loaded (${e.message}).\nServe this page over HTTP or place model-catalog.chatgpt-desktop.json beside the page.`;
+    $("catalogOut").dataset.raw="";
+    copyBtn.disabled=true; downloadBtn.disabled=true;
+    refresh();
+  }
 }
 function bind(){
   $("providerId").addEventListener("input",(e)=>{ state.providerId=e.target.value.replace(/[^A-Za-z0-9_-]/g,""); e.target.value=state.providerId; refresh(); });
   $("baseUrl").addEventListener("input",(e)=>{ state.baseUrl=e.target.value; refresh(); });
   $("envKey").addEventListener("input",(e)=>{ state.envKey=e.target.value.replace(/[^A-Za-z0-9_]/g,""); e.target.value=state.envKey; refresh(); });
-  $("model").addEventListener("change",(e)=>{ state.model=e.target.value; state.effort=selectedModel().effort; refresh(); });
+  $("model").addEventListener("change",(e)=>{ state.model=e.target.value; state.effort=defaultEffort(state.model); refresh(); });
   $("effortSeg").addEventListener("click",(e)=>{ const b=e.target.closest("button"); if(!b)return; state.effort=b.dataset.value; refresh(); });
   $("summarySeg").addEventListener("click",(e)=>{ const b=e.target.closest("button"); if(!b)return; state.summary=b.dataset.value; refresh(); });
   $("approvalSeg").addEventListener("click",(e)=>{ const b=e.target.closest("button"); if(!b)return; state.approval=b.dataset.value; refresh(); });
   $("copyConfigBtn").addEventListener("click",()=>copyText($("configOut").dataset.raw||""));
   $("copyProfileBtn").addEventListener("click",()=>copyText($("profileOut").dataset.raw||""));
-  $("copyCatalogBtn").addEventListener("click",()=>copyText($("catalogOut").dataset.raw||""));
+  $("copyCatalogBtn").addEventListener("click",()=>{ if(catalogAvailable) copyText($("catalogOut").dataset.raw||""); });
   $("downloadConfigBtn").addEventListener("click",()=>download("config.toml",$("configOut").dataset.raw||"","application/toml"));
   $("downloadProfileBtn").addEventListener("click",()=>download(`${state.model}.config.toml`,$("profileOut").dataset.raw||"","application/toml"));
-  $("downloadCatalogBtn").addEventListener("click",()=>download("model_catalog.json",$("catalogOut").dataset.raw||"{}","application/json"));
+  $("downloadCatalogBtn").addEventListener("click",()=>{ if(catalogAvailable) download("model_catalog.json",$("catalogOut").dataset.raw||"","application/json"); });
   $("resetBtn").addEventListener("click",()=>{ if(!confirm(t("common.resetConfirm","Reset this page?"))) return; state=JSON.parse(JSON.stringify(DEFAULT_STATE)); refresh(); showToast(); });
   $("shareBtn").addEventListener("click",()=>window.BYOKShare.shareCurrentPage({state:state}));
 }
 async function init(){
-  window.I18NEngine.init({page:"chatgptDesktop", titleKey:"chatgptDesktop.title", onChange:refresh});
   const shared=await window.BYOKShare.getSharedData({strictState:true});
   if(shared && shared.state) Object.assign(state,shared.state);
   else { const saved=window.BYOKStore.getPage("chatgpt-desktop",null); if(saved && saved.state) Object.assign(state,saved.state); }
   if(!MODELS.some((m)=>m.id===state.model)) state.model=DEFAULT_STATE.model;
+  window.I18NEngine.init({page:"chatgptDesktop", titleKey:"chatgptDesktop.title", onChange:refresh});
   bind(); refresh(); await loadCatalog();
   document.addEventListener("i18n:changed",refresh);
 }
