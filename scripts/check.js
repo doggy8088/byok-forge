@@ -184,7 +184,7 @@ function loadInSandbox(file) {
 })();
 
 /* E. registry 健全性
-   - ollama-cloud：21 筆、首位 priority=100、其餘 20、id 依字母排序
+   - ollama-cloud：23 筆、首位 priority=100、其餘 20、id 依字母排序
    - openrouter：10 筆、首位 deepseek/deepseek-v4-flash、全部 codexEff=high、id 無重複 */
 (function checkRegistry() {
   const label = 'E. registry 健全性（BYOK_MODELS.providers["ollama-cloud"] ＋ ["openrouter"]）';
@@ -203,7 +203,7 @@ function loadInSandbox(file) {
     problems.push('providers["ollama-cloud"].models 不是陣列');
   } else {
     const models = oc.models;
-    if (models.length !== 21) problems.push(`ollama-cloud：models 共 ${models.length} 筆，預期 21`);
+    if (models.length !== 23) problems.push(`ollama-cloud：models 共 ${models.length} 筆，預期 23`);
     const first = models[0] || {};
     if (first.id !== 'glm-5.3-flash') problems.push(`ollama-cloud：第一筆 id=${first.id}，預期 glm-5.3-flash`);
     if (first.priority !== 100) problems.push(`ollama-cloud：第一筆 priority=${first.priority}，預期 100`);

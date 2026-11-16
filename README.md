@@ -217,7 +217,11 @@ and a companion `mcode provider add` CLI snippet. Output includes:
   `google-generative-ai` (effort options are not sent for Gemini).
 - **Provider presets** — OpenRouter, MiniMax API (`https://api.minimax.io/anthropic`), Anthropic,
   OpenAI, Google Gemini, DeepSeek, Ollama (local & cloud), LM Studio, vLLM, and custom. Model
-  capabilities come from models.dev, mapped the way mcode's own `/provider` presets map them.
+  capabilities for Ollama Cloud and OpenRouter come from the shared `models.js` registry, which is
+  built from each provider's own API (Ollama Cloud `/api/tags` + `/api/show`: vision, thinking,
+  effort levels and default, context length; OpenRouter `/api/v1/models`); the other presets use
+  models.dev, mapped the way mcode's own `/provider` presets map them. A provider's default effort
+  is written as `thinking.defaultEffort`.
 - **apiKey is literal** — `mcode` sends `options.apiKey` verbatim and does **not** expand
   `${ENV_VAR}` (only MCP config does). An env var name becomes a `__NAME__` placeholder that the
   snippet's `perl -pi -e 's/__NAME__/$ENV{NAME}/g'` fills in; `mcode provider add --api-key-env`

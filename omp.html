@@ -31,10 +31,10 @@
 <meta name="twitter:title" data-i18n-attr="content:omp.metaTitle" content="OMP BYOK Forge — generate OMP models.yml" />
 <meta name="twitter:description" data-i18n-attr="content:omp.metaDescription" content="Generate OMP (omp.sh) BYOK config (~/.omp/agent/models.yml) with provider ID, API type, model, base URL and env-key substitution." />
 <meta name="twitter:image" content="https://byok-forge.gh.miniasp.com/og-image.jpg" />
-<script src="translations.js?v=20261117"></script>
+<script src="translations.js?v=2026111702"></script>
 <script src="i18n.js?v=20260630"></script>
 <script src="storage.js?v=20260630"></script>
-<script src="models.js?v=20260830"></script>
+<script src="models.js?v=20261117"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Martian+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -642,7 +642,7 @@
     const reg = window.BYOK_MODELS && window.BYOK_MODELS.providers["ollama-cloud"];
     const p = DEFAULT_PRESETS.ollamaCloud;
     if (reg && p) {
-      p.models = reg.models.map((m) => ({ id: m.id, name: m.name, context: m.context, output: m.output, reasoning: false }));
+      p.models = reg.models.map((m) => ({ id: m.id, name: m.name, context: m.context, output: m.output, reasoning: !!m.reasoning }));
       p.defaultModel = reg.defaultModel;
     }
   })();
@@ -651,7 +651,7 @@
     const reg = window.BYOK_MODELS && window.BYOK_MODELS.providers["openrouter"];
     const p = DEFAULT_PRESETS.openrouter;
     if (reg && p) {
-      p.models = reg.models.map((m) => ({ id: m.id, name: m.name, context: m.context, output: m.output, reasoning: true }));
+      p.models = reg.models.map((m) => ({ id: m.id, name: m.name, context: m.context, output: m.output, reasoning: !!m.reasoning }));
       p.defaultModel = reg.defaultModel;
     }
   })();

@@ -31,10 +31,10 @@
 <meta name="twitter:title" data-i18n-attr="content:minimaxCode.metaTitle" content="MiniMax Code BYOK Forge — generate MiniMax Code config.yaml" />
 <meta name="twitter:description" data-i18n-attr="content:minimaxCode.metaDescription" content="Generate MiniMax Code CLI (mcode) BYOK config (~/.minimax/config.yaml) and mcode provider add commands with custom_provider, API format, model capabilities (modalities, tool_call, temperature, reasoning effort, thinking mode) and token limits." />
 <meta name="twitter:image" content="https://byok-forge.gh.miniasp.com/og-image.jpg" />
-<script src="translations.js?v=20261117"></script>
+<script src="translations.js?v=2026111702"></script>
 <script src="i18n.js?v=20260630"></script>
 <script src="storage.js?v=20260630"></script>
-<script src="models.js?v=20260830"></script>
+<script src="models.js?v=20261117"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Martian+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -458,6 +458,13 @@
               <input type="text" id="effortOptions" autocomplete="off" spellcheck="false" placeholder="low, medium, high" />
             </div>
           </div>
+          <div class="row2" style="margin-top:10px;">
+            <div>
+              <label class="lbl" for="defaultEffort" data-i18n="minimaxCode.labelDefaultEffort">thinking.defaultEffort</label>
+              <select id="defaultEffort"></select>
+            </div>
+            <div></div>
+          </div>
           <div class="descline" data-i18n-html="minimaxCode.thinkingHint"><b>thinking.effortOptions</b> sets the effort values you can pick in mcode (default = middle item). Without it, a thinking model always gets a generic <b>medium</b>. <b>thinking_config</b> adds an on/off switch (<b>switchable</b>) or pins it (<b>forced_on</b> / <b>forced_off</b>). <b>google-generative-ai</b> ignores effort values.</div>
 
           <label class="lbl" data-i18n="minimaxCode.labelModalities">modalities.input</label>
@@ -623,6 +630,7 @@
       models: [
         { id: "gemini-pro-latest", name: "Gemini Pro Latest", context: 1048576, output: 65536, reasoning: true, effort: "low,medium,high", input: "text,image,video,audio,pdf", temperature: true },
         { id: "gemini-flash-latest", name: "Gemini Flash Latest", context: 1048576, output: 65536, reasoning: true, effort: "low,medium,high", input: "text,image,video,audio,pdf", temperature: true },
+        { id: "gemini-4-carbon", name: "Gemini 4 Carbon", context: 1048576, output: 32768, reasoning: true, effort: "low,medium,high", input: "text,image,video,audio,pdf", temperature: true },
         { id: "gemini-4-hydrogen", name: "Gemini 4 Hydrogen", context: 1048576, output: 65536, reasoning: true, effort: "low,medium,high,xhigh", input: "text,image,video,audio,pdf", temperature: true },
         { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", context: 1048576, output: 65536, reasoning: true, effort: "low,medium,high", input: "text,image,video,audio,pdf", temperature: true }
       ]
@@ -687,55 +695,31 @@
     }
   };
 
-  // Capabilities for the shared registry models (models.js only carries id/name/limits).
-  // Source: models.dev api.json, 2026-11-16, mapped like mcode's parseModel(). Ids missing
-  // from models.dev fall back to REGISTRY_FALLBACK_CAPS; registry limits are used then.
-  const MODELS_DEV_CAPS = {
-    "ollama-cloud": {
-      "glm-5.3-flash": { context: 1000000, output: 131072, reasoning: true, effort: "low,high,max", input: "text,image,video", temperature: true },
-      "deepseek-v4-pro:0813": { context: 1048576, output: 65536, reasoning: true, effort: "low,high,max", input: "text", temperature: true },
-      "gemma4:31b": { context: 262144, output: 262144, reasoning: true, effort: "", input: "text,image", temperature: true },
-      "glm-5.2": { context: 976000, output: 131072, reasoning: true, effort: "high,max", input: "text", temperature: true },
-      "glm-5.3": { context: 1048576, output: 131072, reasoning: true, effort: "low,high,max", input: "text", temperature: true },
-      "gpt-oss:120b": { context: 131072, output: 131072, reasoning: true, effort: "low,medium,high", input: "text", temperature: true },
-      "gpt-oss:20b": { context: 131072, output: 131072, reasoning: true, effort: "low,medium,high", input: "text", temperature: true },
-      "kimi-k2.6": { context: 262144, output: 262144, reasoning: true, effort: "", input: "text,image", temperature: true },
-      "kimi-k2.7-code": { context: 262144, output: 262144, reasoning: true, effort: "", input: "text,image", temperature: false },
-      "kimi-k3": { context: 1048576, output: 1048576, reasoning: true, effort: "low,high,max", input: "text,image", temperature: false },
-      "minimax-m2.7": { context: 196608, output: 196608, reasoning: true, effort: "", input: "text", temperature: true },
-      "minimax-m3": { context: 512000, output: 131072, reasoning: true, effort: "low,medium,high,max", input: "text,image,video", temperature: true },
-      "mistral-large-3:675b": { context: 262144, output: 262144, reasoning: false, effort: "", input: "text,image", temperature: true },
-      "nemotron-3-nano:30b": { context: 1048576, output: 131072, reasoning: true, effort: "", input: "text", temperature: true },
-      "nemotron-3-super": { context: 262144, output: 65536, reasoning: true, effort: "", input: "text", temperature: true },
-      "nemotron-3-ultra": { context: 262144, output: 128000, reasoning: true, effort: "", input: "text", temperature: true }
-    },
-    "openrouter": {
-      "deepseek/deepseek-v4-flash": { context: 1048576, output: 393216, reasoning: true, effort: "none,high,xhigh", input: "text", temperature: true },
-      "xiaomi/mimo-v2.5": { context: 1000000, output: 65536, reasoning: true, effort: "", input: "text,image,audio,video", temperature: true },
-      "minimax/minimax-m3": { context: 1048576, output: 512000, reasoning: true, effort: "", input: "text,image,video", temperature: true },
-      "tencent/hy3-preview": { context: 262144, output: 235929, reasoning: true, effort: "none,low,high", input: "text", temperature: true },
-      "z-ai/glm-5.2": { context: 1048576, output: 943718, reasoning: true, effort: "none,high,xhigh", input: "text", temperature: true },
-      "anthropic/claude-opus-4.7": { context: 1000000, output: 128000, reasoning: true, effort: "none,low,medium,high,xhigh,max", input: "text,image,pdf", temperature: false },
-      "deepseek/deepseek-v4-pro": { context: 1048576, output: 393216, reasoning: true, effort: "none,high,xhigh", input: "text", temperature: true },
-      "anthropic/claude-opus-4.8": { context: 1000000, output: 128000, reasoning: true, effort: "none,low,medium,high,xhigh,max", input: "text,image,pdf", temperature: false },
-      "anthropic/claude-sonnet-4.6": { context: 1000000, output: 128000, reasoning: true, effort: "none,low,medium,high,max", input: "text,image,pdf", temperature: true },
-      "stepfun/step-3.7-flash": { context: 262144, output: 230400, reasoning: true, effort: "low,medium,high", input: "text,image,video", temperature: true }
-    }
-  };
-  // Registry ids absent from models.dev: assume a text-only thinking model with an on/off switch.
-  const REGISTRY_FALLBACK_CAPS = { reasoning: true, effort: "", input: "text", temperature: true };
+  // Ollama Cloud / OpenRouter models come from the shared registry (models.js), whose
+  // capability fields are taken from each provider's own API (see models.js header):
+  //   input → modalities.input, reasoningEfforts → thinking.effortOptions,
+  //   reasoningDefault → thinking.defaultEffort (string) or the switch's default (boolean).
+  function registryModel(m) {
+    const efforts = Array.isArray(m.reasoningEfforts) ? m.reasoningEfforts : [];
+    const def = m.reasoningDefault;
+    const entry = {
+      id: m.id, name: m.name, context: m.context, output: m.output,
+      reasoning: m.reasoning !== false,
+      effort: efforts.join(","),
+      defaultEffort: typeof def === "string" && efforts.includes(def) ? def : "",
+      input: (Array.isArray(m.input) ? m.input : ["text"]).join(","),
+      temperature: m.temperature !== false
+    };
+    // On/off-only thinking: follow the provider's default switch position.
+    if (entry.reasoning && !efforts.length && def === false) entry.thinkingMode = "switchable-off";
+    return entry;
+  }
 
   [["ollamaCloud", "ollama-cloud"], ["openrouter", "openrouter"]].forEach(function (pair) {
     const reg = window.BYOK_MODELS && window.BYOK_MODELS.providers[pair[1]];
     const p = DEFAULT_PRESETS[pair[0]];
     if (!reg || !p) return;
-    const caps = MODELS_DEV_CAPS[pair[1]] || {};
-    p.models = reg.models.map(function (m) {
-      const c = caps[m.id];
-      return c
-        ? Object.assign({ id: m.id, name: m.name }, c)
-        : Object.assign({ id: m.id, name: m.name, context: m.context, output: m.output }, REGISTRY_FALLBACK_CAPS);
-    });
+    p.models = reg.models.map(registryModel);
     p.defaultModel = reg.defaultModel;
   });
 
@@ -753,6 +737,7 @@
     reasoning: true,
     // Flat primitives only: share links are sanitized with strictState (arrays are dropped).
     effortOptions: "",
+    defaultEffort: "",
     thinkingMode: "switchable-on",
     supportImage: false,
     supportVideo: false,
@@ -764,10 +749,11 @@
     contextLimit: "",
     outputLimit: "",
     configPath: "~/.minimax/config.yaml",
-    schema: 2
+    schema: 3
   };
   // Bump when the model capability fields change so saved / shared state is re-derived.
-  const STATE_SCHEMA = 2;
+  // 3: registry capabilities from provider APIs + thinking.defaultEffort.
+  const STATE_SCHEMA = 3;
   const THINKING_MODES = ["switchable-on", "switchable-off", "forced_on", "forced_off", "omit"];
   const MODALITY_FIELDS = [["image", "supportImage"], ["video", "supportVideo"], ["pdf", "supportPdf"], ["audio", "supportAudio"]];
   // mcode never assigns these as custom_provider keys (management/provider-key.ts).
@@ -803,6 +789,7 @@
       outputLimit: m.output || "",
       reasoning: reasoning,
       effortOptions: effort,
+      defaultEffort: effort && effort.split(",").includes(m.defaultEffort) ? m.defaultEffort : "",
       // Mirrors mcode's save path: a thinking model without effort levels gets a switchable toggle.
       thinkingMode: THINKING_MODES.includes(m.thinkingMode) ? m.thinkingMode : (reasoning && !effort ? "switchable-on" : "omit"),
       toolCall: m.toolCall !== false,
@@ -1025,7 +1012,24 @@
     $("contextLimit").value = state.contextLimit;
     $("outputLimit").value = state.outputLimit;
     $("configPath").value = state.configPath;
+    populateDefaultEffort();
     syncThinkingControls();
+  }
+
+  // defaultEffort is chosen from the current effort list; "" leaves mcode's middle-item default.
+  function populateDefaultEffort() {
+    const sel = $("defaultEffort");
+    const efforts = (state.effortOptions || "").split(",").filter(Boolean);
+    if (!efforts.includes(state.defaultEffort)) state.defaultEffort = "";
+    sel.innerHTML = "";
+    [""].concat(efforts).forEach((e) => {
+      const opt = document.createElement("option");
+      opt.value = e;
+      opt.textContent = e || "— middle item —";
+      sel.appendChild(opt);
+    });
+    sel.value = state.defaultEffort;
+    sel.disabled = !state.reasoning || !efforts.length;
   }
 
   // Thinking controls only mean something for a reasoning model.
@@ -1033,6 +1037,7 @@
     const on = !!state.reasoning;
     $("thinkingMode").disabled = !on;
     $("effortOptions").disabled = !on;
+    $("defaultEffort").disabled = !on || !(state.effortOptions || "");
   }
 
   function normalizeProviderKey(raw) {
@@ -1139,6 +1144,10 @@
       L.push("        thinking:");
       L.push("          effortOptions:");
       efforts.forEach((e) => L.push("            - " + yamlScalar(e)));
+      // mcode uses defaultEffort when it is one of the options; otherwise the middle item.
+      if (state.defaultEffort && efforts.includes(state.defaultEffort)) {
+        L.push("          defaultEffort: " + yamlScalar(state.defaultEffort));
+      }
     }
     if (thinkingMode && thinkingMode !== "omit") {
       const switchable = thinkingMode.indexOf("switchable") === 0;
@@ -1411,6 +1420,13 @@
 
     $("effortOptions").addEventListener("input", function () {
       state.effortOptions = normalizeEffortList(this.value);
+      populateDefaultEffort();
+      saveState();
+      refresh();
+    });
+
+    $("defaultEffort").addEventListener("change", function () {
+      state.defaultEffort = this.value;
       saveState();
       refresh();
     });
@@ -1497,6 +1513,7 @@
       if (params.has(k)) state[k] = params.get(k);
     });
     if (params.has("effortOptions")) state.effortOptions = normalizeEffortList(params.get("effortOptions"));
+    if (params.has("defaultEffort")) state.defaultEffort = params.get("defaultEffort").trim();
     if (!THINKING_MODES.includes(state.thinkingMode)) state.thinkingMode = "omit";
     if (params.has("baseUrl") && !params.has("baseURL")) {
       state.baseURL = params.get("baseUrl");
