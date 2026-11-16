@@ -202,20 +202,28 @@ Generates **MiniMax Code CLI (`@minimax-ai/code` · `mcode`) BYOK config** (`~/.
 and a companion `mcode provider add` CLI snippet. Output includes:
 
 1. A `custom_provider.<id>` YAML block with `name`, `kind: custom`, `enabled: true`, `api`,
-   `options` (`baseURL`, `authMode: api-key`, `apiKey: ${ENV_VAR}`), and `models.<model-id>`
-   (`name`, `configuration_source: manual`, `enabled: true`, `reasoning`, `limit.context`,
-   `limit.output`, `capabilities.support_image`), plus optional top-level
-   `defaultModel: custom_provider:<id>/<model-id>`.
+   `options` (`baseURL`, `authMode: api-key`, `apiKey`), and `models.<model-id>` using the same
+   fields mcode's own provider flow writes: `name`, `configuration_source: manual`, `enabled`,
+   `attachment`, `tool_call`, `temperature`, `modalities.input/output` (text / image / video /
+   pdf / audio), `limit.context` / `limit.output` (omitted when blank → mcode defaults 200,000 /
+   16,384), `reasoning`, `thinking.effortOptions` and `thinking_config` (`mode`, quoted
+   `default_value`). Optional top-level `defaultModel: custom_provider:<id>/<model-id>`.
 2. A CLI snippet with `mcode provider add` (`--name`, `--base-url`, `--api-format`, `--model`,
-   `--api-key-env`, `--context-limit`, `--output-limit`, `--support-image`, `--use`), plus
-   `mcode provider test` and `mcode -m custom_provider:<id>/<model-id>`.
+   `--api-key-env`, `--context-limit`, `--output-limit`, `--support-image`, `--use`), the
+   provider key mcode derives from `--name`, a `perl -pi` line that fills the apiKey placeholder,
+   plus `mcode provider test` and `mcode -m custom_provider:<id>/<model-id>`.
 
 - **Four API formats** — `anthropic-messages`, `openai-completions`, `openai-responses`,
-  `google-generative-ai`.
+  `google-generative-ai` (effort options are not sent for Gemini).
 - **Provider presets** — OpenRouter, MiniMax API (`https://api.minimax.io/anthropic`), Anthropic,
-  OpenAI, Google Gemini, DeepSeek, Ollama (local & cloud), LM Studio, vLLM, and custom.
-- **Secret-free config** — `options.apiKey` uses `${ENV_VAR}` syntax, which `mcode` resolves from
-  `process.env` at runtime without storing plaintext secrets on disk.
+  OpenAI, Google Gemini, DeepSeek, Ollama (local & cloud), LM Studio, vLLM, and custom. Model
+  capabilities come from models.dev, mapped the way mcode's own `/provider` presets map them.
+- **apiKey is literal** — `mcode` sends `options.apiKey` verbatim and does **not** expand
+  `${ENV_VAR}` (only MCP config does). An env var name becomes a `__NAME__` placeholder that the
+  snippet's `perl -pi -e 's/__NAME__/$ENV{NAME}/g'` fills in; `mcode provider add --api-key-env`
+  likewise stores the variable's value, not its name.
+- **CLI vs YAML** — `mcode provider add` can only set limits and image input; effort options,
+  thinking mode, video / pdf / audio input, `tool_call` and `temperature` need the YAML block.
 
 **Where to put it:** save as `~/.minimax/config.yaml` (or `$MINIMAX_DATA_DIR/config.yaml`) or run
 the generated `mcode provider add` command, then launch with `mcode -m custom_provider:<id>/<model>`.
