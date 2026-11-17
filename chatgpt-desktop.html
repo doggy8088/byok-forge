@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<title>ChatGPT Desktop Config Forge — generate BYOK config.toml</title>
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<meta name="theme-color" content="#0a0b0e" />
+<meta name="description" content="Generate ChatGPT Desktop BYOK config.toml, model profile and model catalog for a Responses-compatible endpoint such as LiteLLM." />
+<link rel="canonical" href="https://byok-forge.gh.miniasp.com/chatgpt-desktop.html" />
+<meta name="robots" content="index, follow" />
+<meta name="keywords" content="ChatGPT Desktop, BYOK, Codex Desktop, config.toml, model catalog, LiteLLM, Responses API" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="BYOK Forge" />
+<meta property="og:title" content="ChatGPT Desktop Config Forge — generate BYOK config.toml" />
+<meta property="og:description" content="Generate ChatGPT Desktop configuration, model profile and catalog for a Responses-compatible provider." />
+<meta property="og:url" content="https://byok-forge.gh.miniasp.com/chatgpt-desktop.html" />
+<meta property="og:image" content="https://byok-forge.gh.miniasp.com/og-image.jpg" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="ChatGPT Desktop Config Forge" />
+<meta name="twitter:description" content="Generate ChatGPT Desktop BYOK configuration and model catalog." />
+<meta name="twitter:image" content="https://byok-forge.gh.miniasp.com/og-image.jpg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Martian+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0a0b0e;--bg-2:#0e1015;--panel:#13151c;--panel-2:#171a22;--panel-3:#1c2029;
+    --border:#262b37;--border-2:#323848;--text:#e9e7e0;--muted:#888e9d;--muted-2:#5d636f;
+    --green:#74e0a0;--green-2:#10a37f;--green-soft:rgba(16,163,127,.14);--green-line:rgba(116,224,160,.42);
+    --sky:#5cc8ff;--sky-soft:rgba(92,200,255,.14);--sky-line:rgba(92,200,255,.42);
+    --amber:#ffb454;--red:#ff6a6a;--violet:#a78bfa;--radius:16px;--cjk:'';
+    --mono:'JetBrains Mono',var(--cjk),ui-monospace,SFMono-Regular,Menlo,monospace;
+    --display:'Martian Mono',var(--cjk),var(--mono);--sans:'IBM Plex Sans',var(--cjk),system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(900px 520px at 12% -10%,rgba(16,163,127,.14),transparent 60%),radial-gradient(800px 520px at 92% -4%,rgba(92,200,255,.10),transparent 58%),radial-gradient(700px 700px at 50% 120%,rgba(116,224,160,.05),transparent 60%)}
+  body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.45;background-image:linear-gradient(transparent 0 31px,rgba(255,255,255,.018) 31px 32px),linear-gradient(90deg,transparent 0 31px,rgba(255,255,255,.018) 31px 32px);background-size:32px 32px;mask-image:radial-gradient(circle at 50% 25%,#000 0%,transparent 82%)}
+  .wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 24px 48px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:32px 0 20px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+  .brand{display:flex;align-items:center;gap:14px}
+  .glyph{width:54px;height:54px;border-radius:14px;background:linear-gradient(145deg,#1d2029,#10131a);border:1px solid var(--border-2);display:grid;place-items:center;font-family:var(--display);font-weight:800;color:#07100c;background:var(--green);box-shadow:0 10px 30px -14px rgba(116,224,160,.7)}
+  .brand h1{margin:0;font-family:var(--display);font-size:22px;line-height:1.08;letter-spacing:-.04em}
+  .brand h1 b{color:var(--green)}
+  .brand p{margin:4px 0 0;color:var(--muted);font-family:var(--mono);font-size:11.5px}
+  .meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .pill,.home,.lang-switch .lang-select{font-family:var(--mono);font-size:11.5px;background:var(--panel);color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:7px 12px}
+  .pill b{color:var(--green)} .pill code{color:var(--green)}
+  .home{text-decoration:none;cursor:pointer;transition:.15s ease}.home:hover{color:var(--text);border-color:var(--border-2)}
+  .lang-switch{display:inline-flex}.lang-switch .lang-select{appearance:none;padding-right:30px;cursor:pointer;outline:none}
+  .hero{padding:36px 0 28px;max-width:920px}
+  .kicker{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--green-line);background:var(--green-soft);color:var(--green);border-radius:999px;padding:6px 13px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+  .blip{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+  .hero h2{margin:16px 0 12px;font-family:var(--display);font-size:clamp(28px,4.2vw,43px);line-height:1.08;letter-spacing:-.045em}
+  .hero h2 span{color:var(--green)} .hero p{margin:0;max-width:820px;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:minmax(360px,430px) minmax(0,1fr);gap:22px;align-items:start}
+  .card{background:linear-gradient(180deg,var(--panel),var(--bg-2));border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+  .section{padding:4px 0 20px}
+  .section+.section{border-top:1px solid var(--border);padding-top:20px}
+  .section-h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .section-h .n{font-family:var(--mono);font-size:10px;color:var(--green);border:1px solid var(--green-line);background:var(--green-soft);border-radius:6px;padding:3px 7px}
+  .section-h h2{margin:0;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+  .section-h .hint{margin-left:auto;color:var(--muted-2);font-family:var(--mono);font-size:10px}
+  .provider-lock{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--green-line);background:var(--green-soft);border-radius:12px;margin-bottom:14px}
+  .provider-lock .badge{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--green);color:#07100c;font-family:var(--display);font-weight:800}
+  .provider-lock b{display:block;font-size:14px}.provider-lock small{display:block;color:var(--muted);font-family:var(--mono);font-size:10.5px}
+  .field{display:flex;flex-direction:column;gap:7px;margin-bottom:13px}
+  label,.lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  input,select{width:100%;background:#0b0d12;color:var(--text);border:1px solid var(--border-2);border-radius:9px;padding:10px 12px;font-family:var(--mono);font-size:13px;outline:none}
+  input:focus,select:focus{border-color:var(--green-line);box-shadow:0 0 0 3px var(--green-soft)}
+  .hintline{margin-top:-2px;color:var(--muted-2);font-size:11px;line-height:1.45}
+  .hintline code{color:var(--green)}
+  .seg{display:flex;flex-wrap:wrap;gap:4px;background:#0b0d12;border:1px solid var(--border);border-radius:10px;padding:4px}
+  .seg button{flex:1;min-width:52px;background:transparent;border:0;color:var(--muted);border-radius:7px;padding:8px 6px;font-family:var(--mono);font-size:10.5px;cursor:pointer}
+  .seg button.on{background:var(--green-soft);color:var(--green);box-shadow:inset 0 0 0 1px var(--green-line)}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{border:1px solid var(--border-2);background:var(--panel-2);color:var(--text);border-radius:9px;padding:9px 13px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:.15s ease}
+  .btn:hover{border-color:var(--green-line);color:var(--green)} .btn.primary{background:var(--green);border-color:var(--green);color:#07100c;font-weight:700}.btn:disabled{opacity:.42;cursor:not-allowed;border-color:var(--border);color:var(--muted)}
+  .btn.ghost{width:100%;background:transparent;color:var(--muted)}
+  .out-col{display:flex;flex-direction:column;gap:16px;min-width:0}
+  .summary{display:flex;flex-wrap:wrap;gap:7px;padding:2px 0 4px}
+  .chip{border:1px solid var(--border);background:var(--panel);border-radius:8px;padding:5px 9px;color:var(--muted);font-family:var(--mono);font-size:10.5px}
+  .chip b{color:var(--text)}
+  .output-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+  .output-title{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .output-title .path{color:var(--green);text-transform:none;letter-spacing:0}
+  .term{border:1px solid var(--border);border-radius:12px;background:#0b0d12;overflow:hidden}
+  .bar{display:flex;align-items:center;gap:6px;padding:9px 11px;background:#0d0f14;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted-2)}
+  .dot{width:9px;height:9px;border-radius:50%}.r{background:#ff5f57}.y{background:#febc2e}.g{background:#28c840}
+  pre{margin:0;padding:14px;overflow:auto;max-height:34vh;color:#dfe5e2;font-family:var(--mono);font-size:11.5px;line-height:1.65;white-space:pre}
+  .output-actions{display:flex;gap:7px;padding:9px;border-top:1px solid var(--border);background:#0d0f14}
+  .output-actions .btn{flex:1}
+  .setup{background:linear-gradient(135deg,var(--green-soft),rgba(92,200,255,.05));border:1px solid var(--green-line);border-radius:12px;padding:17px}
+  .setup h3{margin:0 0 8px;font-family:var(--display);font-size:14px;color:var(--green)}
+  .setup p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.7}.setup code{color:var(--green)}
+  footer{position:relative;z-index:1;text-align:center;color:var(--muted-2);font-size:11px;font-family:var(--mono);padding:30px 24px 36px;line-height:1.7}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#07100c;font-family:var(--mono);font-weight:700;font-size:12px;padding:10px 18px;border-radius:9px;opacity:0;pointer-events:none;transition:.2s ease;z-index:50}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}.out-col{grid-row:auto}.wrap{padding:0 16px 36px}header{align-items:flex-start}.meta{width:100%}pre{max-height:30vh}}
+</style>
+<script src="translations.js?v=20260630"></script>
+<script src="i18n.js?v=20260630"></script>
+<script src="storage.js?v=20260630"></script>
+</head>
+<body data-page="chatgpt-desktop">
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="glyph">CD</div>
+      <div><h1 data-i18n-html="chatgptDesktop.brandTitle">chatgpt <b>desktop</b> forge</h1><p>// standalone BYOK config generator for ChatGPT Desktop</p></div>
+    </div>
+    <div class="meta">
+      <div id="langSwitcher"></div>
+      <span class="pill"><b>responses</b> API</span>
+      <span class="pill"><code>config.toml</code> + catalog</span>
+      <button class="home" id="shareBtn" type="button" data-i18n="common.share">⎘ share</button>
+      <a class="home" href="index.html" data-i18n="common.allTools">⊞ all tools</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <span class="kicker"><span class="blip"></span><span>standalone desktop provider</span></span>
+    <h2>Point <span>ChatGPT Desktop</span> at your own model endpoint.</h2>
+    <p>Generate the desktop configuration, model profile and catalog together. Keys stay as environment-variable references, so no secret is written into the generated files.</p>
+  </section>
+
+  <div class="grid">
+    <div class="card">
+      <section class="section">
+        <div class="section-h"><span class="n">01</span><h2 data-i18n="codex.sectionProvider">provider</h2><span class="hint" data-i18n="codex.sectionProviderHint">responses-api only</span></div>
+        <div class="provider-lock"><span class="badge">CD</span><div><b>ChatGPT Desktop</b><small>dedicated Duotify-style Responses provider</small></div></div>
+        <div class="field"><label for="providerId">provider id</label><input id="providerId" autocomplete="off" spellcheck="false" /><div class="hintline">Used as <code>[model_providers.&lt;id&gt;]</code> and <code>model_provider</code>.</div></div>
+        <div class="field"><label for="baseUrl">base_url</label><input id="baseUrl" autocomplete="off" spellcheck="false" /><div class="hintline">Must expose <code>/v1/responses</code>, for example a LiteLLM proxy.</div></div>
+        <div class="field"><label for="envKey">env_key</label><input id="envKey" autocomplete="off" spellcheck="false" /><div class="hintline">ChatGPT Desktop reads the key from this environment variable at runtime.</div></div>
+      </section>
+
+      <section class="section">
+        <div class="section-h"><span class="n">02</span><h2 data-i18n="codex.sectionModel">model</h2><span class="hint">catalog-backed</span></div>
+        <div class="field"><label for="model">model</label><select id="model"></select><div class="hintline">The matching model profile is emitted as <code>&lt;model&gt;.config.toml</code>.</div></div>
+        <div class="field"><span class="lbl">model_reasoning_effort</span><div class="seg" id="effortSeg"></div></div>
+        <div class="field"><span class="lbl">model_reasoning_summary</span><div class="seg" id="summarySeg"><button data-value="omit" data-i18n="codex.omit">omit</button><button data-value="concise" data-i18n="codex.concise">concise</button><button data-value="detailed" data-i18n="codex.detailed">detailed</button></div></div>
+        <div class="field"><span class="lbl">approval_policy</span><div class="seg" id="approvalSeg"><button data-value="untrusted" data-i18n="codex.untrusted">untrusted</button><button data-value="on-request" data-i18n="codex.onRequest">on-request</button><button data-value="never" data-i18n="codex.never">never</button></div></div>
+      </section>
+
+      <section class="section">
+        <div class="section-h"><span class="n">03</span><h2>files</h2><span class="hint">same directory</span></div>
+        <div class="hintline">Place all generated files in the ChatGPT Desktop profile directory. <code>model_catalog_json</code> uses <code>./model_catalog.json</code>, matching the supplied reference configuration.</div>
+        <div class="actions" style="margin-top:14px"><button class="btn ghost" id="resetBtn" type="button" data-i18n="common.resetSettings">↺ reset settings</button></div>
+      </section>
+    </div>
+
+    <div class="out-col">
+      <div class="summary" id="summary"></div>
+
+      <article>
+        <div class="output-head"><span class="output-title">01 · config.toml <span class="path">desktop entry config</span></span></div>
+        <div class="term"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span>~ desktop / config.toml</span></div><pre id="configOut"></pre><div class="output-actions"><button class="btn primary" id="copyConfigBtn">⧉ copy config.toml</button><button class="btn" id="downloadConfigBtn">⤓ download</button></div></div>
+      </article>
+
+      <article>
+        <div class="output-head"><span class="output-title">02 · <span class="path" id="profilePath">duotify-dev.config.toml</span></span></div>
+        <div class="term"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span id="profileTtl">model profile</span></div><pre id="profileOut"></pre><div class="output-actions"><button class="btn primary" id="copyProfileBtn">⧉ copy profile</button><button class="btn" id="downloadProfileBtn">⤓ download</button></div></div>
+      </article>
+
+      <article>
+        <div class="output-head"><span class="output-title">03 · <span class="path">model_catalog.json</span></span></div>
+        <div class="term"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span>model catalog · 4 models</span></div><pre id="catalogOut" style="max-height:24vh"></pre><div class="output-actions"><button class="btn primary" id="copyCatalogBtn" disabled>⧉ copy catalog</button><button class="btn" id="downloadCatalogBtn" disabled>⤓ download</button></div></div>
+      </article>
+
+      <div class="setup"><h3>Use with ChatGPT Desktop</h3><p>Save the three outputs in the same profile directory. Export the generated environment variable in the environment that launches ChatGPT Desktop, then restart the app so it reloads <code>config.toml</code> and <code>model_catalog.json</code>.</p></div>
+    </div>
+  </div>
+</div>
+
+<footer><b>ChatGPT Desktop Config Forge</b> · dedicated BYOK configuration for a Responses-compatible endpoint</footer>
+<div class="toast" id="toast" data-i18n="common.copied">copied ✓</div>
+
+<script>
+"use strict";
+const MODELS = [
+  { id:"duotify-dev", effort:"xhigh", efforts:["low","medium","high","xhigh","max"] },
+  { id:"duotify-dev-lite", effort:"high", efforts:["low","high","xhigh"] },
+  { id:"duotify-dev-terra", effort:"high", efforts:["low","medium","high","xhigh","max","ultra"] },
+  { id:"duotify-dev-ultra", effort:"high", efforts:["low","medium","high","xhigh","max","ultra"] }
+];
+const DEFAULT_STATE = {
+  providerId:"duotify",
+  baseUrl:"http://10.20.132.18:4000/v1",
+  envKey:"DUOTIFY_LITELLM_API_KEY",
+  model:"duotify-dev",
+  effort:"xhigh",
+  summary:"detailed",
+  approval:"on-request"
+};
+let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+let catalogText = "";
+let catalogData = null;
+let catalogAvailable = false;
+let toastTimer;
+
+const $ = (id) => document.getElementById(id);
+const selectedModel = () => MODELS.find((m) => m.id === state.model) || MODELS[0];
+function t(key, fallback){ return window.t ? window.t(key) : fallback; }
+function catalogModel(modelId){ return catalogData && Array.isArray(catalogData.models) ? catalogData.models.find((m) => m.slug === modelId) : null; }
+function modelEfforts(modelId){
+  const model=MODELS.find((m) => m.id === modelId) || selectedModel();
+  const entry=catalogModel(modelId);
+  const levels=entry && Array.isArray(entry.supported_reasoning_levels) ? entry.supported_reasoning_levels.map((x) => x.effort).filter(Boolean) : [];
+  return levels.length ? levels : model.efforts;
+}
+function defaultEffort(modelId){
+  const model=MODELS.find((m) => m.id === modelId) || selectedModel();
+  const allowed=modelEfforts(modelId);
+  return allowed.includes(model.effort) ? model.effort : (allowed[0] || model.effort);
+}
+function normalizedEffort(){
+  const allowed=modelEfforts(state.model);
+  return allowed.includes(state.effort) ? state.effort : defaultEffort(state.model);
+}
+function tomlString(value){
+  return String(value == null ? "" : value).replace(/\\/g,"\\\\").replace(/"/g,"\\\"");
+}
+function providerBlock(){
+  return [
+    `[model_providers.${state.providerId}]`,
+    `name = "${tomlString(state.providerId)}"`,
+    `base_url = "${tomlString(state.baseUrl)}"`,
+    `env_key = "${tomlString(state.envKey)}"`,
+    `wire_api = "responses"`
+  ].join("\n");
+}
+function generatedConfig(){
+  const lines = [
+    `model_catalog_json = "./model_catalog.json"`,
+    ``,
+    `approval_policy = "${tomlString(state.approval)}"`,
+    `model_provider = "${tomlString(state.providerId)}"`,
+    `model = "${tomlString(state.model)}"`,
+    `preferred_auth_method = "apikey"`,
+    `wire_api = "responses"`,
+    `model_reasoning_effort = "${tomlString(state.effort)}"`
+  ];
+  if(state.summary !== "omit") lines.push(`model_reasoning_summary = "${tomlString(state.summary)}"`);
+  lines.push(``, providerBlock());
+  return lines.join("\n");
+}
+function saveState(){ window.BYOKStore.savePage("chatgpt-desktop", { state: state }); }
+function renderSegments(){
+  const effort = $("effortSeg"); effort.innerHTML = "";
+  modelEfforts(state.model).forEach((value) => { const b=document.createElement("button"); b.type="button"; b.dataset.value=value; b.textContent=value; b.className=state.effort===value?"on":""; effort.appendChild(b); });
+  ["summarySeg","approvalSeg"].forEach((id) => [...$(id).children].forEach((b) => b.classList.toggle("on", b.dataset.value === state[id === "summarySeg" ? "summary" : "approval"])));
+}
+function renderModels(){
+  const select=$("model"); select.innerHTML="";
+  MODELS.forEach((m)=>{ const o=document.createElement("option"); o.value=m.id; o.textContent=m.id; o.selected=m.id===state.model; select.appendChild(o); });
+}
+function renderSummary(){
+  const items=[["provider",state.providerId],["model",state.model],["effort",state.effort],["summary",state.summary],["wire","responses"]];
+  $("summary").innerHTML=items.map(([k,v])=>`<span class="chip">${k} <b>${BYOKEsc.html(v)}</b></span>`).join("");
+}
+function refresh(){
+  state.effort=normalizedEffort();
+  $("providerId").value=state.providerId; $("baseUrl").value=state.baseUrl; $("envKey").value=state.envKey;
+  renderModels(); renderSegments(); renderSummary();
+  const config=generatedConfig(); $("configOut").textContent=config; $("configOut").dataset.raw=config;
+  const profileFile=`${state.model}.config.toml`; $("profilePath").textContent=profileFile; $("profileTtl").textContent=profileFile;
+  $("profileOut").textContent=config; $("profileOut").dataset.raw=config;
+  saveState();
+}
+function showToast(){ const el=$("toast"); el.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove("show"),1400); }
+async function copyText(text){
+  try { if(navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(text); else throw new Error(); }
+  catch(e){ const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+  showToast();
+}
+function download(filename,text,mime){ const blob=new Blob([text],{type:mime||"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},100); }
+async function loadCatalog(){
+  const copyBtn=$("copyCatalogBtn"), downloadBtn=$("downloadCatalogBtn");
+  copyBtn.disabled=true; downloadBtn.disabled=true;
+  $("catalogOut").textContent="Loading model_catalog.json…";
+  try {
+    const res=await fetch("model-catalog.chatgpt-desktop.json"); if(!res.ok) throw new Error(`${res.status}`);
+    const data=await res.json();
+    if(!data || !Array.isArray(data.models)) throw new Error("invalid catalog shape");
+    catalogData=data; catalogAvailable=true; catalogText=JSON.stringify(data,null,2);
+    $("catalogOut").textContent=catalogText; $("catalogOut").dataset.raw=catalogText;
+    copyBtn.disabled=false; downloadBtn.disabled=false;
+    state.effort=normalizedEffort(); refresh();
+  } catch(e) {
+    catalogData=null; catalogAvailable=false; catalogText="";
+    $("catalogOut").textContent=`model_catalog.json could not be loaded (${e.message}).\nServe this page over HTTP or place model-catalog.chatgpt-desktop.json beside the page.`;
+    $("catalogOut").dataset.raw="";
+    copyBtn.disabled=true; downloadBtn.disabled=true;
+    refresh();
+  }
+}
+function bind(){
+  $("providerId").addEventListener("input",(e)=>{ state.providerId=e.target.value.replace(/[^A-Za-z0-9_-]/g,""); e.target.value=state.providerId; refresh(); });
+  $("baseUrl").addEventListener("input",(e)=>{ state.baseUrl=e.target.value; refresh(); });
+  $("envKey").addEventListener("input",(e)=>{ state.envKey=e.target.value.replace(/[^A-Za-z0-9_]/g,""); e.target.value=state.envKey; refresh(); });
+  $("model").addEventListener("change",(e)=>{ state.model=e.target.value; state.effort=defaultEffort(state.model); refresh(); });
+  $("effortSeg").addEventListener("click",(e)=>{ const b=e.target.closest("button"); if(!b)return; state.effort=b.dataset.value; refresh(); });
+  $("summarySeg").addEventListener("click",(e)=>{ const b=e.target.closest("button"); if(!b)return; state.summary=b.dataset.value; refresh(); });
+  $("approvalSeg").addEventListener("click",(e)=>{ const b=e.target.closest("button"); if(!b)return; state.approval=b.dataset.value; refresh(); });
+  $("copyConfigBtn").addEventListener("click",()=>copyText($("configOut").dataset.raw||""));
+  $("copyProfileBtn").addEventListener("click",()=>copyText($("profileOut").dataset.raw||""));
+  $("copyCatalogBtn").addEventListener("click",()=>{ if(catalogAvailable) copyText($("catalogOut").dataset.raw||""); });
+  $("downloadConfigBtn").addEventListener("click",()=>download("config.toml",$("configOut").dataset.raw||"","application/toml"));
+  $("downloadProfileBtn").addEventListener("click",()=>download(`${state.model}.config.toml`,$("profileOut").dataset.raw||"","application/toml"));
+  $("downloadCatalogBtn").addEventListener("click",()=>{ if(catalogAvailable) download("model_catalog.json",$("catalogOut").dataset.raw||"","application/json"); });
+  $("resetBtn").addEventListener("click",()=>{ if(!confirm(t("common.resetConfirm","Reset this page?"))) return; state=JSON.parse(JSON.stringify(DEFAULT_STATE)); refresh(); showToast(); });
+  $("shareBtn").addEventListener("click",()=>window.BYOKShare.shareCurrentPage({state:state}));
+}
+async function init(){
+  const shared=await window.BYOKShare.getSharedData({strictState:true});
+  if(shared && shared.state) Object.assign(state,shared.state);
+  else { const saved=window.BYOKStore.getPage("chatgpt-desktop",null); if(saved && saved.state) Object.assign(state,saved.state); }
+  if(!MODELS.some((m)=>m.id===state.model)) state.model=DEFAULT_STATE.model;
+  window.I18NEngine.init({page:"chatgptDesktop", titleKey:"chatgptDesktop.title", onChange:refresh});
+  bind(); refresh(); await loadCatalog();
+  document.addEventListener("i18n:changed",refresh);
+}
+document.addEventListener("DOMContentLoaded",init);
+</script>
+</body>
+</html>

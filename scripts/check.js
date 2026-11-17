@@ -240,5 +240,37 @@ function loadInSandbox(file) {
   report(label, problems.length === 0, problems.join('\n') || summaries.join('；'));
 })();
 
+/* F. ChatGPT Desktop standalone parity: page models must match the copied catalog. */
+(function checkChatGPTDesktopParity() {
+  const problems = [];
+  let slugs = [];
+  try {
+    const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'model-catalog.chatgpt-desktop.json'), 'utf8'));
+    if (!catalog || !Array.isArray(catalog.models)) throw new Error('缺少 models 陣列');
+    slugs = catalog.models.map(m => m.slug).filter(Boolean);
+  } catch (e) {
+    problems.push(`model-catalog.chatgpt-desktop.json 無法解析：${e.message}`);
+  }
+  const html = fs.readFileSync(path.join(ROOT, 'chatgpt-desktop.html'), 'utf8');
+  const block = html.match(/const MODELS = \[([\s\S]*?)\n\];/);
+  let ids = [];
+  if (!block) {
+    problems.push('chatgpt-desktop.html 找不到 MODELS 清單');
+  } else {
+    ids = [...block[1].matchAll(/id\s*:\s*["']([^"']+)["']/g)].map(x => x[1]);
+  }
+  const missing = ids.filter(id => !slugs.includes(id));
+  const extra = slugs.filter(id => !ids.includes(id));
+  if (missing.length) problems.push(`inline models 不在 catalog：${missing.join(', ')}`);
+  if (extra.length) problems.push(`catalog 有未列於 inline models：${extra.join(', ')}`);
+  const codex = fs.readFileSync(path.join(ROOT, 'codex-cli.html'), 'utf8');
+  if (codex.includes('name:"ChatGPT Desktop"') || codex.includes('id:"chatgpt-desktop"')) {
+    problems.push('ChatGPT Desktop 仍混在 codex-cli.html provider 清單中');
+  }
+  report('F. ChatGPT Desktop standalone parity（MODELS = model-catalog.chatgpt-desktop.json）',
+    problems.length === 0,
+    problems.join('\n') || `${ids.length} 個模型一致：${ids.join(', ')}`);
+})();
+
 console.log(failed ? '\ncheck：有檢查失敗，詳情如上。' : '\ncheck：全部通過。');
 process.exit(failed ? 1 : 0);
